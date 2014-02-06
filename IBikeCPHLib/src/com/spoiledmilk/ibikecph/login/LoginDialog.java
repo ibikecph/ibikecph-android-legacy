@@ -99,7 +99,7 @@ public class LoginDialog {
 						dismissProgressDialog();
 					}
 				}).start();
-				dialog.dismiss();
+
 			}
 
 		});
@@ -115,6 +115,9 @@ public class LoginDialog {
 						String auth_token = data.getString("auth_token");
 						int id = data.getInt("id");
 						launchMainMapActivity(auth_token, id);
+						if (dialog != null) {
+							dialog.dismiss();
+						}
 					} else {
 						final String message = data.containsKey("errors") ? data.getString("errors") : data.getString("info");
 						launchErrorDialog(message);

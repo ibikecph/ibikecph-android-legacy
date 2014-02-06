@@ -203,7 +203,6 @@ public class RegisterDialog {
 
 	private boolean validateInput(String name, String email, String password, String passwordConfirm) {
 		boolean ret = true;
-		// TODO check validations
 		if (name.length() == 0 || email.length() == 0 || password.length() == 0 || passwordConfirm.length() == 0) {
 			validationMessage = IbikeApplication.getString("register_error_fields");
 			ret = false;
