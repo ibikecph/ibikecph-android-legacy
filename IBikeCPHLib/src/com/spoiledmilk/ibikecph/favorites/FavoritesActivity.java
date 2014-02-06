@@ -78,9 +78,13 @@ public class FavoritesActivity extends Activity implements SMLocationListener {
 			@Override
 			public void onClick(View arg0) {
 				DB db = new DB(FavoritesActivity.this);
-				if (homeFavorite != null && workFavorite != null) {
-					db.saveFavorite(homeFavorite, FavoritesActivity.this, true);
-					db.saveFavorite(workFavorite, FavoritesActivity.this, true);
+				if (homeFavorite != null || workFavorite != null) {
+					if (homeFavorite != null) {
+						db.saveFavorite(homeFavorite, FavoritesActivity.this, true);
+					}
+					if (workFavorite != null) {
+						db.saveFavorite(workFavorite, FavoritesActivity.this, true);
+					}
 					launchMainMapActivity();
 				} else {
 					Util.showSimpleMessageDlg(FavoritesActivity.this, IbikeApplication.getString("register_error_fields"));
