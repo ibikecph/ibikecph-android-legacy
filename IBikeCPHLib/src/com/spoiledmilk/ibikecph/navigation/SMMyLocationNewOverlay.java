@@ -13,7 +13,6 @@ import org.osmdroid.R;
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IMapView;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.Projection;
 import org.osmdroid.views.overlay.IOverlayMenuProvider;
@@ -66,7 +65,6 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
 
 	protected final MapView mMapView;
 
-	private final MapController mMapController;
 	public IMyLocationProvider mMyLocationProvider;
 
 	private final LinkedList<Runnable> mRunOnFirstFix = new LinkedList<Runnable>();
@@ -129,7 +127,6 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
 		mMyLocationProvider = myLocationProvider;
 		mMapView = mapView;
 
-		mMapController = mapView.getController();
 		mCirclePaint.setARGB(0, 100, 100, 255);
 		mCirclePaint.setAntiAlias(true);
 

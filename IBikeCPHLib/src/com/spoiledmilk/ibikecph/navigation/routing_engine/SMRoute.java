@@ -148,6 +148,9 @@ public class SMRoute implements SMHttpRequestListener {
 				public void run() {
 
 					boolean ok = parseFromJson(jRoot, null, isRouteBroken);
+
+					logWaypoints();
+
 					if (ok) {
 						approachingTurn = false;
 						h.post(new Runnable() {
@@ -522,12 +525,14 @@ public class SMRoute implements SMHttpRequestListener {
 				projectedLoc = lastCorrectedLocation;
 			}
 
+			projectedLoc = loc;
+
 			if (projectedLoc != null) {
 				if (waypoints != null && waypoints.size() > 0) {
 					// find the closest waypoint
 					for (int i = lastVisitedWaypointIndex; i < waypoints.size(); i++) {
 						Location waypoint = waypoints.get(i);
-						if (lastCorrectedLocation.distanceTo(waypoint) < minD) {
+						if (projectedLoc.distanceTo(waypoint) < minD) {
 							minD = projectedLoc.distanceTo(waypoint);
 							closestWaypointIndex = i;
 						}
@@ -547,28 +552,32 @@ public class SMRoute implements SMHttpRequestListener {
 
 		if (closestWaypointIndex > -1) {
 			synchronized (SMRoute.this) {
+
 				Iterator<SMTurnInstruction> it = turnInstructions.iterator();
 				// int i = 0;
 				while (it.hasNext()) {
 					SMTurnInstruction instruction = it.next();
 					double d = loc.distanceTo(instruction.loc);
-					LOG.d("routing debug d = " + d);
 					if (closestWaypointIndex < instruction.waypointsIndex) {
 						// future instruction, stop the loop
+						instruction.lastD = loc.distanceTo(instruction.loc);
 						break;
 					} else if (closestWaypointIndex > instruction.waypointsIndex) {
 						// we have definetly passed the instruction
 						it.remove();
-					} else if (d < 10d && !instruction.plannedForRemoving) {
+					} else if (d < 10d && (!instruction.plannedForRemoving || d > instruction.lastD)) {
 						// we are approaching the instruction
 						LOG.d("routing debug instruction planned for removing = " + instruction.fullDescriptionString + " d = "
 								+ loc.distanceTo(instruction.loc));
 						instruction.plannedForRemoving = true;
-					} else if (d >= 10d && instruction.plannedForRemoving) {
-						// remove the instruction
-						LOG.d("routing debug removing the instruction " + instruction.fullDescriptionString);
-						it.remove();
+					} else {
+						if (d >= 10d && (instruction.plannedForRemoving || d > instruction.lastD)) {
+							// remove the instruction
+							LOG.d("routing debug removing the instruction " + instruction.fullDescriptionString);
+							it.remove();
+						}
 					}
+					instruction.lastD = loc.distanceTo(instruction.loc);
 
 				}
 			}

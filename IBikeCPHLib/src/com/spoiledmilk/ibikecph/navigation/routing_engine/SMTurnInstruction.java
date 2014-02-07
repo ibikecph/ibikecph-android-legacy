@@ -75,6 +75,7 @@ public class SMTurnInstruction {
 	public String fullDescriptionString;
 	boolean isFakeInstruction = false;
 	public boolean plannedForRemoving = false;
+	double lastD = -1;
 
 	public SMTurnInstruction() {
 
