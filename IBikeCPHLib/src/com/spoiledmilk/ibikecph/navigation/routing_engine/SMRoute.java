@@ -550,7 +550,7 @@ public class SMRoute implements SMHttpRequestListener {
 
 		}
 
-		if (closestWaypointIndex > -1) {
+		if (closestWaypointIndex > -1 && !recalculationInProgress) {
 			synchronized (SMRoute.this) {
 
 				Iterator<SMTurnInstruction> it = turnInstructions.iterator();

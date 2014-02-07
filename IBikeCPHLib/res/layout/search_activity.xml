@@ -85,13 +85,14 @@
 
     <TextView
         android:id="@+id/textCurrentLoc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/imgCurrentLoc"
-        android:layout_marginBottom="0dp"
+        android:layout_width="180dp"
+        android:layout_height="42dp"
+        android:layout_above="@+id/textB"
+        android:layout_marginBottom="4dp"
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@+id/imgCurrentLoc"
         android:clickable="true"
+        android:gravity="center_vertical"
         android:text=""
         android:textColor="@color/TextBlue"
         android:textSize="16sp" />
@@ -99,13 +100,13 @@
     <TextView
         android:id="@+id/textA"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="42dp"
         android:layout_above="@+id/textB"
         android:layout_alignLeft="@+id/textB"
         android:layout_alignRight="@+id/btnSwitch"
-        android:layout_marginBottom="28dp"
+        android:layout_marginBottom="4dp"
         android:clickable="true"
-        android:gravity="left"
+        android:gravity="center_vertical|left"
         android:lines="1"
         android:maxLines="1"
         android:text=""
@@ -116,14 +117,14 @@
     <TextView
         android:id="@+id/textB"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="42dp"
         android:layout_alignBottom="@+id/imgInput"
         android:layout_alignLeft="@+id/imgInput"
         android:layout_alignRight="@+id/btnSwitch"
-        android:layout_marginBottom="13dp"
+        android:layout_marginBottom="0dp"
         android:layout_marginLeft="50dp"
         android:clickable="true"
-        android:gravity="left"
+        android:gravity="center_vertical|left"
         android:lines="1"
         android:maxLines="1"
         android:singleLine="true"
@@ -263,7 +264,6 @@
                 <!-- android:layout_alignParentLeft="true" -->
                 <!-- android:layout_alignParentTop="true" -->
                 <!-- android:background="#D1D1D1" /> -->
-
 
                 <ImageView
                     android:id="@+id/pullHandle"
