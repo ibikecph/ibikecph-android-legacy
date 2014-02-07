@@ -166,7 +166,7 @@ public abstract class SearchListItem {
 		SearchListItem ret = null;
 		if (node.has("location")) {
 			ret = new FoursquareData(node);
-		} else {
+		} else if (node.has("properties")) {
 			ret = new KortforData(node);
 		}
 		return ret;

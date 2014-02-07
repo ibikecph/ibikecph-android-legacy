@@ -254,6 +254,10 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
 		currentlyRouting = false;
 		drawRoute();
 		getMapActivity().setOverview(destination, Util.formatDistance(route.getEstimatedDistance()), route.getViaStreets());
+		zoomToBoundingBox();
+	}
+
+	public void zoomToBoundingBox() {
 		final BoundingBoxE6 boundingBox = BoundingBoxE6.fromLocations(route.getWaypoints(), COORDINATE_PADDING);
 		ViewTreeObserver vto = mapView.getViewTreeObserver();
 		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
@@ -604,12 +608,14 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
 		if (getMapActivity() != null) {
 			getMapActivity().updateTime(getEstimatedArrivalTime());
 			getMapActivity().hideProgressBar();
-		}
-		locationOverlay.isTooFarFromRoute = false;
-		isRecalculation = true;
-		rotateMap();
-		if (mapView.tracking && lastAnimLoc != null) {
-			animateMap(lastAnimLoc);
+			locationOverlay.isTooFarFromRoute = false;
+			isRecalculation = true;
+			if (!((SMRouteNavigationActivity) getMapActivity()).bicycleTypeChanged) {
+				rotateMap();
+			}
+			if (mapView.tracking && lastAnimLoc != null && !((SMRouteNavigationActivity) getMapActivity()).bicycleTypeChanged) {
+				animateMap(lastAnimLoc);
+			}
 		}
 	}
 
@@ -620,8 +626,11 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
 		}
 		if (getMapActivity() != null) {
 			getMapActivity().reloadInstructions(route.getTurnInstructions(), isRecalculation);
+			isRecalculation = false;
+			if (((SMRouteNavigationActivity) getMapActivity()).bicycleTypeChanged) {
+				((SMRouteNavigationActivity) getMapActivity()).onNewBicycleRoute();
+			}
 		}
-		isRecalculation = false;
 	}
 
 	// MapListener callbacks:
@@ -778,6 +787,10 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
 			// getMapActivity().stopTrackingUser();
 		}
 		return false;
+	}
+
+	public void getRouteForNewBicycleType() {
+		route.getRouteForNewBicycleType(SMLocationManager.getInstance().getLastValidLocation());
 	}
 
 }

@@ -59,17 +59,15 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 	static final int INSTRUCTIONS_TOP_MARGIN = Util.dp2px(80);
 
 	public int instructionsViewHeight;
-	float lastYMaximized = 0, lastYMinimized = 0, downYMinimized = 0,
-			lastYNormal = 0, downYNormal = 0, posX = 0, touchX = 0, yFix = 0f;
+	float lastYMaximized = 0, lastYMinimized = 0, downYMinimized = 0, lastYNormal = 0, downYNormal = 0, posX = 0, touchX = 0, yFix = 0f;
 	int maxSlide = 0, moveCount = 0;
-	boolean slidden = false, isMaximized = false, isPulledFromNormal = true,
-			instructionsUpdated = false, isFirstTimeInstructionsMax = true;
+	boolean slidden = false, isMaximized = false, isPulledFromNormal = true, instructionsUpdated = false,
+			isFirstTimeInstructionsMax = true, bicycleTypeChanged = false;
 	TranslateAnimation animation, animationInstructions;
 	protected SMRouteNavigationMapFragment mapFragment;
 	protected RelativeLayout overviewLayout;
 	Button btnStart;
-	RelativeLayout instructionsView, instructionsViewMax, leftContainer,
-			parentContainer, routeFinishedContainer, reportProblemsView,
+	RelativeLayout instructionsView, instructionsViewMax, leftContainer, parentContainer, routeFinishedContainer, reportProblemsView,
 			instructionsViewMaxContainer;
 	LinearLayout instructionsViewMin;
 	ImageButton pullHandleMax, pullHandle, pullHandleMin;
@@ -81,21 +79,16 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 	InstructionsPagerAdapter pagerAdapter;
 	ImageView imgCargoSlider;
 	ImageButton imgClose;
-	TextView textGoodRide, textReport2, textRecalculating, textCargo,
-			textBicycle, textTime, textReport, textDestAddress;
+	TextView textGoodRide, textReport2, textRecalculating, textCargo, textBicycle, textTime, textReport, textDestAddress;
 	ProgressBar progressBar;
 	public ArrayList<String> turns;
 	RelativeLayout.LayoutParams paramsForInstMaxContainer;
-	View mapTopDisabledView, pullTouchNormal, pullTouchMax, mapDisabledView,
-			darkenedView;
-	RelativeLayout.LayoutParams paramsInstructionsMaxNormal = new RelativeLayout.LayoutParams(
-			RelativeLayout.LayoutParams.WRAP_CONTENT,
+	View mapTopDisabledView, pullTouchNormal, pullTouchMax, mapDisabledView, darkenedView;
+	RelativeLayout.LayoutParams paramsInstructionsMaxNormal = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
 			(int) (Util.getScreenHeight()));
-	RelativeLayout.LayoutParams paramsInstructionsMaxMaximized = new RelativeLayout.LayoutParams(
-			RelativeLayout.LayoutParams.WRAP_CONTENT,
+	RelativeLayout.LayoutParams paramsInstructionsMaxMaximized = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
 			(int) (Util.getScreenHeight() - INSTRUCTIONS_TOP_MARGIN));
-	RelativeLayout.LayoutParams paramsInstructionsMaxMinimized = new RelativeLayout.LayoutParams(
-			RelativeLayout.LayoutParams.WRAP_CONTENT,
+	RelativeLayout.LayoutParams paramsInstructionsMaxMinimized = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
 			(int) (Util.getScreenHeight()));
 	InstrcutionViewState instructionsViewState = InstrcutionViewState.Invisible;
 
@@ -104,14 +97,11 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		this.setContentView(R.layout.route_navigation_activity);
 		LayoutInflater inflater = LayoutInflater.from(this);
-		reportProblemsView = (RelativeLayout) inflater.inflate(
-				R.layout.report_problems_view, null);
-		textReport = (TextView) reportProblemsView
-				.findViewById(R.id.textReport);
+		reportProblemsView = (RelativeLayout) inflater.inflate(R.layout.report_problems_view, null);
+		textReport = (TextView) reportProblemsView.findViewById(R.id.textReport);
 
 		instructionsViewMaxContainer = (RelativeLayout) findViewById(R.id.instructionsViewMaxContainer);
-		paramsForInstMaxContainer = new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.MATCH_PARENT,
+		paramsForInstMaxContainer = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
 				RelativeLayout.LayoutParams.MATCH_PARENT);
 		paramsForInstMaxContainer.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		paramsForInstMaxContainer.addRule(RelativeLayout.CENTER_HORIZONTAL);
@@ -130,8 +120,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 				setResult(MapActivity.RESULT_RETURN_FROM_NAVIGATION, intent);
 				setResult(MapActivity.RESULT_RETURN_FROM_NAVIGATION);
 				finish();
-				overridePendingTransition(R.anim.slide_in_left,
-						R.anim.slide_out_right);
+				overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
 			}
 
 		});
@@ -140,22 +129,19 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		textRecalculating = (TextView) findViewById(R.id.textRecalculating);
 		textBicycle = (TextView) findViewById(R.id.textBicycle);
 		textCargo = (TextView) findViewById(R.id.textCargo);
-		FrameLayout.LayoutParams rootParams = new FrameLayout.LayoutParams(
-				(int) (9 * Util.getScreenWidth() / 5),
+		FrameLayout.LayoutParams rootParams = new FrameLayout.LayoutParams((int) (9 * Util.getScreenWidth() / 5),
 				FrameLayout.LayoutParams.MATCH_PARENT);
 		findViewById(R.id.root_layout).setLayoutParams(rootParams);
 		this.maxSlide = (int) (4 * Util.getScreenWidth() / 5);
 		Util.init(getWindowManager());
 		leftContainer = (RelativeLayout) findViewById(R.id.leftContainer);
-		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-				(int) Util.getScreenWidth() * 4 / 5,
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams((int) Util.getScreenWidth() * 4 / 5,
 				RelativeLayout.LayoutParams.MATCH_PARENT);
 		params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 		params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		leftContainer.setLayoutParams(params);
 		parentContainer = (RelativeLayout) findViewById(R.id.parent_container);
-		params = new RelativeLayout.LayoutParams((int) Util.getScreenWidth(),
-				RelativeLayout.LayoutParams.MATCH_PARENT);
+		params = new RelativeLayout.LayoutParams((int) Util.getScreenWidth(), RelativeLayout.LayoutParams.MATCH_PARENT);
 		params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 		params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		parentContainer.setLayoutParams(params);
@@ -185,15 +171,11 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 
 		});
 
-		paramsInstructionsMaxNormal.topMargin = (int) (Util.getScreenHeight() - Util
-				.dp2px(146));
-		paramsInstructionsMaxNormal.bottomMargin = -(int) ((Util
-				.getScreenHeight()));
+		paramsInstructionsMaxNormal.topMargin = (int) (Util.getScreenHeight() - Util.dp2px(146));
+		paramsInstructionsMaxNormal.bottomMargin = -(int) ((Util.getScreenHeight()));
 		paramsInstructionsMaxMaximized.topMargin = INSTRUCTIONS_TOP_MARGIN;
-		paramsInstructionsMaxMinimized.topMargin = (int) (Util
-				.getScreenHeight() - Util.getScreenHeight() / 10);
-		paramsInstructionsMaxMinimized.bottomMargin = -(int) ((Util
-				.getScreenHeight()));
+		paramsInstructionsMaxMinimized.topMargin = (int) (Util.getScreenHeight() - Util.getScreenHeight() / 10);
+		paramsInstructionsMaxMinimized.bottomMargin = -(int) ((Util.getScreenHeight()));
 
 		overviewLayout = (RelativeLayout) findViewById(R.id.overviewLayout);
 
@@ -206,19 +188,15 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 				hideOverview();
 				textTime.setText(mapFragment.getEstimatedArrivalTime());
 				mapFragment.startRouting();
-				IbikeApplication.getTracker().sendEvent("Route", "Overview",
-						mapFragment.destination, (long) 0);
+				IbikeApplication.getTracker().sendEvent("Route", "Overview", mapFragment.destination, (long) 0);
 				// instructionsView.setVisibility(View.VISIBLE);
 				setInstructionViewState(InstrcutionViewState.Normal);
-				RelativeLayout.LayoutParams paramsBtnTrack = new RelativeLayout.LayoutParams(
-						RelativeLayout.LayoutParams.WRAP_CONTENT,
+				RelativeLayout.LayoutParams paramsBtnTrack = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
 						RelativeLayout.LayoutParams.WRAP_CONTENT);
-				paramsBtnTrack.setMargins(Util.dp2px(10), Util.dp2px(10),
-						Util.dp2px(10), Util.dp2px(10));
+				paramsBtnTrack.setMargins(Util.dp2px(10), Util.dp2px(10), Util.dp2px(10), Util.dp2px(10));
 				paramsBtnTrack.alignWithParent = true;
 				paramsBtnTrack.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-				paramsBtnTrack.addRule(RelativeLayout.ABOVE,
-						instructionsView.getId());
+				paramsBtnTrack.addRule(RelativeLayout.ABOVE, instructionsView.getId());
 				btnTrack.setLayoutParams(paramsBtnTrack);
 				startTrackingUser();
 			}
@@ -239,8 +217,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 				if (me.getAction() == MotionEvent.ACTION_DOWN) {
 					btnClose.setColorFilter(Color.argb(150, 155, 155, 155));
 					return false;
-				} else if (me.getAction() == MotionEvent.ACTION_UP
-						|| me.getAction() == MotionEvent.ACTION_CANCEL) {
+				} else if (me.getAction() == MotionEvent.ACTION_UP || me.getAction() == MotionEvent.ACTION_CANCEL) {
 					btnClose.setColorFilter(Color.argb(0, 155, 155, 155));
 					return false;
 				}
@@ -283,8 +260,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 
 		instructionsView = (RelativeLayout) findViewById(R.id.instructionsView);
 		instructionsView.setBackgroundColor(Color.BLACK);
-		pullHandle = (ImageButton) instructionsView
-				.findViewById(R.id.imgPullHandle);
+		pullHandle = (ImageButton) instructionsView.findViewById(R.id.imgPullHandle);
 		pullHandle.setOnTouchListener(new OnTouchListener() {
 
 			@Override
@@ -296,8 +272,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		});
 
 		instructionsViewMin = (LinearLayout) findViewById(R.id.instructionsViewMin);
-		pullHandleMin = (ImageButton) instructionsViewMin
-				.findViewById(R.id.imgPullHandleMin);
+		pullHandleMin = (ImageButton) instructionsViewMin.findViewById(R.id.imgPullHandleMin);
 		pullHandleMin.setOnTouchListener(new OnTouchListener() {
 
 			@Override
@@ -308,16 +283,13 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		});
 
 		instructionsViewMax = (RelativeLayout) findViewById(R.id.instructionsViewMax);
-		params = new RelativeLayout.LayoutParams((int) Util.getScreenWidth(),
-				RelativeLayout.LayoutParams.WRAP_CONTENT);
+		params = new RelativeLayout.LayoutParams((int) Util.getScreenWidth(), RelativeLayout.LayoutParams.WRAP_CONTENT);
 		params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 		instructionsView.setLayoutParams(params);
-		params = new RelativeLayout.LayoutParams((int) Util.getScreenWidth(),
-				RelativeLayout.LayoutParams.WRAP_CONTENT);
+		params = new RelativeLayout.LayoutParams((int) Util.getScreenWidth(), RelativeLayout.LayoutParams.WRAP_CONTENT);
 		params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 		findViewById(R.id.overviewLayout).setLayoutParams(params);
-		pullHandleMax = (ImageButton) instructionsViewMax
-				.findViewById(R.id.imgPullHandleMax);
+		pullHandleMax = (ImageButton) instructionsViewMax.findViewById(R.id.imgPullHandleMax);
 		pullHandleMax.setOnTouchListener(new OnTouchListener() {
 
 			@Override
@@ -328,8 +300,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 
 		});
 
-		instructionList = (ListView) instructionsViewMax
-				.findViewById(R.id.listView);
+		instructionList = (ListView) instructionsViewMax.findViewById(R.id.listView);
 		instructionList.addFooterView(reportProblemsView);
 		setInstructionViewState(InstrcutionViewState.Invisible);
 
@@ -343,15 +314,11 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 
 			@Override
 			public void onPageSelected(int position) {
-				if (!instructionsUpdated
-						|| (mapFragment.isRecalculation && !mapFragment
-								.getTrackingMode())) {
-					SMTurnInstruction turn = mapFragment.route
-							.getTurnInstructions().get(position);
+				if (!instructionsUpdated || (mapFragment.isRecalculation && !mapFragment.getTrackingMode())) {
+					SMTurnInstruction turn = mapFragment.route.getTurnInstructions().get(position);
 					if (turn.drivingDirection == SMTurnInstruction.TurnDirection.ReachedYourDestination
 							|| turn.drivingDirection == SMTurnInstruction.TurnDirection.ReachingDestination) {
-						mapFragment.animateTo(mapFragment.route
-								.getEndLocation());
+						mapFragment.animateTo(mapFragment.route.getEndLocation());
 					} else {
 						mapFragment.animateTo(turn.getLocation());
 					}
@@ -420,8 +387,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 			handler.postDelayed(new Runnable() {
 				@Override
 				public void run() {
-					Intent intent = new Intent(SMRouteNavigationActivity.this,
-							getSplashActivityClass());
+					Intent intent = new Intent(SMRouteNavigationActivity.this, getSplashActivityClass());
 					intent.putExtra("timeout", 0);
 					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(intent);
@@ -432,11 +398,9 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 
 		instructionsViewMax.setLayoutParams(paramsInstructionsMaxNormal);
 
-		RelativeLayout.LayoutParams paramsBtnTrack = new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
+		RelativeLayout.LayoutParams paramsBtnTrack = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
 				RelativeLayout.LayoutParams.WRAP_CONTENT);
-		paramsBtnTrack.setMargins(Util.dp2px(10), Util.dp2px(10),
-				Util.dp2px(10), Util.dp2px(10));
+		paramsBtnTrack.setMargins(Util.dp2px(10), Util.dp2px(10), Util.dp2px(10), Util.dp2px(10));
 		paramsBtnTrack.alignWithParent = true;
 		paramsBtnTrack.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 		paramsBtnTrack.addRule(RelativeLayout.ABOVE, overviewLayout.getId());
@@ -449,8 +413,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 	}
 
 	public void launchReportIssuesActivity() {
-		Intent i = new Intent(SMRouteNavigationActivity.this,
-				IssuesActivity.class);
+		Intent i = new Intent(SMRouteNavigationActivity.this, IssuesActivity.class);
 		Bundle b = new Bundle();
 		generateTurnStrings();
 		b.putStringArrayList("turns", turns);
@@ -471,15 +434,13 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 	}
 
 	protected InstructionsPagerAdapter getPagerAdapter() {
-		return new InstructionsPagerAdapter(getSupportFragmentManager(),
-				mapFragment, this);
+		return new InstructionsPagerAdapter(getSupportFragmentManager(), mapFragment, this);
 	}
 
 	@Override
 	public void onLowMemory() {
 		try {
-			if (mapFragment != null && mapFragment.mapView != null
-					&& mapFragment.mapView.getTileProvider() != null)
+			if (mapFragment != null && mapFragment.mapView != null && mapFragment.mapView.getTileProvider() != null)
 				mapFragment.mapView.getTileProvider().clearTileCache();
 		} catch (Exception e) {
 
@@ -496,51 +457,63 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 	}
 
 	public void onBicycleContainerClick(View v) {
+		bicycleTypeChanged = true;
 		mapFragment.locationOverlay.disableMyLocation();
 		v.setBackgroundResource(R.color.BlueListBackground);
-		((ImageView) findViewById(R.id.imgBicycle))
-				.setImageResource(R.drawable.normal_white);
+		((ImageView) findViewById(R.id.imgBicycle)).setImageResource(R.drawable.normal_white);
 		textBicycle.setTextColor(getResources().getColor(R.color.White));
-		findViewById(R.id.cargoContainer).setBackgroundResource(
-				R.color.LeftGreyBackground);
-		((ImageView) findViewById(R.id.imgCargo))
-				.setImageResource(R.drawable.cargo_grey);
+		findViewById(R.id.cargoContainer).setBackgroundResource(R.color.LeftGreyBackground);
+		((ImageView) findViewById(R.id.imgCargo)).setImageResource(R.drawable.cargo_grey);
 		textCargo.setTextColor(getResources().getColor(R.color.TextLightGrey));
 		Config.OSRM_SERVER = Config.OSRM_SERVER_BICYCLE;
-		restartRouting();
+		getRouteForNewBicycleType();
 	}
 
 	public void onCargoContainerClick(View v) {
+		bicycleTypeChanged = true;
 		mapFragment.locationOverlay.disableMyLocation();
 		v.setBackgroundResource(R.color.BlueListBackground);
-		((ImageView) findViewById(R.id.imgCargo))
-				.setImageResource(R.drawable.cargo_white);
+		((ImageView) findViewById(R.id.imgCargo)).setImageResource(R.drawable.cargo_white);
 		textCargo.setTextColor(getResources().getColor(R.color.White));
-		findViewById(R.id.bicycleContainer).setBackgroundResource(
-				R.color.LeftGreyBackground);
-		((ImageView) findViewById(R.id.imgBicycle))
-				.setImageResource(R.drawable.normal_grey);
-		textBicycle
-				.setTextColor(getResources().getColor(R.color.TextLightGrey));
+		findViewById(R.id.bicycleContainer).setBackgroundResource(R.color.LeftGreyBackground);
+		((ImageView) findViewById(R.id.imgBicycle)).setImageResource(R.drawable.normal_grey);
+		textBicycle.setTextColor(getResources().getColor(R.color.TextLightGrey));
 		Config.OSRM_SERVER = Config.OSRM_SERVER_CARGO;
-		restartRouting();
+		getRouteForNewBicycleType();
 	}
 
 	protected boolean hasDarkImage() {
 		return true;
 	}
 
-	private void restartRouting() {
+	private void getRouteForNewBicycleType() {
+		findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
 		stopTrackingUser();
 		mapFragment.routingStarted = false;
-		mapFragment.recalculateRoute();
+		mapFragment.getRouteForNewBicycleType();
+
+	}
+
+	public void onNewBicycleRoute() {
 		translate(-maxSlide, true);
 		setInstructionViewState(InstrcutionViewState.Invisible);
 		overviewLayout.setVisibility(View.VISIBLE);
 		btnStart.setEnabled(true);
-		mapFragment.restartRoute();
-		textTime.setText(mapFragment.getEstimatedArrivalTime());
+		mapFragment.zoomToBoundingBox();
+		bicycleTypeChanged = false;
 	}
+
+	// private void restartRouting() {
+	// stopTrackingUser();
+	// mapFragment.routingStarted = false;
+	// mapFragment.recalculateRoute();
+	// translate(-maxSlide, true);
+	// setInstructionViewState(InstrcutionViewState.Invisible);
+	// overviewLayout.setVisibility(View.VISIBLE);
+	// btnStart.setEnabled(true);
+	// mapFragment.restartRoute();
+	// textTime.setText(mapFragment.getEstimatedArrivalTime());
+	// }
 
 	public void showRouteOverview() {
 		stopTrackingUser();
@@ -554,8 +527,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 
 	protected InstructionListAdapter getInstructionsAdapter() {
 		if (adapter == null) {
-			adapter = new InstructionListAdapter(this,
-					R.layout.direction_top_cell, mapFragment.route);
+			adapter = new InstructionListAdapter(this, R.layout.direction_top_cell, mapFragment.route);
 		}
 		return adapter;
 	}
@@ -570,8 +542,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		textTime.setTypeface(IbikeApplication.getBoldFont());
 		textReport.setText(IbikeApplication.getString("ride_report_a_problem"));
 		textReport.setTypeface(IbikeApplication.getBoldFont());
-		textReport2
-				.setText(IbikeApplication.getString("ride_report_a_problem"));
+		textReport2.setText(IbikeApplication.getString("ride_report_a_problem"));
 		textReport2.setTypeface(IbikeApplication.getBoldFont());
 		textCargo.setText(IbikeApplication.getString("bike_type_2"));
 		textCargo.setTextColor(getResources().getColor(R.color.TextLightGrey));
@@ -582,19 +553,14 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		textGoodRide.setTypeface(IbikeApplication.getBoldFont());
 		textRecalculating.setVisibility(View.GONE);
 		textRecalculating.setTypeface(IbikeApplication.getNormalFont());
-		textRecalculating.setText(IbikeApplication
-				.getString("calculating_new_route"));
+		textRecalculating.setText(IbikeApplication.getString("calculating_new_route"));
 		turns = new ArrayList<String>();
 		// resizeList();
 		btnStart.setText(IbikeApplication.getString("start_route"));
-		String st = "Start: " + IbikeApplication.getString("current_position")
-				+ " (" + mapFragment.startLocation.getLatitude() + ","
-				+ mapFragment.startLocation.getLongitude() + ") End: "
-				+ mapFragment.destination + " ("
-				+ mapFragment.endLocation.getLatitude() + ","
-				+ mapFragment.endLocation.getLongitude() + ")";
-		IbikeApplication.getTracker()
-				.sendEvent("Route", "Resume", st, (long) 0);
+		String st = "Start: " + IbikeApplication.getString("current_position") + " (" + mapFragment.startLocation.getLatitude() + ","
+				+ mapFragment.startLocation.getLongitude() + ") End: " + mapFragment.destination + " ("
+				+ mapFragment.endLocation.getLatitude() + "," + mapFragment.endLocation.getLongitude() + ")";
+		IbikeApplication.getTracker().sendEvent("Route", "Resume", st, (long) 0);
 	}
 
 	public void generateTurnStrings() {
@@ -604,11 +570,9 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 			turns.clear();
 		}
 		for (int i = 0; i < mapFragment.route.allTurnInstructions.size(); i++)
-			turns.add(mapFragment.route.allTurnInstructions.get(i)
-					.generateFullDescriptionString());
+			turns.add(mapFragment.route.allTurnInstructions.get(i).generateFullDescriptionString());
 		for (int i = 0; i < mapFragment.route.turnInstructions.size(); i++)
-			turns.add(mapFragment.route.turnInstructions.get(i)
-					.generateFullDescriptionString());
+			turns.add(mapFragment.route.turnInstructions.get(i).generateFullDescriptionString());
 	}
 
 	public void showRouteFinishedDialog() {
@@ -621,8 +585,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		textDestAddress.setText(mapFragment.destination);
 		routeFinishedContainer.setVisibility(View.VISIBLE);
 		darkenedView.setVisibility(View.GONE);
-		IbikeApplication.getTracker().sendEvent("Route", "Overview",
-				mapFragment.destination, (long) 0);
+		IbikeApplication.getTracker().sendEvent("Route", "Overview", mapFragment.destination, (long) 0);
 		btnClose.setVisibility(View.GONE);
 		viewDistance.setVisibility(View.GONE);
 
@@ -684,15 +647,12 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 				viewDistance.setBackgroundResource(R.drawable.distance_white);
 				textTime.setTextColor(Color.BLACK);
 			}
-			RelativeLayout.LayoutParams paramsBtnTrack = new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.WRAP_CONTENT,
+			RelativeLayout.LayoutParams paramsBtnTrack = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
 					RelativeLayout.LayoutParams.WRAP_CONTENT);
-			paramsBtnTrack.setMargins(Util.dp2px(10), Util.dp2px(10),
-					Util.dp2px(10), Util.dp2px(10));
+			paramsBtnTrack.setMargins(Util.dp2px(10), Util.dp2px(10), Util.dp2px(10), Util.dp2px(10));
 			paramsBtnTrack.alignWithParent = true;
 			paramsBtnTrack.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-			paramsBtnTrack.addRule(RelativeLayout.ABOVE,
-					instructionsView.getId());
+			paramsBtnTrack.addRule(RelativeLayout.ABOVE, instructionsView.getId());
 			btnTrack.setLayoutParams(paramsBtnTrack);
 		} else if (newState == InstrcutionViewState.Minimized) {
 			pullTouchMax.setVisibility(View.GONE);
@@ -708,11 +668,9 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 			instructionsView.setVisibility(View.GONE);
 			instructionsViewMax.setVisibility(View.GONE);
 			instructionsViewMin.setVisibility(View.VISIBLE);
-			RelativeLayout.LayoutParams paramsBtnTrack = new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.WRAP_CONTENT,
+			RelativeLayout.LayoutParams paramsBtnTrack = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
 					RelativeLayout.LayoutParams.WRAP_CONTENT);
-			paramsBtnTrack.setMargins(Util.dp2px(10), Util.dp2px(10),
-					Util.dp2px(10), Util.dp2px(10));
+			paramsBtnTrack.setMargins(Util.dp2px(10), Util.dp2px(10), Util.dp2px(10), Util.dp2px(10));
 			paramsBtnTrack.alignWithParent = true;
 			paramsBtnTrack.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 			paramsBtnTrack.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
@@ -733,11 +691,10 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 			instructionsViewMin.setVisibility(View.GONE);
 		}
 
-		if (newState != InstrcutionViewState.Maximized && mapFragment != null
-				&& mapFragment.locationOverlay != null) {
+		if (newState != InstrcutionViewState.Maximized && mapFragment != null && mapFragment.locationOverlay != null) {
 			mapFragment.locationOverlay
-					.enableMyLocation(mapFragment.locationProvider == null ? mapFragment.locationProvider = new GpsMyLocationProvider(
-							this) : mapFragment.locationProvider);
+					.enableMyLocation(mapFragment.locationProvider == null ? mapFragment.locationProvider = new GpsMyLocationProvider(this)
+							: mapFragment.locationProvider);
 		}
 
 		// enter state actions
@@ -848,23 +805,17 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		}
 	}
 
-	public void setOverview(String destination, String distance,
-			String viaStreets) {
-		((TextView) overviewLayout.findViewById(R.id.overviewDestination))
-				.setTypeface(IbikeApplication.getBoldFont());
-		((TextView) overviewLayout.findViewById(R.id.overviewDestination))
-				.setText(destination);
+	public void setOverview(String destination, String distance, String viaStreets) {
+		((TextView) overviewLayout.findViewById(R.id.overviewDestination)).setTypeface(IbikeApplication.getBoldFont());
+		((TextView) overviewLayout.findViewById(R.id.overviewDestination)).setText(destination);
 		// ((TextView)
 		// overviewLayout.findViewById(R.id.overviewDistanceAndVia)).setTypeface(IbikeApplication.getNormalFont());
-		String distanceAndVia = distance + ", "
-				+ IbikeApplication.getString("via") + " " + viaStreets;
+		String distanceAndVia = distance + ", " + IbikeApplication.getString("via") + " " + viaStreets;
 		if (distanceAndVia.length() > 26)
 			distanceAndVia = distanceAndVia.substring(0, 26) + "...";
-		((TextView) overviewLayout.findViewById(R.id.overviewDistanceAndVia))
-				.setText(distanceAndVia);
+		((TextView) overviewLayout.findViewById(R.id.overviewDistanceAndVia)).setText(distanceAndVia);
 		EasyTracker.getInstance().setContext(this);
-		IbikeApplication.getTracker().sendEvent("Route", "Overview",
-				destination, (long) 0);
+		IbikeApplication.getTracker().sendEvent("Route", "Overview", destination, (long) 0);
 	}
 
 	public void updateInstructionsView(SMTurnInstruction turn) {
@@ -877,8 +828,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		showStopDlg();
 	}
 
-	public void reloadInstructions(List<SMTurnInstruction> turnInstructions,
-			boolean isRecalc) {
+	public void reloadInstructions(List<SMTurnInstruction> turnInstructions, boolean isRecalc) {
 
 		instructionsUpdated = true;
 
@@ -954,11 +904,9 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 			mapDisabledView.setVisibility(View.GONE);
 		}
 
-		final boolean newSlidden = slidden ? newX > -SLIDE_THRESHOLD
-				: newX > SLIDE_THRESHOLD;
+		final boolean newSlidden = slidden ? newX > -SLIDE_THRESHOLD : newX > SLIDE_THRESHOLD;
 		if (finalAnim) {
-			newX = (slidden == newSlidden) ? 0 : (slidden ? -maxSlide
-					: maxSlide);
+			newX = (slidden == newSlidden) ? 0 : (slidden ? -maxSlide : maxSlide);
 		}
 
 		if (animation != null && animation.isInitialized()) {
@@ -1002,10 +950,8 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 					slidden = newSlidden;
 					int leftmargin = slidden ? maxSlide : 0;
 					int rightMargin = slidden ? 0 : maxSlide;
-					RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) parentContainer
-							.getLayoutParams();
-					lp.setMargins(leftmargin, lp.topMargin, rightMargin,
-							lp.bottomMargin);
+					RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) parentContainer.getLayoutParams();
+					lp.setMargins(leftmargin, lp.topMargin, rightMargin, lp.bottomMargin);
 					parentContainer.setLayoutParams(lp);
 
 					if (leftmargin == 0) {
@@ -1032,8 +978,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 	static final int DOUBLE_TAP_PERIOD = 500;
 
 	private void animateInstructions(MotionEvent event) {
-		if (animationInstructions != null
-				&& animationInstructions.isInitialized()) {
+		if (animationInstructions != null && animationInstructions.isInitialized()) {
 			animationInstructions.cancel();
 		}
 
@@ -1051,12 +996,9 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 			instructionsViewMin.setVisibility(View.INVISIBLE);
 			instructionsViewMax.setVisibility(View.VISIBLE);
 			darkenedView.setVisibility(View.VISIBLE);
-			darkenedView.getBackground().setAlpha(
-					Util.yToAlpha((int) event.getRawY()));
-		} else if (event.getAction() == MotionEvent.ACTION_UP
-				|| event.getAction() == MotionEvent.ACTION_CANCEL) {
-			if (isDoubleTap
-					&& System.currentTimeMillis() - lastDownTimestamp <= DOUBLE_TAP_PERIOD) {
+			darkenedView.getBackground().setAlpha(Util.yToAlpha((int) event.getRawY()));
+		} else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+			if (isDoubleTap && System.currentTimeMillis() - lastDownTimestamp <= DOUBLE_TAP_PERIOD) {
 				if (instructionsViewState == InstrcutionViewState.Normal) {
 					setInstructionViewState(InstrcutionViewState.Maximized);
 				} else if (instructionsViewState == InstrcutionViewState.Maximized) {
@@ -1091,10 +1033,8 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 			pullHandleMax.setBackgroundColor(Color.rgb(26, 26, 26));
 		}
 
-		darkenedView.getBackground().setAlpha(
-				Util.yToAlpha((int) event.getRawY()));
-		animationInstructions = new TranslateAnimation(0, 0, lastY,
-				event.getY());
+		darkenedView.getBackground().setAlpha(Util.yToAlpha((int) event.getRawY()));
+		animationInstructions = new TranslateAnimation(0, 0, lastY, event.getY());
 		animationInstructions.setFillAfter(true);
 		animationInstructions.setFillBefore(true);
 		lastY = event.getY();

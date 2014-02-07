@@ -6,7 +6,6 @@
 package com.spoiledmilk.ibikecph.search;
 
 import com.spoiledmilk.ibikecph.R;
-import com.spoiledmilk.ibikecph.util.LOG;
 
 public class HistoryData extends SearchListItem {
 
@@ -119,8 +118,7 @@ public class HistoryData extends SearchListItem {
 
 	@Override
 	public int getIconResourceId() {
-		LOG.d("favorite icon get");
-		return R.drawable.fav_time_gray;// find_history;
+		return R.drawable.fav_time_gray;
 	}
 
 	@Override

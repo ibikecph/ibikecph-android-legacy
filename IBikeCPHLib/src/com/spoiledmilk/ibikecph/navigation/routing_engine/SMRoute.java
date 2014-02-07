@@ -457,13 +457,7 @@ public class SMRoute implements SMHttpRequestListener {
 		// Check if we are finishing:
 		double distanceToFinish = loc.distanceTo(getEndLocation());
 
-		double percentageCompleted = (estimatedRouteDistance - distancePassed) / estimatedRouteDistance;
-
 		arrivalTime = distanceLeft * estimatedArrivalTime / estimatedRouteDistance;
-
-		// arrivalTime = (int) (estimatedArrivalTime * percentageCompleted);
-
-		LOG.d("visitLocation percentageCompleted = " + percentageCompleted + " arrivalTime = " + arrivalTime);
 
 		// Calculate the average speed and update the ETA
 		double speed = loc.getSpeed() > 0 ? loc.getSpeed() : 5;
@@ -513,17 +507,19 @@ public class SMRoute implements SMHttpRequestListener {
 		if (turnInstructions != null && turnInstructions.size() > 0) {
 			// find the projected location on the route segment
 			// check only a couple of the first instructions
-			for (int i = 0; i < turnInstructions.size() - 1 && i < 3; i++) {
-				double d = SMGPSUtil.distanceFromLineInMeters(loc, turnInstructions.get(i).loc, turnInstructions.get(i + 1).loc);
-				if (d < minD && d < 20) {
-					projectedLoc = SMGPSUtil.closestCoordinate(loc, turnInstructions.get(i).loc, turnInstructions.get(i + 1).loc);
-				}
-			}
-			minD = Double.MAX_VALUE;
+			// for (int i = 0; i < turnInstructions.size() - 1 && i < 3; i++) {
+			// double d = SMGPSUtil.distanceFromLineInMeters(loc, turnInstructions.get(i).loc, turnInstructions.get(i +
+			// 1).loc);
+			// if (d < minD && d < 20) {
+			// projectedLoc = SMGPSUtil.closestCoordinate(loc, turnInstructions.get(i).loc, turnInstructions.get(i +
+			// 1).loc);
+			// }
+			// }
+			// minD = Double.MAX_VALUE;
 
-			if (lastCorrectedLocation != null && lastCorrectedLocation.distanceTo(loc) < 30) {
-				projectedLoc = lastCorrectedLocation;
-			}
+			// if (lastCorrectedLocation != null && lastCorrectedLocation.distanceTo(loc) < 30) {
+			// projectedLoc = lastCorrectedLocation;
+			// }
 
 			projectedLoc = loc;
 
@@ -627,6 +623,19 @@ public class SMRoute implements SMHttpRequestListener {
 			viaList.add(endStation);
 			new SMHttpRequest().getRecalculatedRoute(loc, end, viaList, null, null, null, this);
 		}
+	}
+
+	public void getRouteForNewBicycleType(Location loc) {
+		if (recalculationInProgress) {
+			return;
+		}
+		lastRecalcLocation = loc;
+		recalculationInProgress = true;
+		Location end = getEndLocation();
+		if (loc == null || end == null) {
+			return;
+		}
+		new SMHttpRequest().getRecalculatedRoute(loc, end, null, null, null, null, this);
 	}
 
 	boolean checkLocation(Location loc, float maxDistance) {

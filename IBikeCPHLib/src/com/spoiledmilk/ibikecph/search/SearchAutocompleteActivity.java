@@ -579,12 +579,12 @@ public class SearchAutocompleteActivity extends Activity {
 				isFinishing = true;
 				Intent intent = new Intent();
 				if (currentSelection != null) { // && !isClose
-					if (isAddressSearched) {
+					if (isAddressSearched && addr != null) {
 						intent.putExtra("number", addr.number);
 					}
 					if (currentSelection instanceof KortforData && !((KortforData) currentSelection).isPlace()) {
 						String name = currentSelection.getName();
-						if (addr.number != null && !addr.number.equals("") && !addr.number.equals("1")
+						if (addr != null && addr.number != null && !addr.number.equals("") && !addr.number.equals("1")
 								&& AddressParser.containsNumber(addr.number)) {
 							name += " " + addr.number;
 						}

@@ -57,21 +57,6 @@
         android:background="@drawable/routeenterinputbg"
         android:contentDescription="@string/app_name" />
 
-    <ImageButton
-        android:id="@+id/btnSwitch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/imgInput"
-        android:layout_alignRight="@+id/imgInput"
-        android:layout_alignTop="@+id/imgInput"
-        android:layout_marginLeft="-10dp"
-        android:background="@null"
-        android:contentDescription="@string/app_name"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:scaleType="center"
-        android:src="@drawable/route_enter_switch_icon" />
-
     <ImageView
         android:id="@+id/imgCurrentLoc"
         android:layout_width="wrap_content"
@@ -131,6 +116,21 @@
         android:text=""
         android:textColor="@color/Black"
         android:textSize="16sp" />
+
+    <ImageButton
+        android:id="@+id/btnSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/imgInput"
+        android:layout_alignRight="@+id/imgInput"
+        android:layout_alignTop="@+id/imgInput"
+        android:layout_marginLeft="-10dp"
+        android:background="@null"
+        android:contentDescription="@string/app_name"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:scaleType="center"
+        android:src="@drawable/route_enter_switch_icon" />
 
     <com.spoiledmilk.ibikecph.controls.ObservableScrollView
         android:id="@+id/scrollView"
