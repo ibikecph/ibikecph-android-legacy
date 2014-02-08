@@ -167,16 +167,18 @@ public class Util {
 
 	public static void showSimpleMessageDlg(Context context, String message) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(message).setPositiveButton(IbikeApplication.getString("OK"), new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		}).show();
+		builder.setMessage(message)
+				.setPositiveButton(IbikeApplication.getString("OK"), new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				}).show();
 	}
 
 	public static Location locationFromGeoPoint(IGeoPoint geoPoint) {
-		return locationFromCoordinates(geoPoint.getLatitudeE6() * (float) 1E-6, geoPoint.getLongitudeE6() * (float) 1E-6);
+		return locationFromCoordinates(geoPoint.getLatitudeE6() * (float) 1E-6, geoPoint.getLongitudeE6()
+				* (float) 1E-6);
 	}
 
 	public static Location locationFromCoordinates(double lat, double lng) {
@@ -229,7 +231,11 @@ public class Util {
 		handler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				dialog.dismiss();
+				try {
+					dialog.dismiss();
+				} catch (Exception e) {
+					// dialog not attached to window
+				}
 			}
 		}, 3000);
 	}
@@ -283,7 +289,8 @@ public class Util {
 			return null;
 		}
 
-		LOG.d("bmpDecodeFile(" + f.getAbsolutePath() + "," + width_limit + "," + height_limit + "," + max_size + "," + max_dimensions + ")");
+		LOG.d("bmpDecodeFile(" + f.getAbsolutePath() + "," + width_limit + "," + height_limit + "," + max_size + ","
+				+ max_dimensions + ")");
 
 		Bitmap bmp = null;
 		boolean shouldReturn = false;
