@@ -58,12 +58,16 @@ public class LoginDialog {
 		textLoginTitle.setText(IbikeApplication.getString("log_in"));
 		textLoginTitle.setTypeface(IbikeApplication.getBoldFont());
 		textEmail = (EditText) dialog.findViewById(R.id.textEmail);
-		textEmail.setHint(IbikeApplication.getString("register_email_placeholder"));
-		textEmail.setHintTextColor(context.getResources().getColor(R.color.HintColor));
+		textEmail.setHint(IbikeApplication
+				.getString("register_email_placeholder"));
+		textEmail.setHintTextColor(context.getResources().getColor(
+				R.color.HintColor));
 		textEmail.setTypeface(IbikeApplication.getNormalFont());
 		textPassword = (EditText) dialog.findViewById(R.id.textPassword);
-		textPassword.setHint(IbikeApplication.getString("register_password_placeholder"));
-		textPassword.setHintTextColor(context.getResources().getColor(R.color.HintColor));
+		textPassword.setHint(IbikeApplication
+				.getString("register_password_placeholder"));
+		textPassword.setHintTextColor(context.getResources().getColor(
+				R.color.HintColor));
 		textPassword.setTypeface(IbikeApplication.getNormalFont());
 		btnBack = (Button) dialog.findViewById(R.id.btnBack);
 		btnBack.setText(IbikeApplication.getString("back"));
@@ -87,19 +91,26 @@ public class LoginDialog {
 		btnLogin.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				showProgressDialog();
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						Looper.myLooper();
-						Looper.prepare();
-						userData = new UserData(textEmail.getText().toString(), textPassword.getText().toString());
-						Message message = HTTPAccountHandler.performLogin(userData);
-						handler.sendMessage(message);
-						dismissProgressDialog();
-					}
-				}).start();
-
+				if (textEmail.getText() == null || ("" + textEmail.getText().toString().trim()).equals("")
+						|| textPassword.getText() == null || ("" + textPassword.getText().toString()).trim().equals("")) {
+					launchErrorDialog(IbikeApplication.getString("login_error_fields"));
+				} else {
+					showProgressDialog();
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+							Looper.myLooper();
+							Looper.prepare();
+							userData = new UserData(textEmail.getText()
+									.toString(), textPassword.getText()
+									.toString());
+							Message message = HTTPAccountHandler
+									.performLogin(userData);
+							handler.sendMessage(message);
+							dismissProgressDialog();
+						}
+					}).start();
+				}
 			}
 
 		});
@@ -119,15 +130,18 @@ public class LoginDialog {
 							dialog.dismiss();
 						}
 					} else {
-						final String message = data.containsKey("errors") ? data.getString("errors") : data.getString("info");
+						final String message = data.containsKey("errors") ? data
+								.getString("errors") : data.getString("info");
 						launchErrorDialog(message);
 					}
 					return true;
 				}
 			});
 		}
-		textCreateAccount = (TextView) dialog.findViewById(R.id.textCreateAccount);
-		textCreateAccount.setText(IbikeApplication.getString("login_new_account"));
+		textCreateAccount = (TextView) dialog
+				.findViewById(R.id.textCreateAccount);
+		textCreateAccount.setText(IbikeApplication
+				.getString("login_new_account"));
 		textCreateAccount.setTypeface(IbikeApplication.getBoldFont());
 		textCreateAccount.setClickable(true);
 		final Context contextFinal = context;
@@ -141,7 +155,8 @@ public class LoginDialog {
 			}
 		});
 
-		dialog.getWindow().setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		dialog.getWindow().setLayout(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT);
 
 		dialog.setOnDismissListener(new OnDismissListener() {
 
@@ -173,8 +188,10 @@ public class LoginDialog {
 	private void launchMainMapActivity(String auth_token, int id) {
 		dialog.dismiss();
 		progressBar.setVisibility(View.GONE);
-		PreferenceManager.getDefaultSharedPreferences(context).edit().putString("auth_token", auth_token).commit();
-		PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("id", id).commit();
+		PreferenceManager.getDefaultSharedPreferences(context).edit()
+				.putString("auth_token", auth_token).commit();
+		PreferenceManager.getDefaultSharedPreferences(context).edit()
+				.putInt("id", id).commit();
 		((LoginSplashActivity) context).launchMainMapActivity(auth_token, id);
 	}
 

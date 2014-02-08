@@ -91,24 +91,28 @@ public class LoginActivity extends Activity implements FBLoginListener {
 
 			@Override
 			public void onClick(View arg0) {
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
+				if (textEmail.getText() == null || ("" + textEmail.getText().toString().trim()).equals("")
+						|| textPassword.getText() == null || ("" + textPassword.getText().toString()).trim().equals("")) {
+					launchErrorDialog(IbikeApplication.getString("login_error_fields"));
+				} else {
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
 
-						Looper.myLooper();
-						Looper.prepare();
+							Looper.myLooper();
+							Looper.prepare();
 
-						showProgressDialog();
+							showProgressDialog();
 
-						userData = new UserData(textEmail.getText().toString(), textPassword.getText().toString());
-						Message message = HTTPAccountHandler.performLogin(userData);
-						handler.sendMessage(message);
+							userData = new UserData(textEmail.getText().toString(), textPassword.getText().toString());
+							Message message = HTTPAccountHandler.performLogin(userData);
+							handler.sendMessage(message);
 
-						dismissProgressDialog();
+							dismissProgressDialog();
 
-					}
-				}).start();
-
+						}
+					}).start();
+				}
 			}
 
 		});
@@ -131,15 +135,17 @@ public class LoginActivity extends Activity implements FBLoginListener {
 							if (auth_token == null || auth_token.equals("") || auth_token.equals("null")) {
 								auth_token = "";
 							}
-							PreferenceManager.getDefaultSharedPreferences(LoginActivity.this).edit().putString("auth_token", auth_token)
+							PreferenceManager.getDefaultSharedPreferences(LoginActivity.this).edit()
+									.putString("auth_token", auth_token).commit();
+							PreferenceManager.getDefaultSharedPreferences(LoginActivity.this).edit().putInt("id", id)
 									.commit();
-							PreferenceManager.getDefaultSharedPreferences(LoginActivity.this).edit().putInt("id", id).commit();
 							LOG.d("Loged in token = " + auth_token + ", id = " + id);
 							finish();
 							overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
 						}
 					} else {
-						final String message = data.containsKey("errors") ? data.getString("errors") : data.getString("info");
+						final String message = data.containsKey("errors") ? data.getString("errors")
+								: data.getString("info");
 						launchErrorDialog(message);
 					}
 					return true;
@@ -181,7 +187,8 @@ public class LoginActivity extends Activity implements FBLoginListener {
 			}
 		}
 		Session.setActiveSession(session);
-		if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED) || (!session.isOpened() && !session.isClosed())) {
+		if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)
+				|| (!session.isOpened() && !session.isClosed())) {
 			session.openForRead(new Session.OpenRequest(LoginActivity.this).setCallback(statusCallback).setPermissions(
 					Arrays.asList("email")));
 		} else if (session.isOpened() && !session.getPermissions().contains("email")) {
@@ -332,7 +339,8 @@ public class LoginActivity extends Activity implements FBLoginListener {
 					@Override
 					public void onCompleted(GraphUser user, Response response) {
 						if (user != null) {
-							HTTPAccountHandler.checkIsFbTokenValid(Session.getActiveSession().getAccessToken(), LoginActivity.this);
+							HTTPAccountHandler.checkIsFbTokenValid(Session.getActiveSession().getAccessToken(),
+									LoginActivity.this);
 						}
 					}
 				});
