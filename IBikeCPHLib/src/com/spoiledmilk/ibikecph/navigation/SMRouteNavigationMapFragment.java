@@ -790,7 +790,12 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
 	}
 
 	public void getRouteForNewBicycleType() {
-		route.getRouteForNewBicycleType(SMLocationManager.getInstance().getLastValidLocation());
+		if (!route.getRouteForNewBicycleType(SMLocationManager.getInstance().getLastValidLocation())) {
+			if (getActivity() != null) {
+				getMapActivity().onNewBicycleRoute();
+				Util.launchNoConnectionDialog(getMapActivity());
+			}
+		}
 	}
 
 }

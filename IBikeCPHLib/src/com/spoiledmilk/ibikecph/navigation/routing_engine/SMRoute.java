@@ -625,17 +625,18 @@ public class SMRoute implements SMHttpRequestListener {
 		}
 	}
 
-	public void getRouteForNewBicycleType(Location loc) {
+	public boolean getRouteForNewBicycleType(Location loc) {
 		if (recalculationInProgress) {
-			return;
+			return false;
 		}
 		lastRecalcLocation = loc;
 		recalculationInProgress = true;
 		Location end = getEndLocation();
 		if (loc == null || end == null) {
-			return;
+			return false;
 		}
 		new SMHttpRequest().getRecalculatedRoute(loc, end, null, null, null, null, this);
+		return true;
 	}
 
 	boolean checkLocation(Location loc, float maxDistance) {

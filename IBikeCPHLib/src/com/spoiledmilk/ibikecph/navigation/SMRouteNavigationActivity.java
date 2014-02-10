@@ -501,6 +501,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		btnStart.setEnabled(true);
 		mapFragment.zoomToBoundingBox();
 		bicycleTypeChanged = false;
+		findViewById(R.id.progressBar).setVisibility(View.GONE);
 	}
 
 	// private void restartRouting() {
