@@ -206,26 +206,31 @@ public class RegisterDialog {
 		if (name.length() == 0 || email.length() == 0 || password.length() == 0 || passwordConfirm.length() == 0) {
 			validationMessage = IbikeApplication.getString("register_error_fields");
 			ret = false;
+		} else if (!validEmail(email)) {
+			ret = false;
 		} else if (!password.equals(passwordConfirm)) {
 			validationMessage = IbikeApplication.getString("register_error_passwords");
 			ret = false;
 		} else if (password.length() < 3) {
 			validationMessage = IbikeApplication.getString("register_error_passwords_short");
 			ret = false;
-		} else {
-			int atIndex = email.indexOf("@");
-			if (atIndex <= 0) {
-				validationMessage = IbikeApplication.getString("register_error_invalid_email");
-				ret = false;
-			} else if (email.length() < atIndex + 2) {
-				validationMessage = IbikeApplication.getString("register_error_invalid_email");
-				ret = false;
-			} else if (email.indexOf(".", atIndex) < atIndex + 1) {
-				validationMessage = IbikeApplication.getString("register_error_invalid_email");
-				;
-				ret = false;
-			}
+		}
+		return ret;
+	}
 
+	private boolean validEmail(String email) {
+		boolean ret = true;
+		int atIndex = email.indexOf("@");
+		if (atIndex <= 0) {
+			validationMessage = IbikeApplication.getString("register_error_invalid_email");
+			ret = false;
+		} else if (email.length() < atIndex + 2) {
+			validationMessage = IbikeApplication.getString("register_error_invalid_email");
+			ret = false;
+		} else if (email.indexOf(".", atIndex) < atIndex + 1) {
+			validationMessage = IbikeApplication.getString("register_error_invalid_email");
+			;
+			ret = false;
 		}
 		return ret;
 	}
