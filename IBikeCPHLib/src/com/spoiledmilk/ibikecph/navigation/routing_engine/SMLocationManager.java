@@ -73,8 +73,8 @@ public class SMLocationManager implements LocationListener {
 	}
 
 	public Location getLastKnownLocation() {
-		if (lastValidLocation != null)
-			return lastValidLocation;
+//		if (lastValidLocation != null)
+//			return lastValidLocation;
 		return locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 	}
 

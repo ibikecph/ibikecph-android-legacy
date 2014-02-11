@@ -509,6 +509,8 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
 
 		lastLocation = location;
 
+		LOG.d("location overlay onLocationChanged loc = " + location);
+
 		if (route != null) {
 			if (!route.reachedDestination) {
 				// route.visitLocation(location);
@@ -516,8 +518,6 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
 			route.isTooFarFromRoute(location, SMRoute.MAX_DISTANCE_FROM_PATH);
 			location = getSnappedLocation(location, route);
 		}
-
-		// LOG.d("location overlay onLocationChanged loc = " + location);
 
 		// If we had a previous location, let's get those bounds
 		Location oldLocation = mLocation;

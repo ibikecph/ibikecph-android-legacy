@@ -13,7 +13,6 @@ import android.preference.PreferenceManager;
 import android.text.Spanned;
 
 import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.Tracker;
 import com.spoiledmilk.ibikecph.util.IbikePreferences;
 import com.spoiledmilk.ibikecph.util.IbikePreferences.Language;
@@ -46,8 +45,6 @@ public class IbikeApplication extends Application {
 		boldFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTCom-Bd.ttf");
 		italicFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTCom-It.ttf");
 
-		// TODO enable when live
-		GoogleAnalytics.getInstance(this).setAppOptOut(true);
 	}
 
 	public static Spanned getSpanned(String key) {

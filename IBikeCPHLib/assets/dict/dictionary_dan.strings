@@ -184,7 +184,7 @@
 "login_new_account" = "OPRET EN KONTO";
 "save_favorites" = "GEM FAVORITTER";
 "favorites_title" = "TILFØJ FAVORITTER";
-"favorites_text" = "Gem dine favorit destinationer i app’en så er det altid hurtigt og nemt at finde vej hjem, til arbejde eller skole.";
+"favorites_text" = "Gem dine favoritdestinationer i app’en, så er det altid hurtigt og nemt at finde vej hjem, til arbejde eller skole.";
 "favorites_home_placeholder" = "Hjemmeadresse ...";
 "favorites_work_placeholder" = "Arbejdsadresse ...";
 "log_in" = "Log ind";
@@ -229,7 +229,7 @@
 
 "login_error_fields" = "Både din email og din adgangskode skal være indtastet!";
 "register_error_fields" = "Alle felter skal være udfyldt!";
-"register_error_passwords" = "Din adgangskode er forkert!";
+"register_error_passwords" = "Dine kodeord stemmer ikke overens!";
 
 "error_not_logged_in" = "Du skal være logget ind";
 "report_error_problem_not_selected" = "Vælg venligst et problem";

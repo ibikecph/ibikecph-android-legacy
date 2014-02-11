@@ -47,9 +47,6 @@ import com.spoiledmilk.ibikecph.util.LOG;
 
 public class LoginSplashActivity extends FragmentActivity implements iLanguageListener, FBLoginListener, ImagerPrefetcherListener {
 
-	// TODO change the hash key on the facebook app configuration when the app
-	// is submmited, using the signed app key
-
 	RelativeLayout btnSkip;
 	RelativeLayout btnRegister;
 	Button btnLogin;

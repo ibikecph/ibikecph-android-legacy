@@ -6,7 +6,6 @@
 package com.spoiledmilk.ibikecph.map;
 
 import net.hockeyapp.android.CrashManager;
-import net.hockeyapp.android.UpdateManager;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -240,7 +239,7 @@ public class MapActivity extends FragmentActivity implements SMHttpRequestListen
 		}
 
 		// TODO remove this when the app is published
-		UpdateManager.register(this, HOCKEY_APP_ID);
+		// UpdateManager.register(this, HOCKEY_APP_ID);
 
 	}
 

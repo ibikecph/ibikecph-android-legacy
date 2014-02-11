@@ -42,7 +42,10 @@
         android:label="@string/app_name"
         android:largeHeap="true"
         android:theme="@style/iBikeCPHTheme" >
-        <activity android:name="net.hockeyapp.android.UpdateActivity" />
+        
+        <!-- <activity android:name="net.hockeyapp.android.UpdateActivity" /> -->
+
+        
         <activity
             android:name="com.spoiledmilk.ibikecph.SplashActivity"
             android:screenOrientation="portrait" >
