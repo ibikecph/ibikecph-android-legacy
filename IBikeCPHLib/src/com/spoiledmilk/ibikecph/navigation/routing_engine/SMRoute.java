@@ -296,8 +296,9 @@ public class SMRoute implements SMHttpRequestListener {
 						prevlengthInMeters = instructionNode.get(2).asInt();
 						instruction.timeInSeconds = instructionNode.get(4).asInt();
 						instruction.lengthWithUnit = prevlengthWithUnit;
-						if (instructionNode.size() > 8)
+						if (instructionNode.size() > 8) {
 							instruction.vehicle = instructionNode.get(8).asInt();
+						}
 						/**
 						 * Save length to next turn with units so we don't have to generate it each time It's formatted
 						 * just the way we like it
@@ -347,7 +348,7 @@ public class SMRoute implements SMHttpRequestListener {
 					endIndex = turnInstructions.indexOf(station2);
 				}
 			}
-			// TODO test this
+
 			int longestStreet = 0;
 			viaStreets = "";
 
@@ -712,8 +713,6 @@ public class SMRoute implements SMHttpRequestListener {
 			Location coord = SMGPSUtil.closestCoordinate(loc, a, b);
 			if (a.distanceTo(b) > 0.0f) {
 				lastCorrectedHeading = SMGPSUtil.bearingBetween(a, b);
-				// TODO used for testing only
-				// lastCorrectedHeading = 0 + (int) (Math.random() * ((360 - 0) + 1));
 			}
 
 			if (visitedLocations != null && visitedLocations.size() > 0) {

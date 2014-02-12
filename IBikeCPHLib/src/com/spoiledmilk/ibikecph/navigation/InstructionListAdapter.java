@@ -95,10 +95,13 @@ public class InstructionListAdapter extends ArrayAdapter<SMTurnInstruction> {
 			wayname = IbikeApplication.getString("direction_100");
 		else if (instruction.drivingDirection == SMTurnInstruction.TurnDirection.ReachedYourDestination)
 			wayname = IbikeApplication.getString("direction_15");
-		else if (specialWaynamePattern.matcher(instruction.wayName).matches())
+		else if (specialWaynamePattern.matcher(instruction.wayName).matches()) {
 			wayname = IbikeApplication.getString(instruction.wayName);
-		else
+		} else {
 			wayname = instruction.wayName;
+		}
+
+		wayname = instruction.getPrefix() + wayname;
 
 		if (wayname.length() > 35) {
 			wayname = wayname.substring(0, 32) + "...";

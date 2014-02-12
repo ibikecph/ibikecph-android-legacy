@@ -69,6 +69,9 @@ public class InstructionsPagerAdapter extends FragmentStatePagerAdapter {
 			}
 
 		}
+		
+		wayname = turn.getPrefix() + wayname;
+		
 		args.putString("wayName", wayname);
 		args.putFloat("lengthInMeters", turn.lengthInMeters);
 		args.putInt("directionImageResource", getImageResource(turn));

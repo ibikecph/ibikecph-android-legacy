@@ -39,7 +39,6 @@ public class SMGPSUtil {
 		// First, we calculate angles alpha and beta in spherical triangle ABC
 		// and based on them we decide how to calculate the distance:
 		if (Math.sin(b) * Math.sin(c) == 0.0 || Math.sin(c) * Math.sin(a) == 0.0) {
-			// TODO figure out what to do with this case, and if it is possible to happen in our cases.
 			// It probably means that one of distance is n*pi, which gives around 20000km for n = 1,
 			// unlikely for Denmark, so we should be fine.
 			return -1.0;
@@ -97,7 +96,6 @@ public class SMGPSUtil {
 		return Math.acos(Math.cos(a) / Math.cos(x));
 	}
 
-	// ??? TODO check this fn
 	// dA - distance between point C and point A in radians
 	// dB - distance between point C and point B in radians
 	// dAB - length of arc AB in radians
@@ -114,7 +112,6 @@ public class SMGPSUtil {
 		// First, we calculate angles alpha and beta in spherical triangle ABC
 		// and based on them we decide how to calculate the distance:
 		if (Math.sin(b) * Math.sin(c) == 0.0 || Math.sin(c) * Math.sin(a) == 0.0) {
-			// TODO figure out what to do with this case, and if it is possible to happen in our cases.
 			// It probably means that one of distance is n*pi, which gives around 20000km for n = 1,
 			// unlikely for Denmark, so we should be fine.
 			return -1.0;

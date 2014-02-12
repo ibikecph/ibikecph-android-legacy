@@ -157,17 +157,8 @@ public class SMMapFragment extends MapFragmentBase implements MapListener, OnMap
 
 		getMapActivity().enableAddFavourite();
 
-		boolean toScroll = false;
-		if (getMapActivity().pinInfoLayout.getVisibility() != View.VISIBLE) {
-			toScroll = true;
-		}
-
 		pinView.setVisibility(View.VISIBLE);
 		getMapActivity().showPinInfoLayout();
-
-		if (toScroll) {
-			// mapView.scrollBy(0, -infoLayoutHeight / 2);
-		}
 
 		final IGeoPoint gp = mapView.getProjection().fromPixels(X, Y);
 

@@ -234,4 +234,13 @@ public class SMTurnInstruction {
 					lengthInMeters, timeInSeconds, lengthWithUnit, directionAbrevation, azimuth, getLocation().getLatitude(), getLocation()
 							.getLongitude());
 	}
+
+	public String getPrefix() {
+		String ret = "";
+		if (vehicle > kVehicleBike) {
+			String v = "vehicle_" + vehicle;
+			ret = IbikeApplication.getString(v) + ": ";
+		}
+		return ret;
+	}
 }

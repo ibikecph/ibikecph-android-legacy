@@ -170,7 +170,7 @@ public class RegisterDialog {
 				pickIntent.setType("image/*");
 				pickIntent.setAction(Intent.ACTION_GET_CONTENT);
 				Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-				String pickTitle = ""; // TODO add a title?
+				String pickTitle = ""; 
 				Intent chooserIntent = Intent.createChooser(pickIntent, pickTitle);
 				chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { takePhotoIntent });
 				activity.startActivityForResult(chooserIntent, LoginSplashActivity.IMAGE_REQUEST);

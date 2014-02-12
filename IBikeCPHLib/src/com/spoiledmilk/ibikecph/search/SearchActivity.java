@@ -417,7 +417,6 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 						}
 						textB.setText(txt);
 						Calendar cal = Calendar.getInstance();
-						// TODO change the format if needed
 						String date = cal.get(Calendar.DAY_OF_MONTH) + "/" + cal.get(Calendar.MONTH) + "/" + cal.get(Calendar.YEAR);
 						historyData = new HistoryData(-1, b.getString("name"), b.getString("address"), date, date, b.getString("source"),
 								b.getString("subsource"), BLatitude, BLongitude);

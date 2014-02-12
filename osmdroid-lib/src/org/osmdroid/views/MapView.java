@@ -1410,9 +1410,6 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants, Mu
 		}
 		scaleDiffFloat = 1 / mMultiTouchScale;
 
-		// TODO, this doesn't work, but the zoomLevel pinch is not used anywhere, might be useful in the future
-		zoomLevelPinch = multiTouchScale * getZoomLevel();
-
 		invalidate(); // redraw
 
 		return true;
