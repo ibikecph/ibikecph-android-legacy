@@ -812,8 +812,8 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		// ((TextView)
 		// overviewLayout.findViewById(R.id.overviewDistanceAndVia)).setTypeface(IbikeApplication.getNormalFont());
 		String distanceAndVia = distance + ", " + IbikeApplication.getString("via") + " " + viaStreets;
-		if (distanceAndVia.length() > 26)
-			distanceAndVia = distanceAndVia.substring(0, 26) + "...";
+		// if (distanceAndVia.length() > 32)
+		// distanceAndVia = distanceAndVia.substring(0, 32) + "...";
 		((TextView) overviewLayout.findViewById(R.id.overviewDistanceAndVia)).setText(distanceAndVia);
 		EasyTracker.getInstance().setContext(this);
 		IbikeApplication.getTracker().sendEvent("Route", "Overview", destination, (long) 0);

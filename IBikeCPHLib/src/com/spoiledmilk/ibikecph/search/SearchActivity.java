@@ -7,6 +7,7 @@ package com.spoiledmilk.ibikecph.search;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -66,6 +67,8 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 
 	private String aName = "";
 	private String bName = "";
+
+	ArrayList<SearchListItem> searchHistory = new ArrayList<SearchListItem>();
 
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
@@ -233,8 +236,7 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 		}
 		boolean enableStart = BLongitude != -1 && BLatitude != -1;
 		btnStart.setEnabled(enableStart);
-		ArrayList<SearchListItem> searchHistory = new ArrayList<SearchListItem>();
-		searchHistory = new DB(this).getSearchHistory();
+		searchHistory = new ArrayList<SearchListItem>();// new DB(this).getSearchHistory();
 		tFetchSearchHistory thread = new tFetchSearchHistory();
 		thread.start();
 		HistoryAdapter adapter = new HistoryAdapter(this, searchHistory);
@@ -442,18 +444,36 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 		public void run() {
 			final ArrayList<SearchListItem> searchHistory = IbikeApplication.isUserLogedIn() ? new DB(SearchActivity.this)
 					.getSearchHistoryFromServer(SearchActivity.this) : null;
-			SearchActivity.this.runOnUiThread(new Runnable() {
-				public void run() {
-					ArrayList<SearchListItem> searchHistory2 = searchHistory;
-					if (searchHistory == null && !IbikeApplication.isUserLogedIn()) {
-						searchHistory2 = (new DB(SearchActivity.this)).getSearchHistory();
-						final HistoryAdapter adapter = new HistoryAdapter(SearchActivity.this, searchHistory2);
-						listHistory.setAdapter(adapter);
+			if (SearchActivity.this != null && !SearchActivity.this.isDestroyed()) {
+				SearchActivity.this.runOnUiThread(new Runnable() {
+					public void run() {
+						ArrayList<SearchListItem> searchHistory2 = searchHistory;
+						if (searchHistory == null || !IbikeApplication.isUserLogedIn()) {
+							searchHistory2 = (new DB(SearchActivity.this)).getSearchHistory();
+							if (searchHistory2 != null) {
+								final HistoryAdapter adapter = new HistoryAdapter(SearchActivity.this, searchHistory2);
+								listHistory.setAdapter(adapter);
+							}
+						} else {
+
+							SearchActivity.this.searchHistory.clear();
+							Iterator<SearchListItem> it = searchHistory.iterator();
+							int count = 0;
+							while (it.hasNext() && count < 10) {
+								SearchListItem sli = it.next();
+								if (sli.getName().contains(".")) {
+									continue;
+								}
+								SearchActivity.this.searchHistory.add(sli);
+								count++;
+							}
+						}
+						((HistoryAdapter) listHistory.getAdapter()).notifyDataSetChanged();
+						resizeLists();
+						updateLayout();
 					}
-					resizeLists();
-					updateLayout();
-				}
-			});
+				});
+			}
 
 		}
 	}

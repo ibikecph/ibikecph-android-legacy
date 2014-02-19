@@ -1,7 +1,6 @@
 // Created by plusminus on 21:46:22 - 25.09.2008
 package org.osmdroid.tileprovider;
 
-import java.util.Calendar;
 import java.util.HashMap;
 
 import microsoft.mappoint.TileSystem;
@@ -21,7 +20,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.util.Log;
 
 /**
  * This is an abstract class. The tile provider is responsible for:
@@ -285,11 +283,7 @@ public abstract class MapTileProviderBase implements IMapTileProviderCallback, O
 			// and now we'll create a scaled version until the request completes.
 			if (!resizeOnly) {
 
-				long timestamp = Calendar.getInstance().getTimeInMillis();
-
 				final Drawable requestedTile = getMapTile(pTile);
-
-				Log.d("", "getMapTile(pTile) time = " + (Calendar.getInstance().getTimeInMillis() - timestamp) + "ms");
 
 				if (requestedTile == null) {
 					try {

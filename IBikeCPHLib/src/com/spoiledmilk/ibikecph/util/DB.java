@@ -255,6 +255,9 @@ public class DB extends SQLiteOpenHelper {
 			try {
 				postObject.put("auth_token", authToken);
 				JSONObject routeObject = new JSONObject();
+				if (from.getName() == null || from.getName().trim().equals("")) {
+					from.setName(IbikeApplication.getString("current_position"));
+				}
 				routeObject.put("from_name", from.getName());
 				routeObject.put("from_lattitude", from.getLatitude());
 				routeObject.put("from_longitude", from.getLongitude());
