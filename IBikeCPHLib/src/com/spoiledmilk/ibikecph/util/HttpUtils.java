@@ -250,6 +250,9 @@ public class HttpUtils {
 		Message ret = new Message();
 		Bundle data = new Bundle();
 		if (result != null) {
+			if (result.has("info_title")){
+				data.putString("info_title", result.get("info_title").asText());
+			}
 			data.putBoolean("success", result.get("success").asBoolean());
 			data.putString("info", result.get("info").asText());
 			if (result.has("errors"))

@@ -231,7 +231,7 @@ public class IssuesActivity extends Activity {
 						IssuesActivity.this.runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
-								String message = "Error";
+								String message = IbikeApplication.getString("Error");
 								if (responseTemp != null && responseTemp.has("info")) {
 									message = responseTemp.get("info").asText();
 								}

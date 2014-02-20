@@ -287,7 +287,7 @@ public class ProfileActivity extends Activity implements ImagerPrefetcherListene
 
 	private void launchAlertDialog(String msg) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
-		builder.setMessage(msg).setTitle("Error");
+		builder.setMessage(msg).setTitle(IbikeApplication.getString("Error"));
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				dialog.dismiss();

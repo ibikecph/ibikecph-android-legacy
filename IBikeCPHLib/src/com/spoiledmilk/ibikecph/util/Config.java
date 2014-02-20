@@ -6,7 +6,7 @@
 package com.spoiledmilk.ibikecph.util;
 
 public class Config {
-	// public static String serverUrl = "http://ibikecph-staging.herokuapp.com/api";
+	//public static String serverUrl = "http://ibikecph-staging.herokuapp.com/api";
 	public static String serverUrl = "http://www.ibikecph.dk/api";
 	public static final String API_SERVER_LOGIN = serverUrl + "/login";
 	public static final String API_SERVER_REGISTER = serverUrl + "/users";

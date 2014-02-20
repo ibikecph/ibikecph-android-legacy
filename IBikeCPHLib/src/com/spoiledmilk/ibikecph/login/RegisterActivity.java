@@ -144,7 +144,7 @@ public class RegisterActivity extends Activity implements ImagerPrefetcherListen
 						}
 						break;
 					case HTTPAccountHandler.ERROR:
-						launchAlertDialog("Error");
+						launchAlertDialog(IbikeApplication.getString("Error"));
 						break;
 					}
 					return true;
@@ -199,7 +199,7 @@ public class RegisterActivity extends Activity implements ImagerPrefetcherListen
 
 	private void launchAlertDialog(String msg) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
-		builder.setMessage(msg).setTitle("Error");
+		builder.setMessage(msg).setTitle(IbikeApplication.getString("Error"));
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				dialog.dismiss();

@@ -109,7 +109,7 @@ public class RegisterDialog {
 
 				} else {
 					AlertDialog.Builder builder = new AlertDialog.Builder(arg0.getContext());
-					builder.setMessage(validationMessage).setTitle("Error");
+					builder.setMessage(validationMessage).setTitle(IbikeApplication.getString("Error"));
 					builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							dialog.dismiss();
@@ -170,7 +170,7 @@ public class RegisterDialog {
 				pickIntent.setType("image/*");
 				pickIntent.setAction(Intent.ACTION_GET_CONTENT);
 				Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-				String pickTitle = ""; 
+				String pickTitle = "";
 				Intent chooserIntent = Intent.createChooser(pickIntent, pickTitle);
 				chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { takePhotoIntent });
 				activity.startActivityForResult(chooserIntent, LoginSplashActivity.IMAGE_REQUEST);
@@ -237,7 +237,7 @@ public class RegisterDialog {
 
 	private void launchErrorDialog(String info) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(info).setTitle("Error");
+		builder.setMessage(info).setTitle(IbikeApplication.getString("Error"));
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				dialog.dismiss();
