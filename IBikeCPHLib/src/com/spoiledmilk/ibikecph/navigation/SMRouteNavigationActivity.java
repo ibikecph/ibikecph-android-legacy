@@ -1031,7 +1031,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		if (event.getRawY() > Util.getScreenHeight() - Util.dp2px(40)) {
 			pullHandleMax.setBackgroundColor(Color.TRANSPARENT);
 		} else {
-			pullHandleMax.setBackgroundColor(Color.rgb(26, 26, 26));
+			pullHandleMax.setBackgroundColor(getPullHandeBackground());
 		}
 
 		darkenedView.getBackground().setAlpha(Util.yToAlpha((int) event.getRawY()));
@@ -1041,6 +1041,10 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		lastY = event.getY();
 		animationInstructions.setDuration(0);
 		instructionsViewMax.startAnimation(animationInstructions);
+	}
+
+	protected int getPullHandeBackground() {
+		return Color.rgb(26, 26, 26);
 	}
 
 	@Override

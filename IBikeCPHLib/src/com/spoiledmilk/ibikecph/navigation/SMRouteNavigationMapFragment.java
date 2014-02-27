@@ -414,18 +414,20 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
 			// broken route
 			int i = 0;
 			for (Location loc : route.waypoints) {
-				if (i++ > route.station1.waypointsIndex)
+				if (i++ > route.waypointStation1)
 					break;
 				pathOverlay.addPoint(new GeoPoint(loc));
 			}
+			pathOverlay.addPoint(new GeoPoint(route.startStation));
 			mapView.getOverlays().add(pathOverlay);
 
 			pathOverlay2 = new PathOverlay(getRouteColor(), getActivity());
 			pathOverlay2.setAlpha(currentPathAlpha);
 			pathOverlay2.getPaint().setStrokeWidth(Util.dp2px(IbikePreferences.ROUTE_STROKE_WIDTH));
+			pathOverlay2.addPoint(new GeoPoint(route.endStation));
 			i = 0;
 			for (Location loc : route.waypoints) {
-				if (i++ <= route.station2.waypointsIndex)
+				if (i++ < route.waypointStation2)
 					continue;
 				pathOverlay2.addPoint(new GeoPoint(loc));
 			}
@@ -457,19 +459,21 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
 			if (route.routePhase != SMRoute.TO_DESTINATION) {
 				int i = 0;
 				for (Location loc : route.waypoints) {
-					if (i++ > route.station1.waypointsIndex)
+					if (i++ > route.waypointStation1)
 						break;
 					pathOverlay.addPoint(new GeoPoint(loc));
 				}
 			}
+			pathOverlay.addPoint(new GeoPoint(route.startStation));
 			mapView.getOverlays().add(pathOverlay);
 
 			pathOverlay2 = new PathOverlay(getRouteColor(), getActivity());
 			pathOverlay2.setAlpha(currentPathAlpha);
 			pathOverlay2.getPaint().setStrokeWidth(Util.dp2px(IbikePreferences.ROUTE_STROKE_WIDTH));
+			pathOverlay2.addPoint(new GeoPoint(route.endStation));
 			int i = 0;
 			for (Location loc : route.waypoints) {
-				if (i++ <= route.station2.waypointsIndex && route.routePhase != SMRoute.TO_DESTINATION)
+				if (i++ < route.waypointStation2 && route.routePhase != SMRoute.TO_DESTINATION)
 					continue;
 				pathOverlay2.addPoint(new GeoPoint(loc));
 			}

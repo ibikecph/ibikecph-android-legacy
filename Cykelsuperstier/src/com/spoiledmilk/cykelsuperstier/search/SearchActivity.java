@@ -8,8 +8,10 @@ package com.spoiledmilk.cykelsuperstier.search;
 import java.util.Locale;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.RelativeLayout;
 
+import com.spoiledmilk.cykelsuperstier.CykelsuperstierApplication;
 import com.spoiledmilk.cykelsuperstier.R;
 import com.spoiledmilk.ibikecph.IbikeApplication;
 import com.spoiledmilk.ibikecph.util.Util;
@@ -33,6 +35,12 @@ public class SearchActivity extends com.spoiledmilk.ibikecph.search.SearchActivi
 		btnStart.setText(IbikeApplication.getString("marker_start").toUpperCase(Locale.US));
 		btnStart.setTypeface(IbikeApplication.getBoldFont());
 		btnStart.setTextColor(getResources().getColor(R.color.BtnStardDisabled));
+
+		if (CykelsuperstierApplication.isUserLogedIn()) {
+			findViewById(R.id.lineShowMoreTopSeparator).setVisibility(View.VISIBLE);
+		} else {
+			findViewById(R.id.lineShowMoreTopSeparator).setVisibility(View.INVISIBLE);
+		}
 	}
 
 }

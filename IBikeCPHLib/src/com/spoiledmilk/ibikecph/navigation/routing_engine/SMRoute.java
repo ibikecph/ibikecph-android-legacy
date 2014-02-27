@@ -71,7 +71,8 @@ public class SMRoute implements SMHttpRequestListener {
 	public JsonNode jsonRoot, jsonRoot2;
 	public int startStatIndex = 0, endStatIndex = 0;
 	public boolean reachedDestination = false;
-
+	public int waypointStation1 = -1, waypointStation2 = -1;
+	
 	public SMRoute() {
 		init();
 	}
@@ -87,6 +88,8 @@ public class SMRoute implements SMHttpRequestListener {
 		lastRecalcLocation = Util.locationFromCoordinates(0, 0);
 		allTurnInstructions = new ArrayList<SMTurnInstruction>();
 		reachedDestination = false;
+		waypointStation1 = -1;
+		waypointStation2 = -1;
 	}
 
 	public void init(Location start, Location end, SMRouteListener listener, JsonNode routeJSON) {
@@ -324,15 +327,28 @@ public class SMRoute implements SMHttpRequestListener {
 				}
 			}
 			if (isRouteBroken && turnInstructions != null) {
+				
+				double dStat1 = Double.MAX_VALUE, dStat2 = Double.MAX_VALUE;
+				for (int i = 0; i < waypoints.size(); i++) {
+					if (startStation.distanceTo(waypoints.get(i)) < dStat1) {
+						dStat1 = startStation.distanceTo(waypoints.get(i));
+						waypointStation1 = i;
+					}
+					if (endStation.distanceTo(waypoints.get(i)) < dStat2) {
+						dStat2 = endStation.distanceTo(waypoints.get(i));
+						waypointStation2 = i;
+					}
+				}
+
 				Iterator<SMTurnInstruction> it2 = turnInstructions.iterator();
 				float distToStart = Float.MAX_VALUE, distToEnd = Float.MAX_VALUE;
 				while (it2.hasNext()) {
 					SMTurnInstruction smt = it2.next();
-					if (smt.loc.distanceTo(startStation) < distToStart) {
+					if (smt.loc.distanceTo(startStation) < distToStart && smt.waypointsIndex <= waypointStation1) {
 						distToStart = smt.loc.distanceTo(startStation);
 						station1 = smt;
 					}
-					if (smt.loc.distanceTo(endStation) < distToEnd) {
+					if (smt.loc.distanceTo(endStation) < distToEnd && smt.waypointsIndex <= waypointStation2) {
 						distToEnd = smt.loc.distanceTo(endStation);
 						station2 = smt;
 					}

@@ -154,6 +154,11 @@ public class SMRouteNavigationActivity extends com.spoiledmilk.ibikecph.navigati
 	}
 
 	@Override
+	protected int getPullHandeBackground() {
+		return Color.WHITE;
+	}
+
+	@Override
 	protected InstructionListAdapter getInstructionsAdapter() {
 		if (adapter == null) {
 			adapter = new InstructionListAdapter(this, R.layout.direction_top_cell, mapFragment.route);
