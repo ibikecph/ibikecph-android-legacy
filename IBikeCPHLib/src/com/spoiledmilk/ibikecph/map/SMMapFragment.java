@@ -234,6 +234,7 @@ public class SMMapFragment extends MapFragmentBase implements MapListener, OnMap
 			public boolean onItemSingleTapUp(final int index, final OverlayItem item) {
 				getMapActivity().togglePinInfoLayoutVisibility();
 				mapView.getOverlays().remove(pinB);
+				mapView.invalidate();
 				// mapView.scrollBy(0, infoLayoutHeight / 2);
 				return true;
 			}
