@@ -175,8 +175,8 @@
 
 "register_name_placeholder" = "Navn";
 "register_email_placeholder" = "Email";
-"register_password_placeholder" = "Adgangskode";
-"register_password_repeat_placeholder" = "Gentag adgangskode";
+"register_password_placeholder" = "Kodeord";
+"register_password_repeat_placeholder" = "Gentag kodeord";
 "login" = "LOG IND";
 "choose_image_source" = "Vælg profilbillede";
 "image_source_camera" = "Fra kamera";
@@ -223,11 +223,11 @@
 "save_changes" = "GEM ÆNDRINGER";
 "account_name_placeholder" = "Navn";
 "account_email_placeholder" = "Email";
-"account_password_placeholder" = "Skriv ny adgangskode";
-"account_repeat_placeholder" = "Gentag ny adgangskode";
+"account_password_placeholder" = "Skriv ny kodeord";
+"account_repeat_placeholder" = "Gentag ny kodeord";
 
 
-"login_error_fields" = "Både din email og din adgangskode skal være indtastet!";
+"login_error_fields" = "Både din email og din kodeord skal være indtastet!";
 "register_error_fields" = "Alle felter skal være udfyldt!";
 "register_error_passwords" = "Dine kodeord stemmer ikke overens!";
 
@@ -254,7 +254,7 @@
 
 "current_position_cant_be_destination" = "Det er ikke muligt at anvende nuværende position som destination!";
 
-"register_error_passwords_short" = "Din adgangskode er for kort";
+"register_error_passwords_short" = "Din kodeord er for kort";
 "register_error_invalid_email" = "Din email adresse er ikke gyldig";
 
 "register_successful" = "Konto oprettet. En bekræftelse er blevet sendt til din email-adresse, følg venligst linket i emailen for at aktivere din konto.";
