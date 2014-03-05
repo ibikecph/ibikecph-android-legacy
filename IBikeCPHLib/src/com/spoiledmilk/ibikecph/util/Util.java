@@ -121,18 +121,25 @@ public class Util {
 
 	// Format distance string (choose between meters and kilometers)
 	public static String formatDistance(float meters) {
+		String ret;
 		if (meters < 5) {
-			return "";
-		} else if (meters <= 94) {
-			return String.format(Locale.US, "%.0f %s", (float) Math.round(meters / 10.0f) * 10f, DISTANCE_M_SHORT);
-		} else if (meters <= 1049) {
-			return String.format(Locale.US, "%.0f %s", (float) (Math.round(meters / 100.0f) * 100), DISTANCE_M_SHORT);
+			ret = "";
+		} else if (meters < 100f) {
+			float rounded = (float) Math.round(meters / 10.0f) * 10f;
+			ret = String.format(Locale.US, "%.0f %s", rounded, DISTANCE_M_SHORT);
+		} else if (meters < 1000f) {
+			float rounded = (float) (Math.round(meters / 100.0f) * 100);
+			ret = String.format(Locale.US, "%.0f %s", rounded, DISTANCE_M_SHORT);
 		} else {
-			return String.format(Locale.US, "%.1f %s", meters / 1000.0f, DISTANCE_KM_SHORT);
+			ret = String.format(Locale.US, "%.1f %s", meters / 1000.0f, DISTANCE_KM_SHORT);
 		}
-		// return meters > 1000.0f ? String.format("%.1f %@", meters/1000.0f,
-		// DISTANCE_KM_SHORT) : String.format("%.0f %@", meters,
-		// DISTANCE_M_SHORT);
+		if (ret.contains("1.0")) {
+			ret = "1 " + DISTANCE_KM_SHORT;
+		}
+		return ret;
+		// return meters > 1000.0f ? String.format(Locale.US, "%.1f %@", meters / 1000.0f, DISTANCE_KM_SHORT) :
+		// String.format(Locale.US,
+		// "%.0f %@", meters, DISTANCE_M_SHORT);
 	}
 
 	public static JsonNode stringToJsonNode(String jsonStr) {
@@ -167,18 +174,16 @@ public class Util {
 
 	public static void showSimpleMessageDlg(Context context, String message) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(message)
-				.setPositiveButton(IbikeApplication.getString("OK"), new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
-					}
-				}).show();
+		builder.setMessage(message).setPositiveButton(IbikeApplication.getString("OK"), new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		}).show();
 	}
 
 	public static Location locationFromGeoPoint(IGeoPoint geoPoint) {
-		return locationFromCoordinates(geoPoint.getLatitudeE6() * (float) 1E-6, geoPoint.getLongitudeE6()
-				* (float) 1E-6);
+		return locationFromCoordinates(geoPoint.getLatitudeE6() * (float) 1E-6, geoPoint.getLongitudeE6() * (float) 1E-6);
 	}
 
 	public static Location locationFromCoordinates(double lat, double lng) {
@@ -289,8 +294,7 @@ public class Util {
 			return null;
 		}
 
-		LOG.d("bmpDecodeFile(" + f.getAbsolutePath() + "," + width_limit + "," + height_limit + "," + max_size + ","
-				+ max_dimensions + ")");
+		LOG.d("bmpDecodeFile(" + f.getAbsolutePath() + "," + width_limit + "," + height_limit + "," + max_size + "," + max_dimensions + ")");
 
 		Bitmap bmp = null;
 		boolean shouldReturn = false;
