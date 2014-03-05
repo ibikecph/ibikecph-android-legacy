@@ -11,7 +11,7 @@ public class LOG {
 
 	private static String tag = "I Bike CPH";
 
-	private static boolean enabled = false;
+	private static boolean enabled = true;
 
 	public static void turnLogOn() {
 		enabled = true;

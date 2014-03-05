@@ -43,13 +43,11 @@ import com.spoiledmilk.ibikecph.util.Util;
 
 public class ProfileActivity extends Activity implements ImagerPrefetcherListener {
 
+	static final long API_REQUESTS_TIMEOUT = 2000;
 	TextView textTitle;
 	ImageButton btnBack;
 	Button btnLogout;
-	EditText textName;
-	EditText textEmail;
-	EditText textNewPassword;
-	EditText textPasswordConfirm;
+	EditText textName, textEmail, textNewPassword, textPasswordConfirm;
 	TexturedButton btnSave;
 	Button btnDelete;
 	ImageView pictureContainer;
@@ -61,7 +59,7 @@ public class ProfileActivity extends Activity implements ImagerPrefetcherListene
 	public static final int RESULT_USER_DELETED = 101;
 	private static final int IMAGE_REQUEST = 1888;
 	Thread tfetchUser;
-	boolean inProgress = false;
+	long lastAPIRequestTimestamp = 0;
 
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
@@ -119,8 +117,10 @@ public class ProfileActivity extends Activity implements ImagerPrefetcherListene
 		btnSave.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (userData != null && validateInput() && !inProgress) {
-					inProgress = true;
+				if (System.currentTimeMillis() - lastAPIRequestTimestamp < API_REQUESTS_TIMEOUT) {
+					return;
+				}
+				if (userData != null && validateInput()) {
 					new Thread(new Runnable() {
 						@Override
 						public void run() {
@@ -132,13 +132,13 @@ public class ProfileActivity extends Activity implements ImagerPrefetcherListene
 									progressBar.setVisibility(View.VISIBLE);
 								}
 							});
-
+							lastAPIRequestTimestamp = System.currentTimeMillis();
 							Message message = HTTPAccountHandler.performPutUser(userData);
 							handler.sendMessage(message);
 
 						}
 					}).start();
-				} else if (!inProgress) {
+				} else {
 					launchAlertDialog(validationMessage);
 				}
 			}
@@ -166,10 +166,8 @@ public class ProfileActivity extends Activity implements ImagerPrefetcherListene
 						progressBar.setVisibility(View.VISIBLE);
 					}
 				});
-
 				Message message = HTTPAccountHandler.performGetUser(userData);
 				handler.sendMessage(message);
-
 			}
 		});
 		tfetchUser.start();
@@ -183,7 +181,6 @@ public class ProfileActivity extends Activity implements ImagerPrefetcherListene
 					Bundle data = msg.getData();
 					int msgType = data.getInt("type");
 					Boolean success = false;
-					inProgress = false;
 					switch (msgType) {
 					case HTTPAccountHandler.GET_USER:
 						success = data.getBoolean("success");
@@ -341,25 +338,24 @@ public class ProfileActivity extends Activity implements ImagerPrefetcherListene
 		builder.setMessage(IbikeApplication.getString("delete_account_text")).setTitle(IbikeApplication.getString("delete_account_title"));
 		builder.setPositiveButton(IbikeApplication.getString("Delete"), new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
-
+				if (System.currentTimeMillis() - lastAPIRequestTimestamp < API_REQUESTS_TIMEOUT) {
+					return;
+				}
 				IbikeApplication.getTracker().sendEvent("Account", "Delete", "", Long.valueOf(0));
-
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
 						Looper.myLooper();
 						Looper.prepare();
-
 						ProfileActivity.this.runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
 								progressBar.setVisibility(View.VISIBLE);
 							}
 						});
-
+						lastAPIRequestTimestamp = System.currentTimeMillis();
 						Message message = HTTPAccountHandler.performDeleteUser(userData);
 						handler.sendMessage(message);
-
 						ProfileActivity.this.runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
@@ -368,7 +364,6 @@ public class ProfileActivity extends Activity implements ImagerPrefetcherListene
 						});
 					}
 				}).start();
-
 				dialog.dismiss();
 			}
 		});

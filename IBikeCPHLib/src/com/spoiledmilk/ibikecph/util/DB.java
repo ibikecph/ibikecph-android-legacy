@@ -312,11 +312,11 @@ public class DB extends SQLiteOpenHelper {
 
 	public long saveFavorite(FavoritesData fd, Context context, boolean spawnThread) {
 		SQLiteDatabase db = this.getWritableDatabase();
-		if (db == null)
+		if (db == null) {
+			LOG.e("db is null in saveFavorite");
 			return -1;
-
+		}
 		long id;
-
 		ContentValues values = new ContentValues();
 		values.put(KEY_NAME, fd.getName());
 		values.put(KEY_ADDRESS, fd.getAdress());
@@ -328,12 +328,10 @@ public class DB extends SQLiteOpenHelper {
 		id = db.insert(TABLE_FAVORITES, null, values);
 		fd.setId(id);
 		db.close();
-
-		if (context != null)
+		if (context != null) {
 			postFavoriteToServer(fd, context, spawnThread);
-
+		}
 		return id;
-
 	}
 
 	private void postFavoriteToServer(final FavoritesData fd, Context context, boolean spawnThread) {
@@ -393,20 +391,17 @@ public class DB extends SQLiteOpenHelper {
 	}
 
 	public ArrayList<FavoritesData> getFavorites(ArrayList<FavoritesData> ret) {
-
 		if (ret == null) {
 			ret = new ArrayList<FavoritesData>();
 		} else {
 			ret.clear();
 		}
 		SQLiteDatabase db = getReadableDatabase();
-		if (db == null)
+		if (db == null) {
 			return null;
-
+		}
 		String[] columns = { KEY_ID, KEY_NAME, KEY_ADDRESS, KEY_SOURCE, KEY_SUBSOURCE, KEY_LAT, KEY_LONG, KEY_API_ID };
-
 		Cursor cursor = db.query(TABLE_FAVORITES, columns, null, null, null, null, null, null);
-
 		if (cursor != null && cursor.moveToFirst()) {
 			while (cursor != null && !cursor.isAfterLast()) {
 				int colId = cursor.getColumnIndex(KEY_ID);
@@ -416,20 +411,17 @@ public class DB extends SQLiteOpenHelper {
 				int colLat = cursor.getColumnIndex(KEY_LAT);
 				int colLong = cursor.getColumnIndex(KEY_LONG);
 				int colApiId = cursor.getColumnIndex(KEY_API_ID);
-
 				FavoritesData fd = new FavoritesData(cursor.getInt(colId), cursor.getString(colName), cursor.getString(colAddress),
 						cursor.getString(colSubSource), cursor.getDouble(colLat), cursor.getDouble(colLong), cursor.getInt(colApiId));
-
 				ret.add(fd);
 				cursor.moveToNext();
 			}
 		}
-
-		if (cursor != null)
+		if (cursor != null) {
 			cursor.close();
-
+		}
 		db.close();
-
+		LOG.d("favourites count from DB = " + ret.size());
 		return ret;
 	}
 
