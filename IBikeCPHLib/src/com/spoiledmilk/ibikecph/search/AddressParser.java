@@ -8,6 +8,8 @@ package com.spoiledmilk.ibikecph.search;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.os.Bundle;
+
 import com.spoiledmilk.ibikecph.util.LOG;
 
 public class AddressParser {
@@ -236,6 +238,22 @@ public class AddressParser {
 
 		}
 
+		return ret;
+	}
+
+	public static String textFromBundle(Bundle bundle) {
+		String ret = bundle.getString("name");
+		if (bundle.containsKey("isPoi") && bundle.getBoolean("isPoi")) {
+			if (bundle.containsKey("address") && !bundle.getString("address").trim().equals(ret.trim())) {
+				ret += ", " + bundle.getString("address");
+			}
+			if (bundle.containsKey("zip")) {
+				ret += ", " + bundle.getString("zip");
+			}
+			if (bundle.containsKey("city")) {
+				ret += " " + bundle.getString("city");
+			}
+		}
 		return ret;
 	}
 

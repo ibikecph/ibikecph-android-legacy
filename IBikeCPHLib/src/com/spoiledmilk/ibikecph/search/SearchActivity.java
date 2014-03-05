@@ -44,30 +44,15 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 	private Button btnBack;
 	protected TexturedButton btnStart;
 	private ImageButton btnSwitch;
-	private TextView textCurrentLoc;
-	private TextView textB;
-	private TextView textA;
-	private TextView textFavorites;
-	private TextView textRecent;
-	private TextView textShowMore;
-	private ListView listHistory;
-	private ListView listFavorites;
-	private double BLatitude = -1;
-	private double BLongitude = -1;
-	private double ALatitude = -1;
-	private double ALongitude = -1;
+	private TextView textCurrentLoc, textB, textA, textFavorites, textRecent, textShowMore, textOverviewHeader;
+	private ListView listHistory, listFavorites;
+	private double BLatitude = -1, BLongitude = -1, ALatitude = -1, ALongitude = -1;
 	private HistoryData historyData;
-	private boolean isAsearched = false;
-	private boolean isExpanded = false;
+	private boolean isAsearched = false, isExpanded = false;
 	private ArrayList<SearchListItem> favorites;
 	private ObservableScrollView scrollView;
 	private int listItemHeight = 0;
-	private String fromName = "";
-	private String toName = "";
-
-	private String aName = "";
-	private String bName = "";
-
+	private String fromName = "", toName = "", aName = "", bName = "";
 	ArrayList<SearchListItem> searchHistory = new ArrayList<SearchListItem>();
 
 	@Override
@@ -77,6 +62,7 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 		listHistory = (ListView) findViewById(R.id.historyList);
 		listFavorites = (ListView) findViewById(R.id.favoritesList);
 		textShowMore = (TextView) findViewById(R.id.textShowMore);
+		textOverviewHeader = (TextView) findViewById(R.id.textOverviewHeader);
 		scrollView = (ObservableScrollView) findViewById(R.id.scrollView);
 		scrollView.setScrollViewListener(this);
 		btnBack = (Button) findViewById(R.id.btnBack);
@@ -371,22 +357,8 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 						ALatitude = b.getDouble("lat");
 						ALongitude = b.getDouble("lon");
 						textA.setVisibility(View.VISIBLE);
-						// textA.setText(b.getString("name").length() > 34 ? b.getString("name").substring(0, 31) +
-						// "..." : b
-						// .getString("name"));
-						String txt = b.getString("name");
+						String txt = AddressParser.textFromBundle(b);
 						aName = txt;
-						if (b.containsKey("isPoi") && b.getBoolean("isPoi")) {
-							if (b.containsKey("address") && !b.getString("address").trim().equals(txt.trim())) {
-								txt += ", " + b.getString("address");
-							}
-							if (b.containsKey("zip")) {
-								txt += ", " + b.getString("zip");
-							}
-							if (b.containsKey("city")) {
-								txt += " " + b.getString("city");
-							}
-						}
 						textA.setText(txt);
 						textCurrentLoc.setVisibility(View.GONE);
 						findViewById(R.id.imgCurrentLoc).setVisibility(View.GONE);
@@ -395,38 +367,20 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 							fromName = "";
 						if (fromName.contains(","))
 							fromName = fromName.substring(0, fromName.indexOf(','));
-						// if (b.containsKey("number"))
-						// fromName += " " + b.getString("number");
 					} else {
 						BLatitude = b.getDouble("lat");
 						BLongitude = b.getDouble("lon");
-						// textB.setText(b.getString("name").length() > 34 ? b.getString("name").substring(0, 31) +
-						// "..." : b
-						// .getString("name"));
-						String txt = b.getString("name");
+						String txt = AddressParser.textFromBundle(b);
 						bName = txt;
-						if (b.containsKey("isPoi") && b.getBoolean("isPoi")) {
-							if (b.containsKey("address") && !b.getString("address").trim().equals(txt.trim())
-									&& !b.getString("address").equals("")) {
-								txt += ", " + b.getString("address");
-							}
-							if (b.containsKey("zip") && !b.getString("zip").equals("")) {
-								txt += ", " + b.getString("zip");
-							}
-							if (b.containsKey("city") && !b.getString("city").equals("")) {
-								txt += " " + b.getString("city");
-							}
-						}
 						textB.setText(txt);
 						Calendar cal = Calendar.getInstance();
 						String date = cal.get(Calendar.DAY_OF_MONTH) + "/" + cal.get(Calendar.MONTH) + "/" + cal.get(Calendar.YEAR);
 						historyData = new HistoryData(-1, b.getString("name"), b.getString("address"), date, date, b.getString("source"),
 								b.getString("subsource"), BLatitude, BLongitude);
 						toName = b.getString("address");
-						if (toName.contains(","))
+						if (toName.contains(",")) {
 							toName = toName.substring(0, toName.indexOf(','));
-						// if (b.containsKey("number"))
-						// toName += " " + b.getString("number");
+						}
 					}
 				} catch (Exception e) {
 					LOG.e(e.getLocalizedMessage());
@@ -561,14 +515,15 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 	public void onScrollChanged(ObservableScrollView scrollView, int x, int y, int oldx, int oldy) {
 		if (listFavorites.getAdapter() != null) {
 			if (y > 0) {
-				findViewById(R.id.overviewHeader).setVisibility(View.VISIBLE);
+				textOverviewHeader.setVisibility(View.VISIBLE);
 			} else {
-				findViewById(R.id.overviewHeader).setVisibility(View.GONE);
+				textOverviewHeader.setVisibility(View.GONE);
 			}
 			if (y <= (listFavorites.getAdapter().getCount() + 2) * listItemHeight) {
-				((TextView) findViewById(R.id.textOverviewHeader)).setText(IbikeApplication.getString("favorites"));
-			} else
-				((TextView) findViewById(R.id.textOverviewHeader)).setText(IbikeApplication.getString("recent_results"));
+				textOverviewHeader.setText(IbikeApplication.getString("favorites"));
+			} else {
+				textOverviewHeader.setText(IbikeApplication.getString("recent_results"));
+			}
 		}
 	}
 }

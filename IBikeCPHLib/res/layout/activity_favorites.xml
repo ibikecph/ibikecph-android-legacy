@@ -85,13 +85,16 @@
         android:layout_marginTop="25dp"
         android:background="@drawable/input_field_standard"
         android:clickable="true"
+        android:editable="false"
+        android:ellipsize="end"
         android:focusable="false"
         android:focusableInTouchMode="true"
         android:inputType="none"
-        android:maxLines="1"
+        android:lines="1"
         android:paddingLeft="35dp"
         android:paddingRight="35dp"
-        android:text=""
+        android:scrollHorizontally="true"
+        android:singleLine="true"
         android:textSize="14sp" />
 
     <ImageView
@@ -134,12 +137,17 @@
         android:layout_marginTop="10dp"
         android:background="@drawable/input_field_standard"
         android:clickable="true"
+        android:editable="false"
+        android:ellipsize="end"
         android:focusable="false"
         android:focusableInTouchMode="true"
-        android:inputType="text"
+        android:inputType="none"
+        android:lines="1"
         android:maxLines="1"
         android:paddingLeft="35dp"
         android:paddingRight="35dp"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
         android:text=""
         android:textSize="14sp" />
 
