@@ -589,7 +589,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		IbikeApplication.getTracker().sendEvent("Route", "Overview", mapFragment.destination, (long) 0);
 		btnClose.setVisibility(View.GONE);
 		viewDistance.setVisibility(View.GONE);
-
+		imgCargoSlider.setVisibility(View.GONE);
 	}
 
 	protected int getListItemHeight() {

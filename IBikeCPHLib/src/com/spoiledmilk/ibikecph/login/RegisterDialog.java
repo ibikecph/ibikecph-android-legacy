@@ -94,9 +94,7 @@ public class RegisterDialog {
 								inProgress = true;
 								Looper.myLooper();
 								Looper.prepare();
-
 								showProgressDialog();
-
 								userData = new UserData(textName.getText().toString(), textEmail.getText().toString(), textPassword
 										.getText().toString(), textPasswordConfirm.getText().toString(), base64image, "image.jpg");
 								Message message = HTTPAccountHandler.performRegister(userData, context);
@@ -170,7 +168,7 @@ public class RegisterDialog {
 				pickIntent.setType("image/*");
 				pickIntent.setAction(Intent.ACTION_GET_CONTENT);
 				Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-				String pickTitle = ""; 
+				String pickTitle = "";
 				Intent chooserIntent = Intent.createChooser(pickIntent, pickTitle);
 				chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { takePhotoIntent });
 				activity.startActivityForResult(chooserIntent, LoginSplashActivity.IMAGE_REQUEST);
