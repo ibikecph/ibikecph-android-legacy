@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.spoiledmilk.ibikecph.IbikeApplication;
 import com.spoiledmilk.ibikecph.R;
 import com.spoiledmilk.ibikecph.controls.TexturedButton;
+import com.spoiledmilk.ibikecph.search.AddressParser;
 import com.spoiledmilk.ibikecph.search.SearchAutocompleteActivity;
 import com.spoiledmilk.ibikecph.util.APIListener;
 import com.spoiledmilk.ibikecph.util.Config;
@@ -316,11 +317,10 @@ public class EditFavoriteFragment extends Fragment implements APIListener {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-
 		if (data != null) {
 			Bundle b = data.getExtras();
 			if (b.containsKey("address") && b.containsKey("lat") && b.containsKey("lon")) {
-				favoritesData.setAdress(b.getString("address").replaceAll("\n", ""));
+				favoritesData.setAdress(AddressParser.textFromBundle(b).replaceAll("\n", ""));
 				favoritesData.setLatitude(b.getDouble("lat"));
 				favoritesData.setLongitude(b.getDouble("lon"));
 				String txt = favoritesData.getAdress();

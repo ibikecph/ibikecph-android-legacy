@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.spoiledmilk.ibikecph.IbikeApplication;
 import com.spoiledmilk.ibikecph.R;
 import com.spoiledmilk.ibikecph.controls.TexturedButton;
+import com.spoiledmilk.ibikecph.search.AddressParser;
 import com.spoiledmilk.ibikecph.search.SearchAutocompleteActivity;
 import com.spoiledmilk.ibikecph.util.DB;
 import com.spoiledmilk.ibikecph.util.Util;
@@ -253,13 +254,10 @@ public class AddFavoriteFragment extends Fragment {
 		if (data != null) {
 			Bundle b = data.getExtras();
 			if (b.containsKey("address") && b.containsKey("lat") && b.containsKey("lon")) {
-				favoritesData = new FavoritesData(textFavoriteName.getText().toString(), b.getString("address").replace("\n", ""),
-						currentFavoriteType, b.getDouble("lat"), b.getDouble("lon"), -1);
-				if (b.containsKey("name")) {
-					textAddress.setText(b.getString("name"));
-				} else {
-					textAddress.setText(favoritesData.getAdress());
-				}
+				String address = AddressParser.textFromBundle(b).replace("\n", "");
+				favoritesData = new FavoritesData(textFavoriteName.getText().toString(), address, currentFavoriteType, b.getDouble("lat"),
+						b.getDouble("lon"), -1);
+				textAddress.setText(address);
 				if (b.containsKey("poi")) {
 					textFavoriteName.setText(b.getString("poi"));
 				}
