@@ -15,6 +15,12 @@ public class Config {
 	public static final String OSRM_SERVER_BICYCLE = "http://routes.ibikecph.dk";
 	public static String OSRM_SERVER = "http://routes.ibikecph.dk";
 	public static final String GEOCODER = "http://geo.oiorest.dk/adresser";
-	// TODO change the hash key on the facebook app configuration when the app
-	// is submmited, using the signed app key
+	// TODO uncomment this before submission
+	// public static final String ALTERNATE_TILESOURCE = "IBikeCPH";
+	public static final String ALTERNATE_TILESOURCE = "Mapnik";
+	public static final String USER_AGENT = "IBikeCPH/1.1";
+	public static boolean LOG_ENABLED = true;
+	public static final String HOCKEY_APP_ID = "f145bf4833683cfaa1744bf799eee64b";
+	public static final boolean HOCKEY_UPDATES_ENABLED = true;
+	public static final boolean ANALYTICS_ENABLED = false;
 }

@@ -11,21 +11,20 @@ public class LOG {
 
 	private static String tag = "I Bike CPH";
 
-	private static boolean enabled = true;
-
 	public static void turnLogOn() {
-		enabled = true;
+		Config.LOG_ENABLED = true;
 	}
 
 	public static void turnLogOff() {
-		enabled = false;
+		Config.LOG_ENABLED = false;
 	}
 
 	public static int d(String msg) {
-		if (enabled)
+		if (Config.LOG_ENABLED) {
 			return Log.d(tag, msg);
-		else
+		} else {
 			return -1;
+		}
 	}
 
 	public static int fd(String msg) {

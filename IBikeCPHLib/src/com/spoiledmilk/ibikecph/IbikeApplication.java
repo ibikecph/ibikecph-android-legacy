@@ -13,7 +13,9 @@ import android.preference.PreferenceManager;
 import android.text.Spanned;
 
 import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.Tracker;
+import com.spoiledmilk.ibikecph.util.Config;
 import com.spoiledmilk.ibikecph.util.IbikePreferences;
 import com.spoiledmilk.ibikecph.util.IbikePreferences.Language;
 import com.spoiledmilk.ibikecph.util.LOG;
@@ -26,25 +28,19 @@ public class IbikeApplication extends Application {
 	public SMDictionary dictionary;
 	private static Typeface normalFont, boldFont, italicFont;
 
-	// private static GoogleAnalytics mGaInstance;
-
 	@Override
 	public void onCreate() {
+		LOG.d("Creating Application");
 		super.onCreate();
 		instance = this;
 		settings = new IbikePreferences(this);
 		settings.load();
-
-		LOG.d("Creating Application");
-
-		// settings must be loaded before this
 		dictionary = new SMDictionary(this);
 		dictionary.init();
-
 		normalFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTCom-Md.ttf");
 		boldFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTCom-Bd.ttf");
 		italicFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTCom-It.ttf");
-
+		GoogleAnalytics.getInstance(this).setAppOptOut(!Config.ANALYTICS_ENABLED);
 	}
 
 	public static Spanned getSpanned(String key) {
@@ -62,10 +58,6 @@ public class IbikeApplication extends Application {
 	public void changeLanguage(Language language) {
 		if (settings.getLanguage() != language) {
 			LOG.d("Changing language to " + language.name());
-			// this must be called before settings.setLanguage() because after
-			// lng setting has
-			// changed, listeners will be notified and will most probably try to
-			// reload strings from dictionary
 			dictionary.changeLanguage(language);
 			settings.setLanguage(language);
 		}

@@ -6,6 +6,7 @@
 package com.spoiledmilk.ibikecph.map;
 
 import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.UpdateManager;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -50,14 +51,13 @@ import com.spoiledmilk.ibikecph.navigation.routing_engine.SMLocationManager;
 import com.spoiledmilk.ibikecph.search.HistoryData;
 import com.spoiledmilk.ibikecph.search.SearchActivity;
 import com.spoiledmilk.ibikecph.search.SearchAutocompleteActivity;
+import com.spoiledmilk.ibikecph.util.Config;
 import com.spoiledmilk.ibikecph.util.DB;
 import com.spoiledmilk.ibikecph.util.LOG;
 import com.spoiledmilk.ibikecph.util.Util;
 
 @SuppressLint("NewApi")
 public class MapActivity extends FragmentActivity implements SMHttpRequestListener, iLanguageListener {
-
-	public static final String HOCKEY_APP_ID = "f145bf4833683cfaa1744bf799eee64b";
 
 	protected static final int SLIDE_THRESHOLD = 40;
 	public static int RESULT_RETURN_FROM_NAVIGATION = 105;
@@ -112,7 +112,6 @@ public class MapActivity extends FragmentActivity implements SMHttpRequestListen
 			@Override
 			public void onClick(View v) {
 				pinInfoLayout.setClickable(false);
-
 				LOG.d("find route");
 				Location start = SMLocationManager.getInstance().getLastValidLocation();
 				if (start == null) {
@@ -123,7 +122,6 @@ public class MapActivity extends FragmentActivity implements SMHttpRequestListen
 				}
 			}
 		});
-
 		btnSaveFavorite = (ImageButton) findViewById(R.id.btnSaveFavorite);
 		btnSaveFavorite.setOnClickListener(new OnClickListener() {
 
@@ -157,7 +155,6 @@ public class MapActivity extends FragmentActivity implements SMHttpRequestListen
 			}
 
 		});
-
 		btnTrack = (ImageButton) findViewById(R.id.btnTrack);
 		btnTrack.setOnClickListener(new OnClickListener() {
 			@Override
@@ -193,7 +190,6 @@ public class MapActivity extends FragmentActivity implements SMHttpRequestListen
 			}
 
 		});
-
 		btnSearch = (Button) findViewById(R.id.btnSearch);
 		btnSearch.setOnClickListener(new OnClickListener() {
 
@@ -205,7 +201,6 @@ public class MapActivity extends FragmentActivity implements SMHttpRequestListen
 			}
 
 		});
-
 		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams((int) Util.getScreenWidth() * 4 / 5,
 				RelativeLayout.LayoutParams.MATCH_PARENT);
 		params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
@@ -222,9 +217,7 @@ public class MapActivity extends FragmentActivity implements SMHttpRequestListen
 		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 		fragmentTransaction.add(R.id.leftContainer, leftMenu);
 		fragmentTransaction.commit();
-
 		findViewById(R.id.rootLayout).invalidate();
-
 		if (savedInstanceState != null) {
 			final Handler handler = new Handler();
 			handler.postDelayed(new Runnable() {
@@ -238,9 +231,9 @@ public class MapActivity extends FragmentActivity implements SMHttpRequestListen
 			}, 400);
 		}
 
-		// TODO remove this when the app is published
-		// UpdateManager.register(this, HOCKEY_APP_ID);
-
+		if (Config.HOCKEY_UPDATES_ENABLED) {
+			UpdateManager.register(this, Config.HOCKEY_APP_ID);
+		}
 	}
 
 	protected Class<?> getSearchActivity() {
@@ -339,7 +332,6 @@ public class MapActivity extends FragmentActivity implements SMHttpRequestListen
 			}
 
 		}
-		// btnSaveFavorite.setEnabled(IbikeApplication.isUserLogedIn());
 		if (!Util.isNetworkConnected(this)) {
 			Util.launchNoConnectionDialog(this);
 		}
@@ -355,7 +347,7 @@ public class MapActivity extends FragmentActivity implements SMHttpRequestListen
 	}
 
 	protected void checkForCrashes() {
-		CrashManager.register(this, HOCKEY_APP_ID);
+		CrashManager.register(this, Config.HOCKEY_APP_ID);
 	}
 
 	public void startTrackingUser() {
