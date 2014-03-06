@@ -99,7 +99,6 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		LayoutInflater inflater = LayoutInflater.from(this);
 		reportProblemsView = (RelativeLayout) inflater.inflate(R.layout.report_problems_view, null);
 		textReport = (TextView) reportProblemsView.findViewById(R.id.textReport);
-
 		instructionsViewMaxContainer = (RelativeLayout) findViewById(R.id.instructionsViewMaxContainer);
 		paramsForInstMaxContainer = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
 				RelativeLayout.LayoutParams.MATCH_PARENT);
@@ -409,13 +408,15 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		instructionsView.measure(0, 0);
 		instructionsViewHeight = instructionsView.getMeasuredHeight();
 
+		turns = new ArrayList<String>();
+
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 
 	public void launchReportIssuesActivity() {
+		generateTurnStrings();
 		Intent i = new Intent(SMRouteNavigationActivity.this, IssuesActivity.class);
 		Bundle b = new Bundle();
-		generateTurnStrings();
 		b.putStringArrayList("turns", turns);
 		b.putString("startLoc", mapFragment.startLocation.toString());
 		b.putString("endLoc", mapFragment.endLocation.toString());
@@ -465,6 +466,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 	}
 
 	public void onBicycleContainerClick(View v) {
+		turns.clear();
 		bicycleTypeChanged = true;
 		mapFragment.locationOverlay.disableMyLocation();
 		v.setBackgroundResource(R.color.BlueListBackground);
@@ -478,6 +480,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 	}
 
 	public void onCargoContainerClick(View v) {
+		turns.clear();
 		bicycleTypeChanged = true;
 		mapFragment.locationOverlay.disableMyLocation();
 		v.setBackgroundResource(R.color.BlueListBackground);
@@ -573,15 +576,13 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 	}
 
 	public void generateTurnStrings() {
-		if (turns == null) {
-			turns = new ArrayList<String>();
-		} else {
-			turns.clear();
-		}
-		for (int i = 0; i < mapFragment.route.allTurnInstructions.size(); i++)
+		turns.clear();
+		for (int i = 0; i < mapFragment.route.allTurnInstructions.size(); i++) {
 			turns.add(mapFragment.route.allTurnInstructions.get(i).generateFullDescriptionString());
-		for (int i = 0; i < mapFragment.route.turnInstructions.size(); i++)
+		}
+		for (int i = 0; i < mapFragment.route.turnInstructions.size(); i++) {
 			turns.add(mapFragment.route.turnInstructions.get(i).generateFullDescriptionString());
+		}
 	}
 
 	public void showRouteFinishedDialog() {

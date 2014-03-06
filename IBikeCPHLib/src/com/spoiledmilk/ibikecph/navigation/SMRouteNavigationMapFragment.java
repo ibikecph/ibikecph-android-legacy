@@ -208,15 +208,15 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
 	}
 
 	protected void start(Location from, Location to, JsonNode jsonRoot, String startName, String endName) {
-
 		mapView.setMapListener(this);
 		this.startName = startName;
 		this.endName = endName;
 		route = new SMRoute();
 		route.init(from, to, this, jsonRoot);
-		if (locationOverlay == null)
+		if (locationOverlay == null) {
 			locationOverlay = new SMMyLocationNewOverlay(getActivity(), locationProvider = new GpsMyLocationProvider(getActivity()),
 					mapView);
+		}
 		locationOverlay.setRoute(route);
 		showRouteOverview();
 		drawPins();

@@ -72,7 +72,7 @@ public class SMRoute implements SMHttpRequestListener {
 	public int startStatIndex = 0, endStatIndex = 0;
 	public boolean reachedDestination = false;
 	public int waypointStation1 = -1, waypointStation2 = -1;
-	
+
 	public SMRoute() {
 		init();
 	}
@@ -327,7 +327,7 @@ public class SMRoute implements SMHttpRequestListener {
 				}
 			}
 			if (isRouteBroken && turnInstructions != null) {
-				
+
 				double dStat1 = Double.MAX_VALUE, dStat2 = Double.MAX_VALUE;
 				for (int i = 0; i < waypoints.size(); i++) {
 					if (startStation.distanceTo(waypoints.get(i)) < dStat1) {
@@ -578,6 +578,8 @@ public class SMRoute implements SMHttpRequestListener {
 					} else if (closestWaypointIndex > instruction.waypointsIndex) {
 						// we have definetly passed the instruction
 						it.remove();
+						pastTurnInstructions.add(instruction);
+						allTurnInstructions.add(instruction);
 					} else if (d < 10d && (!instruction.plannedForRemoving || d > instruction.lastD)) {
 						// we are approaching the instruction
 						LOG.d("routing debug instruction planned for removing = " + instruction.fullDescriptionString + " d = "
@@ -588,6 +590,8 @@ public class SMRoute implements SMHttpRequestListener {
 							// remove the instruction
 							LOG.d("routing debug removing the instruction " + instruction.fullDescriptionString);
 							it.remove();
+							pastTurnInstructions.add(instruction);
+							allTurnInstructions.add(instruction);
 						}
 					}
 					instruction.lastD = loc.distanceTo(instruction.loc);
