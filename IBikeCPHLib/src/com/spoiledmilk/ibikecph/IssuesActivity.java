@@ -32,28 +32,14 @@ import com.spoiledmilk.ibikecph.util.LOG;
 public class IssuesActivity extends Activity {
 
 	private Spinner spinner;
-	private TextView textTitle;
-	private TextView textOption1;
-	private TextView textOption2;
-	private TextView textOption3;
-	private TextView textOption4;
-	private TextView textOption5;
-	private TextView textOption6;
-	private EditText textComment1;
-	private EditText textComment2;
-	private EditText textComment3;
-	private EditText textComment4;
-	private EditText textComment5;
-	private EditText textComment6;
-	private ImageView imgRadio1;
-	private ImageView imgRadio2;
-	private ImageView imgRadio3;
-	private ImageView imgRadio4;
-	private ImageView imgRadio5;
-	private ImageView imgRadio6;
+	private TextView textTitle, textOption1, textOption2, textOption3, textOption4, textOption5, textOption6;
+	private EditText textComment1, textComment2, textComment3, textComment4, textComment5, textComment6;
+	private ImageView imgRadio1, imgRadio2, imgRadio3, imgRadio4, imgRadio5, imgRadio6;
 	private TexturedButton btnSend;
 	private TextView currentOption = null;
 	private EditText currentComment = null;
+	private ArrayList<String> turns;
+	private String startLoc, endLoc, startName, endName;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +47,11 @@ public class IssuesActivity extends Activity {
 		setContentView(R.layout.activity_issues);
 		spinner = (Spinner) findViewById(R.id.spinner);
 		Bundle data = getIntent().getExtras();
-		ArrayList<String> turns = data.getStringArrayList("turns");
+		turns = data.getStringArrayList("turns");
+		startLoc = data.getString("startLoc");
+		endLoc = data.getString("endLoc");
+		startName = data.getString("startName");
+		endName = data.getString("endName");
 		IssuesAdapter dataAdapter = new IssuesAdapter(this, turns, R.layout.list_row_issues, R.layout.spinner_layout);
 		spinner.setAdapter(dataAdapter);
 		textTitle = (TextView) findViewById(R.id.textTitle);
@@ -185,8 +175,9 @@ public class IssuesActivity extends Activity {
 		imgRadio6.setImageResource(R.drawable.radio_checked);
 		textComment6.setVisibility(View.VISIBLE);
 		currentOption = textOption6;
-		if (currentComment != null && currentComment.getText() != null)
+		if (currentComment != null && currentComment.getText() != null) {
 			textComment6.setText(currentComment.getText().toString());
+		}
 		currentComment = textComment6;
 	}
 
@@ -220,7 +211,20 @@ public class IssuesActivity extends Activity {
 						JSONObject jsonIssue = new JSONObject();
 						jsonIssue.put("route_segment", spinner.getSelectedItem().toString());
 						jsonIssue.put("error_type", currentOption.getText().toString());
-						jsonIssue.put("comment", currentComment == null ? "" : currentComment.getText().toString());
+						String comment = "";
+						comment += IbikeApplication.getString("report_from") + "\n";
+						comment += startName + "\n" + startLoc + "\n\n";
+						comment += IbikeApplication.getString("report_to") + "\n";
+						comment += endName + "\n" + endLoc + "\n\n";
+						comment += IbikeApplication.getString("report_reason") + "\n";
+						comment += currentOption.getText().toString() + "\n\n";
+						comment += (currentComment == null ? "" : currentComment.getText().toString()) + "\n\n";
+						comment += spinner.getSelectedItem().toString() + "\n\n";
+						comment += IbikeApplication.getString("report_tbt_instructions") + "\n";
+						for (String turn : turns) {
+							comment += turn + "\n";
+						}
+						jsonIssue.put("comment", comment);
 						jsonPost.put("issue", jsonIssue);
 						response = HttpUtils.postToServer(Config.serverUrl + "/issues", jsonPost);
 						IbikeApplication.getTracker().sendEvent("Report", "Completed", "", (long) 0);
@@ -234,6 +238,7 @@ public class IssuesActivity extends Activity {
 								String message = "Error";
 								if (responseTemp != null && responseTemp.has("info")) {
 									message = responseTemp.get("info").asText();
+									LOG.d("issues response message = " + message);
 								}
 								AlertDialog.Builder builder = new AlertDialog.Builder(IssuesActivity.this);
 								builder.setMessage(message);

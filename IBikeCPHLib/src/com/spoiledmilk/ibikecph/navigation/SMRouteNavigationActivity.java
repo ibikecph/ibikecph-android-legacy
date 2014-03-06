@@ -417,6 +417,14 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		Bundle b = new Bundle();
 		generateTurnStrings();
 		b.putStringArrayList("turns", turns);
+		b.putString("startLoc", mapFragment.startLocation.toString());
+		b.putString("endLoc", mapFragment.endLocation.toString());
+		String source = mapFragment.source;
+		if (source == null || source.equals("")) {
+			source = IbikeApplication.getString("current_position");
+		}
+		b.putString("startName", source);
+		b.putString("endName", mapFragment.destination);
 		i.putExtras(b);
 		startActivity(i);
 		overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);

@@ -90,7 +90,7 @@
 "new_route" = "Ny rute";
 "Stop" = "Stop";
 
-"Error" = "Error";
+"Error" = "Fejl";
 "OK" = "OK";
 "error_no_gps_location" = "Ingen GPS lokation!";
 "error_address_not_found" = "Adressens lokation kan ikke findes!";

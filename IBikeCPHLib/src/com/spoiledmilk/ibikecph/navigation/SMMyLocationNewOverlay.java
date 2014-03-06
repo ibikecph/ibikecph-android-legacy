@@ -506,11 +506,7 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
 	}
 
 	public void onLocationChanged(Location location, IMyLocationProvider source) {
-
 		lastLocation = location;
-
-		LOG.d("location overlay onLocationChanged loc = " + location);
-
 		if (route != null) {
 			if (!route.reachedDestination) {
 				// route.visitLocation(location);
@@ -524,15 +520,12 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
 		if (oldLocation != null) {
 			this.getMyLocationDrawingBounds(mMapView.getZoomLevelFloor(), oldLocation, mMyLocationPreviousRect);
 		}
-
 		mLocation = location;
 		mMapCoords.set(0, 0);
-
 		if (mLocation != null) {
 			TileSystem.LatLongToPixelXY(mLocation.getLatitude(), mLocation.getLongitude(), MapViewConstants.MAXIMUM_ZOOMLEVEL, mMapCoords);
 			final int worldSize_2 = TileSystem.MapSize(MapViewConstants.MAXIMUM_ZOOMLEVEL) / 2;
 			mMapCoords.offset(-worldSize_2, -worldSize_2);
-
 			if (mMapView.tracking) {
 				// this is done in the navigation fragment :
 				// mMapController.animateTo(mLocation.getLatitude(), mLocation.getLongitude());
@@ -547,17 +540,14 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
 			} else {
 				// Get new drawing bounds
 				this.getMyLocationDrawingBounds(mMapView.getZoomLevelFloor(), mLocation, mMyLocationRect);
-
 				// If we had a previous location, merge in those bounds too
 				if (oldLocation != null) {
 					mMyLocationRect.union(mMyLocationPreviousRect);
 				}
-
 				// Invalidate the bounds
 				mMapView.postInvalidate(mMyLocationRect.left, mMyLocationRect.top, mMyLocationRect.right, mMyLocationRect.bottom);
 			}
 		}
-
 		for (final Runnable runnable : mRunOnFirstFix) {
 			new Thread(runnable).start();
 		}
@@ -586,7 +576,6 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
 				ret = SMGPSUtil.closestCoordinate(location, route.waypoints.get(indexFound), route.waypoints.get(indexFound + 1));
 			}
 		}
-
 		return ret;
 	}
 
@@ -598,15 +587,11 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
 	 */
 	public boolean enableMyLocation(IMyLocationProvider myLocationProvider) {
 		boolean result = true;
-
 		if (myLocationProvider == null)
 			throw new RuntimeException("You must pass an IMyLocationProvider to enableMyLocation()");
-
 		this.setMyLocationProvider(myLocationProvider);
-
 		result = mMyLocationProvider.startLocationProvider(this);
 		mIsLocationEnabled = result;
-
 		// set initial location when enabled
 		if (result && isFollowLocationEnabled()) {
 			mLocation = mMyLocationProvider.getLastKnownLocation();
@@ -621,14 +606,11 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
 				// mMapController.animateTo(new GeoPoint(mLocation));
 			}
 		}
-
 		// LOG.d("invalidating the map from the location change ");
-
 		// Update the screen to see changes take effect
 		if (mMapView != null) {
 			mMapView.postInvalidate();
 		}
-
 		return result;
 	}
 

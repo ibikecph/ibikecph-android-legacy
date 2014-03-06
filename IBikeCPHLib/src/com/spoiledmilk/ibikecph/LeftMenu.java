@@ -284,6 +284,7 @@ public class LeftMenu extends Fragment {
 		LOG.d("Left menu onResume");
 		initStrings();
 		if (IbikeApplication.isUserLogedIn()) {
+			favorites = (new DB(getActivity())).getFavorites(favorites);
 			textLogin.setVisibility(View.GONE);
 			textProfile.setVisibility(View.VISIBLE);
 			fetchFavorites = new tFetchFavorites();

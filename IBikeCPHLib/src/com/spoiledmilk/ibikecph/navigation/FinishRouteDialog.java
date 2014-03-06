@@ -43,13 +43,7 @@ public class FinishRouteDialog extends DialogFragment {
 		textReport.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				Intent i = new Intent(getActivity(), IssuesActivity.class);
-				Bundle b = new Bundle();
-				((SMRouteNavigationActivity) getActivity()).generateTurnStrings();
-				b.putStringArrayList("turns", ((SMRouteNavigationActivity) getActivity()).turns);
-				i.putExtras(b);
-				getActivity().startActivity(i);
-				getActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+				((SMRouteNavigationActivity) getActivity()).launchReportIssuesActivity();
 			}
 
 		});
