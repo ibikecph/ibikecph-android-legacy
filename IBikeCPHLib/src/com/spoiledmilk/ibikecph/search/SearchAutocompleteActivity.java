@@ -55,12 +55,8 @@ public class SearchAutocompleteActivity extends Activity {
 	private AutocompleteAdapter adapter;
 	private SearchListItem currentSelection;
 	private int lastTextSize = 0;
-	private boolean addressPicked = false;
-	private boolean isA = false;
-	private boolean isOirestFetched = false;
-	private boolean isFoursquareFetched = false;
-	private boolean isClose = false;
-	boolean isAddressSearched = false;
+	private boolean addressPicked = false, isA = false, isOirestFetched = false, isFoursquareFetched = false, isClose = false,
+			isAddressSearched = false;
 	private Address addr;
 	private ProgressBar progressBar;
 
@@ -71,9 +67,9 @@ public class SearchAutocompleteActivity extends Activity {
 		progressBar = (ProgressBar) findViewById(R.id.progressBar);
 		progressBar.setVisibility(View.INVISIBLE);
 		Bundle data = getIntent().getExtras();
-		if (data != null)
+		if (data != null) {
 			isA = data.getBoolean("isA", false);
-
+		}
 		btnClose = (Button) findViewById(R.id.btnClose);
 		btnClose.setOnClickListener(new OnClickListener() {
 			@Override
@@ -99,15 +95,12 @@ public class SearchAutocompleteActivity extends Activity {
 				return false;
 			}
 		});
-
 		listSearch = (ListView) findViewById(R.id.listSearch);
 		adapter = new AutocompleteAdapter(this, new ArrayList<SearchListItem>(), isA);
 		listSearch.setAdapter(adapter);
-
 		if (isA) {
 			adapter.add(new CurrentLocation());
 		}
-
 		listSearch.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -116,7 +109,6 @@ public class SearchAutocompleteActivity extends Activity {
 			}
 
 		});
-
 		if (data != null && data.containsKey("lastName")) {
 			ArrayList<SearchListItem> listData = new ArrayList<SearchListItem>();
 			DB db = new DB(this);
@@ -148,7 +140,6 @@ public class SearchAutocompleteActivity extends Activity {
 			textSrch.setText(reuseName);
 			textSrch.setSelection(reuseName.length());
 		}
-
 	}
 
 	private void onItemClicked(int position, boolean isFromAdapter) {
@@ -239,30 +230,23 @@ public class SearchAutocompleteActivity extends Activity {
 			addr.number = "1";
 		}
 		performGeocode();
-
 	}
 
 	private void performGeocode() {
 		(new Thread() {
-
 			@Override
 			public void run() {
 				isAddressSearched = true;
 				if (addr != null && addr.number != null && !addr.number.trim().equals("") && !isClose) {
-
 					JsonNode node;
 					try {
-
 						if (currentSelection == null) {
 							currentSelection = new KortforData(AddressParser.addresWithoutNumber(textSrch.getText().toString()),
 									addr.number);
 						}
-
 						LOG.d("Street searchfor the number " + addr.number);
-
 						String urlString = "http://geo.oiorest.dk/adresser.json?q="
 								+ URLEncoder.encode(currentSelection.getStreet() + " " + addr.number, "UTF-8");
-
 						boolean coordinatesFound = false;
 						if (adapter != null && adapter.getCount() > 0 && adapter.getItem(0) instanceof KortforData) {
 							KortforData kd = (KortforData) adapter.getItem(0);
@@ -274,10 +258,8 @@ public class SearchAutocompleteActivity extends Activity {
 								coordinatesFound = true;
 							}
 						}
-
 						if (!coordinatesFound) {
 							node = HTTPAutocompleteHandler.getOiorestGeocode(urlString, "" + addr.number);
-
 							if (node != null) {
 								if (node.has("wgs84koordinat") && node.get("wgs84koordinat").has("bredde")) {
 									currentSelection.setLatitude(Double.parseDouble(node.get("wgs84koordinat").get("bredde").asText()));
@@ -333,8 +315,9 @@ public class SearchAutocompleteActivity extends Activity {
 		if (textSrch.getText().toString().equals(tag)) {
 			adapter.updateListData(list, AddressParser.addresWithoutNumber(textSrch.getText().toString()), addr);
 		}
-		if (isOirestFetched && isFoursquareFetched)
+		if (isOirestFetched && isFoursquareFetched) {
 			progressBar.setVisibility(View.INVISIBLE);
+		}
 	}
 
 	public void hideKeyboard() {
@@ -342,10 +325,6 @@ public class SearchAutocompleteActivity extends Activity {
 	}
 
 	private class MyTextWatcher implements TextWatcher {
-
-		public MyTextWatcher() {
-
-		}
 
 		@Override
 		public void afterTextChanged(Editable statusText) {
@@ -355,13 +334,9 @@ public class SearchAutocompleteActivity extends Activity {
 			if (foursquareThread != null && foursquareThread.isAlive()) {
 				foursquareThread.interrupt();
 			}
-			// final String txt = textSrch.getText().toString();
-
 			Address temp;
 			temp = AddressParser.parseAddressRegex(textSrch.getText().toString().replaceAll("\n", ","));
-
 			LOG.d("after text changed");
-
 			if (addr == null || !addr.equals(temp)) {
 				LOG.d("clearing the adapter and spawning the search threads");
 				adapter.clear();
@@ -378,15 +353,15 @@ public class SearchAutocompleteActivity extends Activity {
 					isOirestFetched = false;
 					isFoursquareFetched = !(textSrch.getText().toString().length() > 2);
 					isAddressSearched = false;
-
 					final Handler handler = new Handler();
 					handler.postDelayed(new Runnable() {
-
 						@Override
 						public void run() {
 							spawnSearchThreads(loc1, searchText, addr, textSrch.getText().toString());
 						}
 					}, 500);
+
+					adapter.updateListData(textSrch.getText().toString(), addr);
 
 					if (textSrch.getText().toString().length() != lastTextSize && textSrch.getText().toString().length() > 1
 							&& !addressPicked) {
@@ -394,7 +369,6 @@ public class SearchAutocompleteActivity extends Activity {
 					}
 					addressPicked = false;
 					lastTextSize = textSrch.getText().toString().length();
-
 				}
 			}
 			addr = temp;
@@ -426,7 +400,6 @@ public class SearchAutocompleteActivity extends Activity {
 		} else {
 			lastAddress = addr;
 		}
-
 		if (!Util.isNetworkConnected(this)) {
 			Util.launchNoConnectionDialog(this);
 			progressBar.setVisibility(View.INVISIBLE);
@@ -435,7 +408,6 @@ public class SearchAutocompleteActivity extends Activity {
 			kmsThread = new Thread(new Runnable() {
 				@Override
 				public void run() {
-
 					// final List<JsonNode> kortforsyningenList = new ArrayList<JsonNode>();
 					final ArrayList<SearchListItem> data = new ArrayList<SearchListItem>();
 					if (!(addr.street == null || addr.street.trim().equals(""))) {
@@ -475,9 +447,7 @@ public class SearchAutocompleteActivity extends Activity {
 
 						}
 					}
-
 					if (!addr.isAddress()) {
-
 						List<JsonNode> places = HTTPAutocompleteHandler.getKortforsyningenPlaces(loc, addr);
 						if (places != null) {
 							int count = 0;
@@ -507,7 +477,6 @@ public class SearchAutocompleteActivity extends Activity {
 							}
 						}
 					}
-
 					isOirestFetched = true;
 					runOnUiThread(new Runnable() {
 						public void run() {
@@ -519,16 +488,13 @@ public class SearchAutocompleteActivity extends Activity {
 
 			});
 			kmsThread.start();
-
 			if (textSrch.getText().toString().length() >= 3 && addr.isFoursquare()) {
 				// fetch the Foursquare autocomplete
 				foursquareThread = new Thread(new Runnable() {
 					@Override
 					public void run() {
-
 						List<JsonNode> list = HTTPAutocompleteHandler.getFoursquareAutocomplete(addr, SearchAutocompleteActivity.this, loc);
 						final ArrayList<SearchListItem> data = new ArrayList<SearchListItem>();
-
 						if (list != null) {
 							int count = 0;
 							for (JsonNode node : list) {
@@ -548,7 +514,6 @@ public class SearchAutocompleteActivity extends Activity {
 								}
 							}
 						}
-
 						isFoursquareFetched = true;
 						runOnUiThread(new Runnable() {
 							public void run() {
@@ -571,14 +536,13 @@ public class SearchAutocompleteActivity extends Activity {
 
 			@Override
 			public void run() {
-
 				progressBar.setVisibility(View.INVISIBLE);
 				if (isFinishing) {
 					return;
 				}
 				isFinishing = true;
 				Intent intent = new Intent();
-				if (currentSelection != null) { // && !isClose
+				if (currentSelection != null) {
 					if (isAddressSearched && addr != null) {
 						intent.putExtra("number", addr.number);
 					}
@@ -634,7 +598,6 @@ public class SearchAutocompleteActivity extends Activity {
 					}
 				}
 				finish();
-
 			}
 		});
 	}

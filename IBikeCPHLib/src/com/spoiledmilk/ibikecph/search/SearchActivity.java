@@ -40,6 +40,7 @@ import com.spoiledmilk.ibikecph.util.LOG;
 public class SearchActivity extends Activity implements ScrollViewListener {
 
 	public static final int RESULT_SEARCH_ROUTE = 102;
+	private static final long HISTORY_FETCHING_TIMEOUT = 120 * 1000;
 
 	private Button btnBack;
 	protected TexturedButton btnStart;
@@ -54,6 +55,7 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 	private int listItemHeight = 0;
 	private String fromName = "", toName = "", aName = "", bName = "";
 	ArrayList<SearchListItem> searchHistory = new ArrayList<SearchListItem>();
+	private long timestampHistoryFetched = 0;
 
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
@@ -222,9 +224,13 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 		}
 		boolean enableStart = BLongitude != -1 && BLatitude != -1;
 		btnStart.setEnabled(enableStart);
-		searchHistory = new ArrayList<SearchListItem>();// new DB(this).getSearchHistory();
-		tFetchSearchHistory thread = new tFetchSearchHistory();
-		thread.start();
+		if (System.currentTimeMillis() - timestampHistoryFetched > HISTORY_FETCHING_TIMEOUT) {
+			searchHistory = new ArrayList<SearchListItem>();
+			tFetchSearchHistory thread = new tFetchSearchHistory();
+			thread.start();
+		} else {
+			searchHistory = new DB(this).getSearchHistory();
+		}
 		HistoryAdapter adapter = new HistoryAdapter(this, searchHistory);
 		listHistory.setAdapter(adapter);
 		listHistory.setOnItemClickListener(new OnItemClickListener() {
@@ -398,7 +404,7 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 		public void run() {
 			final ArrayList<SearchListItem> searchHistory = IbikeApplication.isUserLogedIn() ? new DB(SearchActivity.this)
 					.getSearchHistoryFromServer(SearchActivity.this) : null;
-			if (SearchActivity.this != null && !SearchActivity.this.isDestroyed()) {
+			if (SearchActivity.this != null) {
 				SearchActivity.this.runOnUiThread(new Runnable() {
 					public void run() {
 						ArrayList<SearchListItem> searchHistory2 = searchHistory;
@@ -409,7 +415,6 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 								listHistory.setAdapter(adapter);
 							}
 						} else {
-
 							SearchActivity.this.searchHistory.clear();
 							Iterator<SearchListItem> it = searchHistory.iterator();
 							int count = 0;
@@ -425,6 +430,7 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 						((HistoryAdapter) listHistory.getAdapter()).notifyDataSetChanged();
 						resizeLists();
 						updateLayout();
+						timestampHistoryFetched = System.currentTimeMillis();
 					}
 				});
 			}

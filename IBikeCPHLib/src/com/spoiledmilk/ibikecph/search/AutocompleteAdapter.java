@@ -42,6 +42,7 @@ public class AutocompleteAdapter extends ArrayAdapter<SearchListItem> {
 	String[] splitted;
 	private int stringLength = 0;
 	private boolean isA;
+	private ViewHolder viewHolder;
 
 	ArrayList<SearchListItem> newData = new ArrayList<SearchListItem>();
 
@@ -51,18 +52,8 @@ public class AutocompleteAdapter extends ArrayAdapter<SearchListItem> {
 	}
 
 	@Override
-	public void clear() {
-		super.clear();
-
-	}
-
-	private ViewHolder viewHolder;
-
-	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-
 		View view = convertView;
-
 		if (view == null) {
 			view = inflater.inflate(R.layout.list_row_search, parent, false);
 			viewHolder = new ViewHolder();
@@ -82,19 +73,15 @@ public class AutocompleteAdapter extends ArrayAdapter<SearchListItem> {
 		} else {
 			viewHolder = (ViewHolder) view.getTag();
 		}
-
 		final SearchListItem item = getItem(position);
-
 		final ImageView imgIcon = viewHolder.imgIcon;
 		final TextView textLocation = viewHolder.textLocation;
 		final TextView textAddress = viewHolder.textAddress;
-
 		if (item.type == SearchListItem.nodeType.CURRENT_POSITION) {
 			String name = item.getName();
 			textLocation.setText(name);
 			textAddress.setVisibility(View.GONE);
 		} else {
-
 			String name = item.getName();
 			String addr = item.getAdress();
 			if (addr == null || addr.equals(name)) {
@@ -103,7 +90,6 @@ public class AutocompleteAdapter extends ArrayAdapter<SearchListItem> {
 					name += " " + item.getNumber();
 				}
 			}
-
 			if (item.getZip() != null && !item.getZip().equals("") && !(item instanceof HistoryData)) {
 				addr += (addr.equals("") ? "" : ", ") + item.getZip();
 			}
@@ -113,7 +99,6 @@ public class AutocompleteAdapter extends ArrayAdapter<SearchListItem> {
 				}
 				addr += item.getCity();
 			}
-
 			if (!(item instanceof FoursquareData) && !(item instanceof KortforData) && !(item instanceof HistoryData)) {
 				addr = "";
 			} else if (item instanceof HistoryData) {
@@ -123,13 +108,10 @@ public class AutocompleteAdapter extends ArrayAdapter<SearchListItem> {
 					addr = "";
 				}
 			}
-
 			if (item instanceof HistoryData) {
 				LOG.d("history item name = " + name + " addr = " + addr);
 			}
-
 			Spannable WordtoSpan = new SpannableString(name), WordtoSpan2 = new SpannableString(addr);
-
 			boolean found = false, found2 = false;
 			for (String word : splitted) { // iterrate through the search string
 				int index = name.toLowerCase(Locale.US).indexOf(word.toLowerCase(Locale.US));
@@ -154,13 +136,11 @@ public class AutocompleteAdapter extends ArrayAdapter<SearchListItem> {
 				}
 
 			}
-
 			if (addr == null || addr.equals("")) {
 				textAddress.setVisibility(View.GONE);
 			} else {
 				textAddress.setVisibility(View.VISIBLE);
 			}
-
 			if (found) {
 				textLocation.setText(WordtoSpan);
 			} else {
@@ -172,7 +152,6 @@ public class AutocompleteAdapter extends ArrayAdapter<SearchListItem> {
 				textAddress.setText(addr);
 			}
 		}
-
 		if (item.type == SearchListItem.nodeType.HISTORY) {
 			textLocation.setPadding(Util.dp2px(18), 0, 0, 0);
 			textAddress.setPadding(Util.dp2px(18), 0, 0, 0);
@@ -201,33 +180,135 @@ public class AutocompleteAdapter extends ArrayAdapter<SearchListItem> {
 
 	final private Comparator<SearchListItem> comparator = new Comparator<SearchListItem>() {
 		public int compare(SearchListItem e1, SearchListItem e2) {
-			// int ret =
-			// Integer.valueOf(e1.getOrder()).compareTo(e2.getOrder());
-			// if (ret == 0) {
-			// if (e1.getClass().equals(KortforData.class) ||
-			// e1.getClass().equals(FoursquareData.class)) {
-			// LOG.d("distance = " + (e1.getDistance() - e2.getDistance()));
 			int ret = (int) (e1.getDistance() - e2.getDistance());
-			// } else {
-			// ret =
-			// Integer.valueOf(e1.getRelevance()).compareTo(e2.getRelevance());
-			// }
-			//
-			// }
 			return ret;
 		}
 	};
 
-	public void updateListData(List<SearchListItem> list, String searchStr, Address addr) {
+	public void updateListData(String searchStr, Address addr) {
+		// fetch local favourites and search history from the database
 		if (searchStr == null || searchStr.trim().length() == 0) {
 			clear();
 			return;
 		}
-
 		Location loc = SMLocationManager.getInstance().hasValidLocation() ? SMLocationManager.getInstance().getLastValidLocation()
 				: MapFragmentBase.locCopenhagen;
+		splitString(searchStr);
+		if (searchStr.length() != stringLength) {
+			clear();
+			if (isA) {
+				add(new CurrentLocation());
+			}
+			stringLength = searchStr.length();
+			ArrayList<SearchListItem> historyList = new DB(getContext()).getSearchHistoryForString(searchStr);
+			Iterator<SearchListItem> it = historyList.iterator();
+			while (it.hasNext()) {
+				HistoryData sli = (HistoryData) it.next();
+				Address a = AddressParser.parseAddressRegex(sli.getName().replaceAll(",", ""));
+				sli.setName(a.street + " " + a.number);
+				sli.setAddress(((a.zip != null && !a.zip.equals("")) ? a.zip + " " : "") + a.city);
+				sli.setDistance(loc.distanceTo(Util.locationFromCoordinates(sli.getLatitude(), sli.getLongitude())));
+				add(sli);
+			}
+			ArrayList<SearchListItem> favoritesList = new DB(getContext()).getFavoritesForString(searchStr);
+			Iterator<SearchListItem> it2 = favoritesList.iterator();
+			while (it2.hasNext()) {
+				FavoritesData sli = (FavoritesData) it2.next();
+				sli.setDistance(loc.distanceTo(Util.locationFromCoordinates(sli.getLatitude(), sli.getLongitude())));
+				add(sli);
+			}
+		}
+		super.sort(comparator);
+		notifyDataSetChanged();
+	}
 
+	public void updateListData(List<SearchListItem> list, String searchStr, Address addr) {
+		// search items fetched from server
+		if (searchStr == null || searchStr.trim().length() == 0) {
+			clear();
+			return;
+		}
+		Location loc = SMLocationManager.getInstance().hasValidLocation() ? SMLocationManager.getInstance().getLastValidLocation()
+				: MapFragmentBase.locCopenhagen;
 		boolean isForPreviousCleared = false, isKMSPreviousCleared = false;
+		splitString(searchStr);
+		if (searchStr.length() != stringLength) {
+			clear();
+			if (isA) {
+				add(new CurrentLocation());
+			}
+			if (list != null && list.size() == 1 && (list.get(0) instanceof FavoritesData || list.get(0) instanceof HistoryData)) {
+				add(list.get(0));
+			} else {
+				// add local favourites and search history
+				stringLength = searchStr.length();
+				ArrayList<SearchListItem> historyList = new DB(getContext()).getSearchHistoryForString(searchStr);
+				Iterator<SearchListItem> it = historyList.iterator();
+				while (it.hasNext()) {
+					HistoryData sli = (HistoryData) it.next();
+					Address a = AddressParser.parseAddressRegex(sli.getName().replaceAll(",", ""));
+					sli.setName(a.street + " " + a.number);
+					sli.setAddress(((a.zip != null && !a.zip.equals("")) ? a.zip + " " : "") + a.city);
+					sli.setDistance(loc.distanceTo(Util.locationFromCoordinates(sli.getLatitude(), sli.getLongitude())));
+					add(sli);
+				}
+				ArrayList<SearchListItem> favoritesList = new DB(getContext()).getFavoritesForString(searchStr);
+				Iterator<SearchListItem> it2 = favoritesList.iterator();
+				while (it2.hasNext()) {
+					FavoritesData sli = (FavoritesData) it2.next();
+					sli.setDistance(loc.distanceTo(Util.locationFromCoordinates(sli.getLatitude(), sli.getLongitude())));
+					add(sli);
+				}
+			}
+		}
+		if (list != null) {
+			// add data from Foursquare and Kortforsyningen
+			Iterator<SearchListItem> it = list.iterator();
+			while (it.hasNext()) {
+				SearchListItem s = it.next();
+				if (s instanceof FoursquareData) { // Foursquare
+					if (!isForPreviousCleared) {
+						ArrayList<SearchListItem> itemsToRemove = new ArrayList<SearchListItem>();
+						for (int i = 0; i < super.getCount(); i++) {
+							if (getItem(i).getClass().equals(FoursquareData.class)) {
+								itemsToRemove.add(getItem(i));
+							}
+						}
+						Iterator<SearchListItem> it2 = itemsToRemove.iterator();
+						while (it2.hasNext()) {
+							SearchListItem sli = it2.next();
+							super.remove(sli);
+							it2.remove();
+						}
+						isForPreviousCleared = true;
+					}
+					add(s);
+				} else if (s instanceof KortforData) { // Kortforsyningen
+					if (!isKMSPreviousCleared) {
+						ArrayList<SearchListItem> itemsToRemove = new ArrayList<SearchListItem>();
+						for (int i = 0; i < super.getCount(); i++) {
+							if (getItem(i).getClass().equals(KortforData.class)) {
+								itemsToRemove.add(getItem(i));
+							}
+						}
+						Iterator<SearchListItem> it2 = itemsToRemove.iterator();
+						while (it2.hasNext()) {
+							SearchListItem sli = it2.next();
+							super.remove(sli);
+							it2.remove();
+						}
+						isKMSPreviousCleared = true;
+					}
+					add(s);
+				}
+
+			}
+		}
+		super.sort(comparator);
+		notifyDataSetChanged();
+	}
+
+	private void splitString(String searchStr) {
 		splitted = null;
 		splitted = searchStr.split("\\s");
 		if (splitted == null) {
@@ -248,92 +329,6 @@ public class AutocompleteAdapter extends ArrayAdapter<SearchListItem> {
 			splitted[j] = word;
 			j++;
 		}
-		if (searchStr.length() != stringLength) {
-			clear();
-			if (isA) {
-				add(new CurrentLocation());
-			}
-			if (list != null && list.size() == 1 && (list.get(0) instanceof FavoritesData || list.get(0) instanceof HistoryData)) {
-				add(list.get(0));
-			} else {
-				stringLength = searchStr.length();
-				ArrayList<SearchListItem> historyList = new DB(getContext()).getSearchHistoryForString(searchStr);
-				Iterator<SearchListItem> it = historyList.iterator();
-				while (it.hasNext()) {
-					HistoryData sli = (HistoryData) it.next();
-					Address a = AddressParser.parseAddressRegex(sli.getName().replaceAll(",", ""));
-					sli.setName(a.street + " " + a.number);
-					sli.setAddress(((a.zip != null && !a.zip.equals("")) ? a.zip + " " : "") + a.city);
-					sli.setDistance(loc.distanceTo(Util.locationFromCoordinates(sli.getLatitude(), sli.getLongitude())));
-					add(sli); // .setRelevance(searchStr)
-				}
-				ArrayList<SearchListItem> favoritesList = new DB(getContext()).getFavoritesForString(searchStr);
-				Iterator<SearchListItem> it2 = favoritesList.iterator();
-				while (it2.hasNext()) {
-					FavoritesData sli = (FavoritesData) it2.next();
-					sli.setDistance(loc.distanceTo(Util.locationFromCoordinates(sli.getLatitude(), sli.getLongitude())));
-					add(sli); // .setRelevance(searchStr)
-				}
-			}
-		}
-		if (list != null) {
-			Iterator<SearchListItem> it = list.iterator();
-			// int count = 0;
-			while (it.hasNext()) { // && count < 3
-				SearchListItem s = it.next();
-				if (s instanceof FoursquareData) { // foursquare
-					if (!isForPreviousCleared) {
-						ArrayList<SearchListItem> itemsToRemove = new ArrayList<SearchListItem>();
-						for (int i = 0; i < super.getCount(); i++) {
-							if (getItem(i).getClass().equals(FoursquareData.class)) {
-								itemsToRemove.add(getItem(i));
-							}
-						}
-						Iterator<SearchListItem> it2 = itemsToRemove.iterator();
-						while (it2.hasNext()) {
-							SearchListItem sli = it2.next();
-							super.remove(sli);
-							it2.remove();
-						}
-						isForPreviousCleared = true;
-					}
-					add(s);
-				} else if (s instanceof KortforData) { // kortforsyningen
-					if (!isKMSPreviousCleared) {
-						ArrayList<SearchListItem> itemsToRemove = new ArrayList<SearchListItem>();
-						for (int i = 0; i < super.getCount(); i++) {
-							if (getItem(i).getClass().equals(KortforData.class)) {
-								itemsToRemove.add(getItem(i));
-							}
-						}
-						Iterator<SearchListItem> it2 = itemsToRemove.iterator();
-						while (it2.hasNext()) {
-							SearchListItem sli = it2.next();
-							super.remove(sli);
-							it2.remove();
-						}
-						isKMSPreviousCleared = true;
-					}
-					// KortforData kd = new KortforData(node);
-					// LOG.d("KortforData = " + kd);
-					// if (addr.zip != null && !addr.zip.equals("") && kd.getZip() != null) {
-					// if (!addr.zip.trim().toLowerCase(Locale.UK).equals(kd.getZip().toLowerCase(Locale.UK))) {
-					// continue;
-					// }
-					// }
-					// if (addr.city != null && !addr.city.equals("") && addr.city != addr.street && kd.getCity() !=
-					// null) {
-					// if (!addr.city.trim().toLowerCase(Locale.UK).equals(kd.getCity().toLowerCase(Locale.UK))) {
-					// continue;
-					// }
-					// }
-					add(s);
-				}
-
-			}
-		}
-		super.sort(comparator);
-		notifyDataSetChanged();
 	}
 
 	public int getStringLength() {
