@@ -448,7 +448,7 @@ public class DB extends SQLiteOpenHelper {
 								.get("sub_source").asText(), data.get("lattitude").asDouble(), data.get("longitude").asDouble(), data.get(
 								"id").asInt());
 						saveFavorite(fd, null, false);
-						ret.add(fd);
+						// ret.add(fd);
 					}
 					LOG.d("favorites fetched = " + ret);
 				}
@@ -458,6 +458,7 @@ public class DB extends SQLiteOpenHelper {
 				}
 			}
 		}
+		getFavorites(ret);
 		return ret;
 	}
 

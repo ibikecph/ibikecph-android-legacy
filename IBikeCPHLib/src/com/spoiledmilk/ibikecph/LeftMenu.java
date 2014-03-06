@@ -6,7 +6,6 @@
 package com.spoiledmilk.ibikecph;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -53,30 +52,19 @@ public class LeftMenu extends Fragment {
 	protected static final int dividerHeight = Util.dp2px(2);
 
 	protected int favoritesContainerHeight;
-
-	TextView textFavorites;
-	TextView textProfile;
-	TextView textAbout;
-	TextView textLogin;
-	TextView textSettings;
-	TextView textNewFavorite;
-	TextView textFavoriteHint;
-
+	TextView textFavorites, textProfile, textAbout, textLogin, textSettings, textNewFavorite, textFavoriteHint;
 	SortableListView favoritesList;
-	protected ArrayList<FavoritesData> favorites = null;
+	protected ArrayList<FavoritesData> favorites = new ArrayList<FavoritesData>();
 	ImageView imgAdd;
 	tFetchFavorites fetchFavorites;
 	ImageButton btnEditFavorites;
 	LinearLayout addContainer;
-	protected RelativeLayout favoritesHeaderContainer;
-	protected RelativeLayout favoritesContainer;
-	protected RelativeLayout profileContainer;
-	protected RelativeLayout aboutContainer;
-	protected RelativeLayout settingsContainer;
+	protected RelativeLayout favoritesHeaderContainer, favoritesContainer, profileContainer, aboutContainer, settingsContainer;
 	Button btnDone;
 	View lastListDivider;
 	private boolean isEditMode = false;
 	public boolean favoritesEnabled = true;
+	private ListAdapter listAdapter;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -295,7 +283,6 @@ public class LeftMenu extends Fragment {
 		super.onResume();
 		LOG.d("Left menu onResume");
 		initStrings();
-
 		if (IbikeApplication.isUserLogedIn()) {
 			textLogin.setVisibility(View.GONE);
 			textProfile.setVisibility(View.VISIBLE);
@@ -305,9 +292,12 @@ public class LeftMenu extends Fragment {
 			textLogin.setVisibility(View.VISIBLE);
 			textProfile.setVisibility(View.GONE);
 		}
+		listAdapter = getAdapter();
+		favoritesList.setAdapter(listAdapter);
 		textNewFavorite.setTextColor(getAddFavoriteTextColor());
-		reloadFavorites();
+		// reloadFavorites();
 		btnEditFavorites.setEnabled(IbikeApplication.isUserLogedIn() && favorites != null && favorites.size() != 0 && !isEditMode);
+		updateControls();
 	}
 
 	protected int getAddFavoriteTextColor() {
@@ -437,11 +427,6 @@ public class LeftMenu extends Fragment {
 			addContainer.setClickable(false);
 		} else {
 			// Loged in, and there is a list of favorites
-			ListAdapter listAdapter = favoritesList.getAdapter();
-			if (listAdapter == null) {
-				listAdapter = getAdapter();
-				favoritesList.setAdapter(listAdapter);
-			}
 			favoritesList.clearAnimations();
 			favoritesList.setVisibility(View.VISIBLE);
 			if (listAdapter != null) {
@@ -526,7 +511,8 @@ public class LeftMenu extends Fragment {
 		if (adapter == null) {
 			adapter = new FavoritesAdapter(getActivity(), favorites, this);
 		} else {
-			adapter.clear();
+			favorites.clear();
+			adapter.notifyDataSetChanged();
 		}
 		return adapter;
 	}
@@ -540,15 +526,9 @@ public class LeftMenu extends Fragment {
 				if (LeftMenu.this != null && LeftMenu.this.getActivity() != null) {
 					LeftMenu.this.getActivity().runOnUiThread(new Runnable() {
 						public void run() {
-							if (favorites == null) {
-								favorites = new ArrayList<FavoritesData>();
-							} else {
-								favorites.clear();
-							}
-							Iterator<FavoritesData> it = favs.iterator();
-							while (it.hasNext()) {
-								favorites.add(it.next());
-							}
+							favorites.clear();
+							favorites.addAll(favs);
+							((FavoritesAdapter) listAdapter).notifyDataSetChanged();
 							if (getView() != null) {
 								LOG.d("update favorites from thread count = " + favorites.size());
 								updateControls();
