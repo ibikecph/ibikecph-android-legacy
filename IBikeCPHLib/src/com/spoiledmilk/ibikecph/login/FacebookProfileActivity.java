@@ -226,7 +226,7 @@ public class FacebookProfileActivity extends Activity {
 
 	private void launchAlertDialog(String msg) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(FacebookProfileActivity.this);
-		builder.setMessage(msg).setTitle("Error");
+		builder.setMessage(msg).setTitle(IbikeApplication.getString("Error"));
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				dialog.dismiss();

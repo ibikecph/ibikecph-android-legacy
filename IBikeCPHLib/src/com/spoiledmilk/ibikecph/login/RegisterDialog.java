@@ -107,7 +107,7 @@ public class RegisterDialog {
 
 				} else {
 					AlertDialog.Builder builder = new AlertDialog.Builder(arg0.getContext());
-					builder.setMessage(validationMessage).setTitle("Error");
+					builder.setMessage(validationMessage).setTitle(IbikeApplication.getString("Error"));
 					builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							dialog.dismiss();
@@ -235,7 +235,7 @@ public class RegisterDialog {
 
 	private void launchErrorDialog(String info) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(info).setTitle("Error");
+		builder.setMessage(info).setTitle(IbikeApplication.getString("Error"));
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
 				dialog.dismiss();

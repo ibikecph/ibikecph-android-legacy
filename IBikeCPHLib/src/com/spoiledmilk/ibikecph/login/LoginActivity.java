@@ -93,7 +93,7 @@ public class LoginActivity extends Activity implements FBLoginListener {
 			public void onClick(View arg0) {
 				if (textEmail.getText() == null || ("" + textEmail.getText().toString().trim()).equals("")
 						|| textPassword.getText() == null || ("" + textPassword.getText().toString()).trim().equals("")) {
-					launchErrorDialog(IbikeApplication.getString("login_error_fields"));
+					launchErrorDialog("",IbikeApplication.getString("login_error_fields"));
 				} else {
 					new Thread(new Runnable() {
 						@Override
@@ -130,7 +130,7 @@ public class LoginActivity extends Activity implements FBLoginListener {
 						int id = data.getInt("id");
 						progressBar.setVisibility(View.GONE);
 						if (id < 0) {
-							launchErrorDialog("Login failed : " + data.toString());
+							launchErrorDialog("","Login failed : " + data.toString());
 						} else {
 							if (auth_token == null || auth_token.equals("") || auth_token.equals("null")) {
 								auth_token = "";
@@ -146,7 +146,11 @@ public class LoginActivity extends Activity implements FBLoginListener {
 					} else {
 						final String message = data.containsKey("errors") ? data.getString("errors")
 								: data.getString("info");
-						launchErrorDialog(message);
+						String title = "";
+						if (data.containsKey("info_title")) {
+							title = data.getString("info_title");
+						}
+						launchErrorDialog(title,message);
 					}
 					return true;
 				}
@@ -270,10 +274,15 @@ public class LoginActivity extends Activity implements FBLoginListener {
 		});
 	}
 
-	private void launchErrorDialog(String info) {
+	private void launchErrorDialog(String title, String info) {
 		if (!isFinishing() && isRunning) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(IbikeApplication.getString("Error"));
+			if (!title.equals("")){
+				builder.setTitle(title);
+			}
+			else{
+				builder.setTitle(IbikeApplication.getString("Error"));
+			}
 			builder.setMessage(info);
 			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
@@ -374,7 +383,7 @@ public class LoginActivity extends Activity implements FBLoginListener {
 					performFBLogin(null);
 					numOfRetries++;
 				} else {
-					launchErrorDialog("Facebook login failed");
+					launchErrorDialog("","Facebook login failed");
 				}
 			}
 		});

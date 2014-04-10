@@ -56,10 +56,12 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 	private String fromName = "", toName = "", aName = "", bName = "";
 	ArrayList<SearchListItem> searchHistory = new ArrayList<SearchListItem>();
 	private long timestampHistoryFetched = 0;
+	private boolean isDestroyed = false;
 
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		isDestroyed = false;
 		setContentView(R.layout.search_activity);
 		listHistory = (ListView) findViewById(R.id.historyList);
 		listFavorites = (ListView) findViewById(R.id.favoritesList);
@@ -203,6 +205,12 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 				btnSwitch.setAlpha(40);
 			}
 		}
+	}
+	
+	@Override
+	protected void onDestroy() {
+	    super.onDestroy();
+	    isDestroyed = true;
 	}
 
 	@Override
@@ -404,7 +412,7 @@ public class SearchActivity extends Activity implements ScrollViewListener {
 		public void run() {
 			final ArrayList<SearchListItem> searchHistory = IbikeApplication.isUserLogedIn() ? new DB(SearchActivity.this)
 					.getSearchHistoryFromServer(SearchActivity.this) : null;
-			if (SearchActivity.this != null) {
+			if (SearchActivity.this != null && !isDestroyed) {
 				SearchActivity.this.runOnUiThread(new Runnable() {
 					public void run() {
 						ArrayList<SearchListItem> searchHistory2 = searchHistory;

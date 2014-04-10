@@ -104,7 +104,7 @@ public class LoginSplashActivity extends FragmentActivity implements iLanguageLi
 						String auth_token = data.getString("auth_token");
 						int id = data.getInt("id");
 						if (id < 0) {
-							launchErrorDialog("Login failed : " + data.toString());
+							launchErrorDialog("","Login failed : " + data.toString());
 						} else {
 							if (auth_token == null || auth_token.equals("") || auth_token.equals("null")) {
 								auth_token = "";
@@ -112,7 +112,11 @@ public class LoginSplashActivity extends FragmentActivity implements iLanguageLi
 							launchMainMapActivity(auth_token, id);
 						}
 					} else {
-						launchErrorDialog(data.getString("info"));
+						String title = "";
+						if (data.containsKey("info_title")) {
+							title = data.getString("info_title");
+						}
+						launchErrorDialog(title, data.getString("info"));
 					}
 					return true;
 				}
@@ -266,9 +270,13 @@ public class LoginSplashActivity extends FragmentActivity implements iLanguageLi
 		});
 	}
 
-	private void launchErrorDialog(String info) {
+	private void launchErrorDialog(String title, String info) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(IbikeApplication.getString("Error"));
+		if (!title.equals("")) {
+			builder.setTitle(title);
+		} else {
+			builder.setTitle(IbikeApplication.getString("Error"));
+		}
 		builder.setMessage(info);
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
@@ -438,7 +446,7 @@ public class LoginSplashActivity extends FragmentActivity implements iLanguageLi
 					performFBLogin();
 					numOfRetries++;
 				} else {
-					launchErrorDialog("Facebook login failed");
+					launchErrorDialog("","Facebook login failed");
 				}
 			}
 		});
