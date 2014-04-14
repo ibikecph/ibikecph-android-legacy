@@ -42,6 +42,7 @@ import com.spoiledmilk.ibikecph.SplashActivity;
 import com.spoiledmilk.ibikecph.iLanguageListener;
 import com.spoiledmilk.ibikecph.favorites.AddFavoriteFragment;
 import com.spoiledmilk.ibikecph.favorites.EditFavoriteFragment;
+import com.spoiledmilk.ibikecph.favorites.FavoritesActivity;
 import com.spoiledmilk.ibikecph.favorites.FavoritesData;
 import com.spoiledmilk.ibikecph.login.LoginActivity;
 import com.spoiledmilk.ibikecph.login.ProfileActivity;
@@ -230,6 +231,14 @@ public class MapActivity extends FragmentActivity implements SMHttpRequestListen
 
     protected Class<?> getSearchActivity() {
         return SearchActivity.class;
+    }
+
+    public void showWelcomeScreen() {
+        if (!IbikeApplication.isWelcomeScreenSeen()) {
+            IbikeApplication.setWelcomeScreenSeen(true);
+            Intent i = new Intent(this, FavoritesActivity.class);
+            startActivity(i);
+        }
     }
 
     @Override

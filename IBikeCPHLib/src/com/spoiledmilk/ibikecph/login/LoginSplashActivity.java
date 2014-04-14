@@ -47,438 +47,440 @@ import com.spoiledmilk.ibikecph.util.LOG;
 
 public class LoginSplashActivity extends FragmentActivity implements iLanguageListener, FBLoginListener, ImagerPrefetcherListener {
 
-	RelativeLayout btnSkip;
-	RelativeLayout btnRegister;
-	Button btnLogin;
-	TextView textCreateAccount;
-	TextView textLoginExplanation;
-	public static final int IMAGE_REQUEST = 1888;
-	LoginDialog lg;
-	RegisterDialog rd;
-	TextView textSkip;
-	TextView textRegister;
-	Handler handler;
-	Button btnFacebookLogin;
-	AlertDialog registrationDialog;
-	private Session.StatusCallback statusCallback = new SessionStatusCallback();
-	Bundle savedInstanceState;
+    RelativeLayout btnSkip;
+    RelativeLayout btnRegister;
+    Button btnLogin;
+    TextView textCreateAccount;
+    TextView textLoginExplanation;
+    public static final int IMAGE_REQUEST = 1888;
+    LoginDialog lg;
+    RegisterDialog rd;
+    TextView textSkip;
+    TextView textRegister;
+    Handler handler;
+    Button btnFacebookLogin;
+    AlertDialog registrationDialog;
+    private Session.StatusCallback statusCallback = new SessionStatusCallback();
+    Bundle savedInstanceState;
 
-	@Override
-	public void onCreate(final Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		this.setContentView(getLayoutId());
-		this.savedInstanceState = savedInstanceState;
-		btnSkip = (RelativeLayout) findViewById(R.id.btnSkip);
-		btnRegister = (RelativeLayout) findViewById(R.id.btnRegister);
-		btnFacebookLogin = (Button) findViewById(R.id.btnFacebookLogin);
-		textSkip = (TextView) findViewById(R.id.textSkip);
-		textRegister = (TextView) findViewById(R.id.textRegister);
+    @Override
+    public void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        this.setContentView(getLayoutId());
+        this.savedInstanceState = savedInstanceState;
+        btnSkip = (RelativeLayout) findViewById(R.id.btnSkip);
+        btnRegister = (RelativeLayout) findViewById(R.id.btnRegister);
+        btnFacebookLogin = (Button) findViewById(R.id.btnFacebookLogin);
+        textSkip = (TextView) findViewById(R.id.textSkip);
+        textRegister = (TextView) findViewById(R.id.textRegister);
 
-		btnLogin = (Button) findViewById(R.id.btnLogin);
-		btnLogin.setOnClickListener(new OnClickListener() {
+        btnLogin = (Button) findViewById(R.id.btnLogin);
+        btnLogin.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View arg0) {
-				disableButtons();
-				lg = new LoginDialog();
-				lg.createLoginDialog(LoginSplashActivity.this);
-			}
+            @Override
+            public void onClick(View arg0) {
+                disableButtons();
+                lg = new LoginDialog();
+                lg.createLoginDialog(LoginSplashActivity.this);
+            }
 
-		});
+        });
 
-		textCreateAccount = (TextView) findViewById(R.id.textCreateAccount);
-		textLoginExplanation = (TextView) findViewById(R.id.textLoginExplanation);
+        textCreateAccount = (TextView) findViewById(R.id.textCreateAccount);
+        textLoginExplanation = (TextView) findViewById(R.id.textLoginExplanation);
 
-		if (handler == null) {
-			handler = new Handler(new Handler.Callback() {
+        if (handler == null) {
+            handler = new Handler(new Handler.Callback() {
 
-				@Override
-				public boolean handleMessage(Message msg) {
-					Bundle data = msg.getData();
-					Boolean success = data.getBoolean("success");
-					dismissProgressDialog();
-					if (rd != null) {
-						rd.inProgress = false;
-					}
-					if (success) {
-						String auth_token = data.getString("auth_token");
-						int id = data.getInt("id");
-						if (id < 0) {
-							launchErrorDialog("","Login failed : " + data.toString());
-						} else {
-							if (auth_token == null || auth_token.equals("") || auth_token.equals("null")) {
-								auth_token = "";
-							}
-							launchMainMapActivity(auth_token, id);
-						}
-					} else {
-						String title = "";
-						if (data.containsKey("info_title")) {
-							title = data.getString("info_title");
-						}
-						launchErrorDialog(title, data.getString("info"));
-					}
-					return true;
-				}
-			});
-		}
+                @Override
+                public boolean handleMessage(Message msg) {
+                    Bundle data = msg.getData();
+                    Boolean success = data.getBoolean("success");
+                    dismissProgressDialog();
+                    if (rd != null) {
+                        rd.inProgress = false;
+                    }
+                    if (success) {
+                        String auth_token = data.getString("auth_token");
+                        int id = data.getInt("id");
+                        if (id < 0) {
+                            launchErrorDialog("", "Login failed : " + data.toString());
+                        } else {
+                            if (auth_token == null || auth_token.equals("") || auth_token.equals("null")) {
+                                auth_token = "";
+                            }
+                            launchMainMapActivity(auth_token, id);
+                        }
+                    } else {
+                        String title = "";
+                        if (data.containsKey("info_title")) {
+                            title = data.getString("info_title");
+                        }
+                        launchErrorDialog(title, data.getString("info"));
+                    }
+                    return true;
+                }
+            });
+        }
 
-		Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
+        Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
 
-	}
+    }
 
-	protected int getLayoutId() {
-		return R.layout.login_splash_activity;
-	}
+    protected int getLayoutId() {
+        return R.layout.login_splash_activity;
+    }
 
-	protected int getButtonPressedColor() {
-		return 0xFF07568B;
-	}
+    protected int getButtonPressedColor() {
+        return 0xFF07568B;
+    }
 
-	protected int getButtonImageResource() {
-		return R.drawable.btn_splash_blue_selector;
-	}
+    protected int getButtonImageResource() {
+        return R.drawable.btn_splash_blue_selector;
+    }
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		initStrings();
-		enableButtons();
-	}
+    @Override
+    public void onResume() {
+        super.onResume();
+        initStrings();
+        enableButtons();
+    }
 
-	public void onFacebookLoginClick(View v) {
-		disableButtons();
-		performFBLogin();
-	}
+    public void onFacebookLoginClick(View v) {
+        disableButtons();
+        performFBLogin();
+    }
 
-	public void performFBLogin() {
-		Session session = Session.getActiveSession();
-		if (session == null) {
-			if (savedInstanceState != null) {
-				session = Session.restoreSession(this, null, statusCallback, savedInstanceState);
-			}
-			if (session == null) {
-				session = new Session(this);
-			}
-		}
-		Session.setActiveSession(session);
-		if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED) || (!session.isOpened() && !session.isClosed())) {
-			session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback).setPermissions(Arrays.asList("email")));
-		} else if (session.isOpened() && !session.getPermissions().contains("email")) {
-			session.requestNewPublishPermissions(new NewPermissionsRequest(this, Arrays.asList("email")).setCallback(statusCallback));
-		} else {
-			Session.openActiveSession(this, true, statusCallback);
-		}
-	}
+    public void performFBLogin() {
+        Session session = Session.getActiveSession();
+        if (session == null) {
+            if (savedInstanceState != null) {
+                session = Session.restoreSession(this, null, statusCallback, savedInstanceState);
+            }
+            if (session == null) {
+                session = new Session(this);
+            }
+        }
+        Session.setActiveSession(session);
+        if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED) || (!session.isOpened() && !session.isClosed())) {
+            session.openForRead(new Session.OpenRequest(this).setCallback(statusCallback).setPermissions(Arrays.asList("email")));
+        } else if (session.isOpened() && !session.getPermissions().contains("email")) {
+            session.requestNewPublishPermissions(new NewPermissionsRequest(this, Arrays.asList("email")).setCallback(statusCallback));
+        } else {
+            Session.openActiveSession(this, true, statusCallback);
+        }
+    }
 
-	public void onBtnSkipClick(View v) {
-		launchMainMapActivity();
-	}
+    public void onBtnSkipClick(View v) {
+        launchMainMapActivity();
+    }
 
-	public void onBtnRegisterClick(View v) {
-		disableButtons();
-		rd = new RegisterDialog();
-		rd.createRegisterDialog(LoginSplashActivity.this);
-	}
+    public void onBtnRegisterClick(View v) {
+        disableButtons();
+        rd = new RegisterDialog();
+        rd.createRegisterDialog(LoginSplashActivity.this);
+    }
 
-	private void login(final String accessToken) {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				Looper.myLooper();
-				Looper.prepare();
-				showProgressDialog();
-				LOG.d("facebook login fb token = " + accessToken);
-				Message message = HTTPAccountHandler.performFacebookLogin(accessToken);
-				handler.sendMessage(message);
-				dismissProgressDialog();
+    private void login(final String accessToken) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Looper.myLooper();
+                Looper.prepare();
+                showProgressDialog();
+                LOG.d("facebook login fb token = " + accessToken);
+                Message message = HTTPAccountHandler.performFacebookLogin(accessToken);
+                handler.sendMessage(message);
+                dismissProgressDialog();
 
-			}
-		}).start();
-	}
+            }
+        }).start();
+    }
 
-	@Override
-	public void onPause() {
-		super.onPause();
-		if (lg != null) {
-			lg.dismissProgressDialog();
-		}
-		if (rd != null) {
-			rd.dismissProgressDialog();
-		}
-		if (registrationDialog != null && registrationDialog.isShowing())
-			registrationDialog.dismiss();
-	}
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (lg != null) {
+            lg.dismissProgressDialog();
+        }
+        if (rd != null) {
+            rd.dismissProgressDialog();
+        }
+        if (registrationDialog != null && registrationDialog.isShowing())
+            registrationDialog.dismiss();
+    }
 
-	private void initStrings() {
-		textSkip.setText(IbikeApplication.getString("btn_skip"));
-		textSkip.setTypeface(IbikeApplication.getBoldFont());
-		textRegister.setText(IbikeApplication.getString("register_with_mail"));
-		textRegister.setTypeface(IbikeApplication.getBoldFont());
-		btnFacebookLogin.setText(IbikeApplication.getString("login_with_fb"));
-		btnFacebookLogin.setTypeface(IbikeApplication.getBoldFont());
-		btnLogin.setText(IbikeApplication.getString("login"));
-		btnLogin.setTypeface(IbikeApplication.getNormalFont());
-		textCreateAccount.setText(IbikeApplication.getString("create_account"));
-		textCreateAccount.setTypeface(IbikeApplication.getBoldFont());
-		textLoginExplanation.setText(IbikeApplication.getString("create_account_text"));
-		textLoginExplanation.setTypeface(IbikeApplication.getNormalFont());
-	}
+    private void initStrings() {
+        textSkip.setText(IbikeApplication.getString("btn_skip"));
+        textSkip.setTypeface(IbikeApplication.getBoldFont());
+        textRegister.setText(IbikeApplication.getString("register_with_mail"));
+        textRegister.setTypeface(IbikeApplication.getBoldFont());
+        btnFacebookLogin.setText(IbikeApplication.getString("login_with_fb"));
+        btnFacebookLogin.setTypeface(IbikeApplication.getBoldFont());
+        btnLogin.setText(IbikeApplication.getString("login"));
+        btnLogin.setTypeface(IbikeApplication.getNormalFont());
+        textCreateAccount.setText(IbikeApplication.getString("create_account"));
+        textCreateAccount.setTypeface(IbikeApplication.getBoldFont());
+        textLoginExplanation.setText(IbikeApplication.getString("create_account_text"));
+        textLoginExplanation.setTypeface(IbikeApplication.getNormalFont());
+    }
 
-	public void launchMainMapActivity() {
-		Intent i = new Intent(LoginSplashActivity.this, MapActivity.class);
-		LoginSplashActivity.this.startActivity(i);
-		overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-		finish();
-	}
+    public void launchMainMapActivity() {
+        IbikeApplication.setWelcomeScreenSeen(true);
+        Intent i = new Intent(LoginSplashActivity.this, MapActivity.class);
+        LoginSplashActivity.this.startActivity(i);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        finish();
+    }
 
-	static Intent lastData;
+    static Intent lastData;
 
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
-			if (rd != null) {
-				rd.showProgressDialog();
-			}
-			lastData = data;
-			showProgressDialog();
-			AsyncImageFetcher aif = new AsyncImageFetcher(this, this);
-			aif.execute(data);
-		} else if (Session.getActiveSession() != null && data != null && data.getExtras() != null) {
-			Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
-		}
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            if (rd != null) {
+                rd.showProgressDialog();
+            }
+            lastData = data;
+            showProgressDialog();
+            AsyncImageFetcher aif = new AsyncImageFetcher(this, this);
+            aif.execute(data);
+        } else if (Session.getActiveSession() != null && data != null && data.getExtras() != null) {
+            Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
+        }
 
-	}
+    }
 
-	public void showProgressDialog() {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				findViewById(R.id.progressBar).bringToFront();
-				findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
-			}
-		});
-	}
+    public void showProgressDialog() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                findViewById(R.id.progressBar).bringToFront();
+                findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+            }
+        });
+    }
 
-	public void dismissProgressDialog() {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				findViewById(R.id.progressBar).setVisibility(View.GONE);
-			}
-		});
-	}
+    public void dismissProgressDialog() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                findViewById(R.id.progressBar).setVisibility(View.GONE);
+            }
+        });
+    }
 
-	private void launchErrorDialog(String title, String info) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		if (!title.equals("")) {
-			builder.setTitle(title);
-		} else {
-			builder.setTitle(IbikeApplication.getString("Error"));
-		}
-		builder.setMessage(info);
-		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.dismiss();
-			}
-		});
-		AlertDialog dialog = builder.create();
-		dialog.show();
-	}
+    private void launchErrorDialog(String title, String info) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        if (!title.equals("")) {
+            builder.setTitle(title);
+        } else {
+            builder.setTitle(IbikeApplication.getString("Error"));
+        }
+        builder.setMessage(info);
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 
-	public void launchMainMapActivity(String auth_token, int id) {
-		disableButtons();
-		findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
-		PreferenceManager.getDefaultSharedPreferences(this).edit().putString("auth_token", auth_token).commit();
-		PreferenceManager.getDefaultSharedPreferences(this).edit().putInt("id", id).commit();
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				DB db = new DB(LoginSplashActivity.this);
-				ArrayList<FavoritesData> favorites = db.getFavoritesFromServer(LoginSplashActivity.this, null);
-				if (favorites == null || favorites.size() == 0) {
-					LoginSplashActivity.this.runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							Intent i = new Intent(LoginSplashActivity.this, FavoritesActivity.class);
-							startActivity(i);
-							overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-							findViewById(R.id.progressBar).setVisibility(View.GONE);
-							finish();
+    public void launchMainMapActivity(String auth_token, int id) {
+        disableButtons();
+        findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putString("auth_token", auth_token).commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putInt("id", id).commit();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                DB db = new DB(LoginSplashActivity.this);
+                ArrayList<FavoritesData> favorites = db.getFavoritesFromServer(LoginSplashActivity.this, null);
+                if (favorites == null || favorites.size() == 0) {
+                    LoginSplashActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            IbikeApplication.setWelcomeScreenSeen(true);
+                            Intent i = new Intent(LoginSplashActivity.this, FavoritesActivity.class);
+                            startActivity(i);
+                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                            findViewById(R.id.progressBar).setVisibility(View.GONE);
+                            finish();
 
-						}
-					});
-				} else {
-					LoginSplashActivity.this.runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							findViewById(R.id.progressBar).setVisibility(View.GONE);
-							launchMainMapActivity();
-						}
-					});
-				}
-			}
-		}).start();
-	}
+                        }
+                    });
+                } else {
+                    LoginSplashActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            findViewById(R.id.progressBar).setVisibility(View.GONE);
+                            launchMainMapActivity();
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
 
-	@Override
-	public void onStart() {
-		super.onStart();
-		if (Session.getActiveSession() != null) {
-			Session.getActiveSession().addCallback(statusCallback);
-		}
-		EasyTracker.getInstance().activityStart(this);
-	}
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (Session.getActiveSession() != null) {
+            Session.getActiveSession().addCallback(statusCallback);
+        }
+        EasyTracker.getInstance().activityStart(this);
+    }
 
-	@Override
-	public void onStop() {
-		super.onStop();
-		if (Session.getActiveSession() != null) {
-			Session.getActiveSession().removeCallback(statusCallback);
-		}
-		EasyTracker.getInstance().activityStop(this);
-	}
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (Session.getActiveSession() != null) {
+            Session.getActiveSession().removeCallback(statusCallback);
+        }
+        EasyTracker.getInstance().activityStop(this);
+    }
 
-	public void setRegisterDialog(RegisterDialog rd) {
-		this.rd = rd;
-	}
+    public void setRegisterDialog(RegisterDialog rd) {
+        this.rd = rd;
+    }
 
-	@Override
-	public void reloadStrings() {
-		initStrings();
-	}
+    @Override
+    public void reloadStrings() {
+        initStrings();
+    }
 
-	public void launchRegistrationDialog(String info) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(info);
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int arg1) {
-				dialog.dismiss();
-			}
-		});
-		registrationDialog = builder.create();
-		registrationDialog.show();
-	}
+    public void launchRegistrationDialog(String info) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(info);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int arg1) {
+                dialog.dismiss();
+            }
+        });
+        registrationDialog = builder.create();
+        registrationDialog.show();
+    }
 
-	private class SessionStatusCallback implements Session.StatusCallback {
-		@Override
-		public void call(Session session, SessionState state, Exception exception) {
-			if (!session.isOpened()) {
-				session = Session.getActiveSession();
-			}
-			if (session.isOpened()) {
-				final Session tempSession = session;
-				Request.executeMeRequestAsync(session, new Request.GraphUserCallback() {
-					@Override
-					public void onCompleted(GraphUser user, Response response) {
-						if (user != null) {
-							HTTPAccountHandler.checkIsFbTokenValid(tempSession.getAccessToken(), LoginSplashActivity.this);
-						}
-					}
-				});
-			}
+    private class SessionStatusCallback implements Session.StatusCallback {
+        @Override
+        public void call(Session session, SessionState state, Exception exception) {
+            if (!session.isOpened()) {
+                session = Session.getActiveSession();
+            }
+            if (session.isOpened()) {
+                final Session tempSession = session;
+                Request.executeMeRequestAsync(session, new Request.GraphUserCallback() {
+                    @Override
+                    public void onCompleted(GraphUser user, Response response) {
+                        if (user != null) {
+                            HTTPAccountHandler.checkIsFbTokenValid(tempSession.getAccessToken(), LoginSplashActivity.this);
+                        }
+                    }
+                });
+            }
 
-		}
-	}
+        }
+    }
 
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		Session session = Session.getActiveSession();
-		Session.saveSession(session, outState);
-		if (rd != null && rd.isDialogAlive()) {
-			outState.putString("name", rd.getName());
-			outState.putString("email", rd.getEmail());
-			outState.putString("password", rd.getPassword());
-			outState.putString("passwordConfirm", rd.getPasswordConfirmation());
-		}
-		if (lg != null) {
-			lg.dismissProgressDialog();
-		}
-		if (rd != null) {
-			rd.dismissProgressDialog();
-		}
-	}
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Session session = Session.getActiveSession();
+        Session.saveSession(session, outState);
+        if (rd != null && rd.isDialogAlive()) {
+            outState.putString("name", rd.getName());
+            outState.putString("email", rd.getEmail());
+            outState.putString("password", rd.getPassword());
+            outState.putString("passwordConfirm", rd.getPasswordConfirmation());
+        }
+        if (lg != null) {
+            lg.dismissProgressDialog();
+        }
+        if (rd != null) {
+            rd.dismissProgressDialog();
+        }
+    }
 
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-		if (savedInstanceState != null && savedInstanceState.containsKey("name")) {
-			rd = new RegisterDialog();
-			rd.createRegisterDialog(LoginSplashActivity.this);
-			rd.setName(savedInstanceState.getString("name"));
-			rd.setEmail(savedInstanceState.getString("email"));
-			rd.setPassword(savedInstanceState.getString("password"));
-			rd.setPasswordConfirmation(savedInstanceState.getString("passwordConfirm"));
-			if (lastData != null) {
-				showProgressDialog();
-				AsyncImageFetcher aif = new AsyncImageFetcher(this, this);
-				aif.execute(lastData);
-			}
-		}
-	}
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null && savedInstanceState.containsKey("name")) {
+            rd = new RegisterDialog();
+            rd.createRegisterDialog(LoginSplashActivity.this);
+            rd.setName(savedInstanceState.getString("name"));
+            rd.setEmail(savedInstanceState.getString("email"));
+            rd.setPassword(savedInstanceState.getString("password"));
+            rd.setPasswordConfirmation(savedInstanceState.getString("passwordConfirm"));
+            if (lastData != null) {
+                showProgressDialog();
+                AsyncImageFetcher aif = new AsyncImageFetcher(this, this);
+                aif.execute(lastData);
+            }
+        }
+    }
 
-	@Override
-	public void onFBLoginSuccess(final String token) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				IbikeApplication.setIsFacebookLogin(true);
-				login(token);
-			}
-		});
-	}
+    @Override
+    public void onFBLoginSuccess(final String token) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                IbikeApplication.setIsFacebookLogin(true);
+                login(token);
+            }
+        });
+    }
 
-	int numOfRetries = 0;
+    int numOfRetries = 0;
 
-	@Override
-	public void onFBLoginError() {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				if (numOfRetries == 0) {
-					Session session = Session.getActiveSession();
-					if (session != null) {
-						session.closeAndClearTokenInformation();
-					}
-					performFBLogin();
-					numOfRetries++;
-				} else {
-					launchErrorDialog("","Facebook login failed");
-				}
-			}
-		});
-	}
+    @Override
+    public void onFBLoginError() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (numOfRetries == 0) {
+                    Session session = Session.getActiveSession();
+                    if (session != null) {
+                        session.closeAndClearTokenInformation();
+                    }
+                    performFBLogin();
+                    numOfRetries++;
+                } else {
+                    launchErrorDialog("", "Facebook login failed");
+                }
+            }
+        });
+    }
 
-	@Override
-	public void onImagePrefetched(ImageData imageData) {
-		if (imageData != null && imageData.bmp != null && rd != null) {
-			rd.onImageSet(imageData.base64, imageData.bmp);
-			LOG.d("onImageSet finished");
-		} else {
-			Toast.makeText(this, "Error fetching the image", Toast.LENGTH_SHORT).show();
-		}
-		dismissProgressDialog();
-	}
+    @Override
+    public void onImagePrefetched(ImageData imageData) {
+        if (imageData != null && imageData.bmp != null && rd != null) {
+            rd.onImageSet(imageData.base64, imageData.bmp);
+            LOG.d("onImageSet finished");
+        } else {
+            Toast.makeText(this, "Error fetching the image", Toast.LENGTH_SHORT).show();
+        }
+        dismissProgressDialog();
+    }
 
-	public void onDialogDismissed() {
-		enableButtons();
-	}
+    public void onDialogDismissed() {
+        enableButtons();
+    }
 
-	private void enableButtons() {
-		btnLogin.setEnabled(true);
-		btnFacebookLogin.setEnabled(true);
-		btnSkip.setEnabled(true);
-		btnRegister.setEnabled(true);
-	}
+    private void enableButtons() {
+        btnLogin.setEnabled(true);
+        btnFacebookLogin.setEnabled(true);
+        btnSkip.setEnabled(true);
+        btnRegister.setEnabled(true);
+    }
 
-	private void disableButtons() {
-		btnLogin.setEnabled(false);
-		btnFacebookLogin.setEnabled(false);
-		btnSkip.setEnabled(false);
-		btnRegister.setEnabled(false);
-	}
+    private void disableButtons() {
+        btnLogin.setEnabled(false);
+        btnFacebookLogin.setEnabled(false);
+        btnSkip.setEnabled(false);
+        btnRegister.setEnabled(false);
+    }
 
 }

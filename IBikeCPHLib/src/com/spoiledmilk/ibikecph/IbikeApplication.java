@@ -23,101 +23,109 @@ import com.spoiledmilk.ibikecph.util.SMDictionary;
 
 public class IbikeApplication extends Application {
 
-	private static IbikeApplication instance = null;
-	public IbikePreferences settings;
-	public SMDictionary dictionary;
-	private static Typeface normalFont, boldFont, italicFont;
+    private static IbikeApplication instance = null;
+    public IbikePreferences settings;
+    public SMDictionary dictionary;
+    private static Typeface normalFont, boldFont, italicFont;
 
-	@Override
-	public void onCreate() {
-		LOG.d("Creating Application");
-		super.onCreate();
-		instance = this;
-		settings = new IbikePreferences(this);
-		settings.load();
-		dictionary = new SMDictionary(this);
-		dictionary.init();
-		normalFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTCom-Md.ttf");
-		boldFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTCom-Bd.ttf");
-		italicFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTCom-It.ttf");
-		GoogleAnalytics.getInstance(this).setAppOptOut(!Config.ANALYTICS_ENABLED);
-	}
+    @Override
+    public void onCreate() {
+        LOG.d("Creating Application");
+        super.onCreate();
+        instance = this;
+        settings = new IbikePreferences(this);
+        settings.load();
+        dictionary = new SMDictionary(this);
+        dictionary.init();
+        normalFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTCom-Md.ttf");
+        boldFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTCom-Bd.ttf");
+        italicFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTCom-It.ttf");
+        GoogleAnalytics.getInstance(this).setAppOptOut(!Config.ANALYTICS_ENABLED);
+    }
 
-	public static Spanned getSpanned(String key) {
-		return instance.dictionary.get(key);
-	}
+    public static Spanned getSpanned(String key) {
+        return instance.dictionary.get(key);
+    }
 
-	public static String getString(String key) {
-		return instance.dictionary.get(key).toString();
-	}
+    public static String getString(String key) {
+        return instance.dictionary.get(key).toString();
+    }
 
-	public static Context getContext() {
-		return instance.getApplicationContext();
-	}
+    public static Context getContext() {
+        return instance.getApplicationContext();
+    }
 
-	public void changeLanguage(Language language) {
-		if (settings.getLanguage() != language) {
-			LOG.d("Changing language to " + language.name());
-			dictionary.changeLanguage(language);
-			settings.setLanguage(language);
-		}
-	}
+    public void changeLanguage(Language language) {
+        if (settings.getLanguage() != language) {
+            LOG.d("Changing language to " + language.name());
+            dictionary.changeLanguage(language);
+            settings.setLanguage(language);
+        }
+    }
 
-	public static String getLanguageString() {
-		return instance.settings.language == Language.DAN ? "da" : "en";
-	}
+    public static String getLanguageString() {
+        return instance.settings.language == Language.DAN ? "da" : "en";
+    }
 
-	public static IbikePreferences getSettings() {
-		return instance.settings;
-	}
+    public static IbikePreferences getSettings() {
+        return instance.settings;
+    }
 
-	public static boolean isUserLogedIn() {
-		return PreferenceManager.getDefaultSharedPreferences(getContext()).contains("auth_token");
-	}
+    public static boolean isUserLogedIn() {
+        return PreferenceManager.getDefaultSharedPreferences(getContext()).contains("auth_token");
+    }
 
-	public static String getAuthToken() {
-		return PreferenceManager.getDefaultSharedPreferences(getContext()).getString("auth_token", "");
-	}
+    public static String getAuthToken() {
+        return PreferenceManager.getDefaultSharedPreferences(getContext()).getString("auth_token", "");
+    }
 
-	public static boolean areFavoritesFetched() {
-		return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("favorites_fetched", false);
-	}
+    public static boolean areFavoritesFetched() {
+        return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("favorites_fetched", false);
+    }
 
-	public static void setFavoritesFetched(boolean b) {
-		PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("favorites_fetched", b).commit();
+    public static void setFavoritesFetched(boolean b) {
+        PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("favorites_fetched", b).commit();
 
-	}
+    }
 
-	public static boolean isHistoryFetched() {
-		return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("history_fetched", false);
-	}
+    public static boolean isHistoryFetched() {
+        return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("history_fetched", false);
+    }
 
-	public static void setHistoryFetched(boolean b) {
-		PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("history_fetched", b).commit();
+    public static void setHistoryFetched(boolean b) {
+        PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("history_fetched", b).commit();
 
-	}
+    }
 
-	public static void setIsFacebookLogin(boolean b) {
-		PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("is_facebook_login", b).commit();
-	}
+    public static void setIsFacebookLogin(boolean b) {
+        PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("is_facebook_login", b).commit();
+    }
 
-	public static boolean isFacebookLogin() {
-		return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("is_facebook_login", false);
-	}
+    public static boolean isFacebookLogin() {
+        return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("is_facebook_login", false);
+    }
 
-	public static Typeface getNormalFont() {
-		return normalFont;
-	}
+    public static Typeface getNormalFont() {
+        return normalFont;
+    }
 
-	public static Typeface getBoldFont() {
-		return boldFont;
-	}
+    public static Typeface getBoldFont() {
+        return boldFont;
+    }
 
-	public static Typeface getItalicFont() {
-		return italicFont;
-	}
+    public static Typeface getItalicFont() {
+        return italicFont;
+    }
 
-	public static Tracker getTracker() {
-		return EasyTracker.getTracker();
-	}
+    public static Tracker getTracker() {
+        return EasyTracker.getTracker();
+    }
+
+    public static void setWelcomeScreenSeen(boolean b) {
+        PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("welcone_seen", b).commit();
+    }
+
+    public static boolean isWelcomeScreenSeen() {
+        return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("welcone_seen", false);
+    }
 }
