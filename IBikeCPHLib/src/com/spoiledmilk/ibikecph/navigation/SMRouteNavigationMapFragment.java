@@ -63,6 +63,7 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
     protected PathOverlay pathOverlay, pathOverlay2;
     protected int currentPathAlpha = IbikePreferences.ROUTE_ALPHA;
     public SMRoute route;
+    private int routeColor = IbikePreferences.ROUTE_COLOR;
     protected ItemizedIconOverlay<OverlayItem> markerOverlay;
     protected ItemizedIconOverlay<OverlayItem> markerOverlayB;
     protected ItemizedIconOverlay<OverlayItem> markerStationOverlay;
@@ -163,7 +164,11 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
     }
 
     protected int getRouteColor() {
-        return IbikePreferences.ROUTE_COLOR;
+        if (route != null && route.recalculationInProgress) {
+            return routeColor;
+        } else {
+            return IbikePreferences.ROUTE_COLOR;
+        }
     }
 
     String formatArrivalTime(int seconds) {
@@ -401,8 +406,9 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
         if (route == null || route.getWaypoints() == null)
             return;
         mapView.getOverlays().remove(pathOverlay);
-        if (pathOverlay2 != null)
+        if (pathOverlay2 != null) {
             mapView.getOverlays().remove(pathOverlay2);
+        }
         pathOverlay = new PathOverlay(getRouteColor(), getActivity());
         pathOverlay.setAlpha(currentPathAlpha);
         pathOverlay.getPaint().setStrokeWidth(Util.dp2px(IbikePreferences.ROUTE_STROKE_WIDTH));
@@ -440,17 +446,16 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
     }
 
     public void redrawRoute() {
-        if (route == null || route.getWaypoints() == null || getActivity() == null)
+        if (route == null || route.getWaypoints() == null || getActivity() == null) {
             return;
-
+        }
         mapView.getOverlays().remove(pathOverlay);
-        if (pathOverlay2 != null)
+        if (pathOverlay2 != null) {
             mapView.getOverlays().remove(pathOverlay2);
+        }
         pathOverlay = new PathOverlay(getRouteColor(), getActivity());
-
         pathOverlay.setAlpha(currentPathAlpha);
         pathOverlay.getPaint().setStrokeWidth(Util.dp2px(IbikePreferences.ROUTE_STROKE_WIDTH));
-
         if (route.isRouteBroken && route.endStation != null) {
             // broken route
             if (route.routePhase != SMRoute.TO_DESTINATION) {
@@ -463,7 +468,6 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
             }
             pathOverlay.addPoint(new GeoPoint(route.startStation));
             mapView.getOverlays().add(pathOverlay);
-
             pathOverlay2 = new PathOverlay(getRouteColor(), getActivity());
             pathOverlay2.setAlpha(currentPathAlpha);
             pathOverlay2.getPaint().setStrokeWidth(Util.dp2px(IbikePreferences.ROUTE_STROKE_WIDTH));
@@ -475,14 +479,12 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
                 pathOverlay2.addPoint(new GeoPoint(loc));
             }
             mapView.getOverlays().add(pathOverlay2);
-
         } else {
             for (Location loc : route.getWaypoints()) {
                 pathOverlay.addPoint(new GeoPoint(loc));
             }
             mapView.getOverlays().add(pathOverlay);
         }
-
         drawPins();
     }
 
@@ -579,13 +581,17 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
 
     @Override
     public void serverError() {
+        routeColor = IbikePreferences.ROUTE_COLOR;
         Util.launchNoConnectionDialog(getActivity());
         getMapActivity().hideProgressBar();
         route.recalculationInProgress = false;
+        redrawRoute();
     }
 
     @Override
     public void routeRecalculationStarted() {
+        routeColor = IbikePreferences.ROUTE_DIMMED_COLOR;
+        redrawRoute();
         if (getMapActivity() != null) {
             getMapActivity().showProgressBar();
         }
@@ -599,6 +605,7 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
 
     @Override
     public void routeRecalculationDone() {
+        routeColor = IbikePreferences.ROUTE_COLOR;
         if (getMapActivity() != null) {
             getMapActivity().updateTime(getEstimatedArrivalTime());
             getMapActivity().hideProgressBar();
