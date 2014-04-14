@@ -73,9 +73,21 @@ public class SMLocationManager implements LocationListener {
     }
 
     public Location getLastKnownLocation() {
-        // if (lastValidLocation != null)
-        // return lastValidLocation;
-        return locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        Location locGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        Location locNetwork = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        Location ret = null;
+        if (locGPS == null) {
+            ret = locNetwork;
+        } else if (locNetwork == null) {
+            ret = locGPS;
+        } else {
+            if (locGPS.getTime() > locNetwork.getTime()) {
+                ret = locGPS;
+            } else {
+                ret = locNetwork;
+            }
+        }
+        return ret;
     }
 
     @Override
