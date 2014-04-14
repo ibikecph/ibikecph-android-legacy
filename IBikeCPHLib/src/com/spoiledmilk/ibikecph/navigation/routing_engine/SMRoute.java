@@ -52,7 +52,7 @@ public class SMRoute implements SMHttpRequestListener {
 	float caloriesBurned;
 	public Location locationStart;
 	public Location locationEnd;
-	boolean recalculationInProgress;
+	public boolean recalculationInProgress;
 	float estimatedArrivalTime, arrivalTime;
 	int estimatedRouteDistance = -1;
 	String routeChecksum;
@@ -72,6 +72,7 @@ public class SMRoute implements SMHttpRequestListener {
 	public int startStatIndex = 0, endStatIndex = 0;
 	public boolean reachedDestination = false;
 	public int waypointStation1 = -1, waypointStation2 = -1;
+	public long timestampCalculationError = 0;
 
 	public SMRoute() {
 		init();

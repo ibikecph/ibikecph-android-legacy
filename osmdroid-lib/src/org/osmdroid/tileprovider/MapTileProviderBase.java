@@ -35,406 +35,402 @@ import android.os.Handler;
  */
 public abstract class MapTileProviderBase implements IMapTileProviderCallback, OpenStreetMapTileProviderConstants {
 
-	private static final Logger logger = LoggerFactory.getLogger(MapTileProviderBase.class);
+    private static final Logger logger = LoggerFactory.getLogger(MapTileProviderBase.class);
 
-	public static final MapTileCache mTileCache = new MapTileCache();
-	protected Handler mTileRequestCompleteHandler;
-	protected boolean mUseDataConnection = true;
+    public static MapTileCache mTileCache = new MapTileCache();
+    protected Handler mTileRequestCompleteHandler;
+    protected boolean mUseDataConnection = true;
 
-	private ITileSource mTileSource;
+    private ITileSource mTileSource;
 
-	/**
-	 * Attempts to get a Drawable that represents a {@link MapTile}. If the tile is not immediately available this will
-	 * return null and attempt to get the tile from known tile sources for subsequent future requests. Note that this
-	 * may return a {@link ReusableBitmapDrawable} in which case you should follow proper handling procedures for using
-	 * that Drawable or it may reused while you are working with it.
-	 * 
-	 * @see ReusableBitmapDrawable
-	 */
-	public abstract Drawable getMapTile(MapTile pTile);
+    /**
+     * Attempts to get a Drawable that represents a {@link MapTile}. If the tile is not immediately available this will return null and attempt to get
+     * the tile from known tile sources for subsequent future requests. Note that this may return a {@link ReusableBitmapDrawable} in which case you
+     * should follow proper handling procedures for using that Drawable or it may reused while you are working with it.
+     * 
+     * @see ReusableBitmapDrawable
+     */
+    public abstract Drawable getMapTile(MapTile pTile);
 
-	public abstract void detach();
+    public abstract void detach();
 
-	/**
-	 * Gets the minimum zoom level this tile provider can provide
-	 * 
-	 * @return the minimum zoom level
-	 */
-	public abstract int getMinimumZoomLevel();
+    /**
+     * Gets the minimum zoom level this tile provider can provide
+     * 
+     * @return the minimum zoom level
+     */
+    public abstract int getMinimumZoomLevel();
 
-	/**
-	 * Gets the maximum zoom level this tile provider can provide
-	 * 
-	 * @return the maximum zoom level
-	 */
-	public abstract int getMaximumZoomLevel();
+    /**
+     * Gets the maximum zoom level this tile provider can provide
+     * 
+     * @return the maximum zoom level
+     */
+    public abstract int getMaximumZoomLevel();
 
-	/**
-	 * Sets the tile source for this tile provider.
-	 * 
-	 * @param pTileSource
-	 *            the tile source
-	 */
-	public void setTileSource(final ITileSource pTileSource) {
-		mTileSource = pTileSource;
-		clearTileCache();
-	}
+    /**
+     * Sets the tile source for this tile provider.
+     * 
+     * @param pTileSource
+     *            the tile source
+     */
+    public void setTileSource(final ITileSource pTileSource) {
+        mTileSource = pTileSource;
+        clearTileCache();
+    }
 
-	/**
-	 * Gets the tile source for this tile provider.
-	 * 
-	 * @return the tile source
-	 */
-	public ITileSource getTileSource() {
-		return mTileSource;
-	}
+    /**
+     * Gets the tile source for this tile provider.
+     * 
+     * @return the tile source
+     */
+    public ITileSource getTileSource() {
+        return mTileSource;
+    }
 
-	/**
-	 * Creates a {@link MapTileCache} to be used to cache tiles in memory.
-	 */
-	public MapTileCache createTileCache() {
-		return new MapTileCache();
-	}
+    /**
+     * Creates a {@link MapTileCache} to be used to cache tiles in memory.
+     */
+    public MapTileCache createTileCache() {
+        return new MapTileCache();
+    }
 
-	public MapTileProviderBase(final ITileSource pTileSource) {
-		this(pTileSource, null);
-	}
+    public MapTileProviderBase(final ITileSource pTileSource) {
+        this(pTileSource, null);
+    }
 
-	public MapTileProviderBase(final ITileSource pTileSource, final Handler pDownloadFinishedListener) {
-		// mTileCache = this.createTileCache();
-		mTileRequestCompleteHandler = pDownloadFinishedListener;
-		mTileSource = pTileSource;
-	}
+    public MapTileProviderBase(final ITileSource pTileSource, final Handler pDownloadFinishedListener) {
+        // mTileCache = this.createTileCache();
+        mTileRequestCompleteHandler = pDownloadFinishedListener;
+        mTileSource = pTileSource;
+    }
 
-	/**
-	 * Called by implementation class methods indicating that they have completed the request as best it can. The tile
-	 * is added to the cache, and a MAPTILE_SUCCESS_ID message is sent.
-	 * 
-	 * @param pState
-	 *            the map tile request state object
-	 * @param pDrawable
-	 *            the Drawable of the map tile
-	 */
-	@Override
-	public void mapTileRequestCompleted(final MapTileRequestState pState, final Drawable pDrawable) {
-		// put the tile in the cache
-		putTileIntoCache(pState, pDrawable);
+    /**
+     * Called by implementation class methods indicating that they have completed the request as best it can. The tile is added to the cache, and a
+     * MAPTILE_SUCCESS_ID message is sent.
+     * 
+     * @param pState
+     *            the map tile request state object
+     * @param pDrawable
+     *            the Drawable of the map tile
+     */
+    @Override
+    public void mapTileRequestCompleted(final MapTileRequestState pState, final Drawable pDrawable) {
+        // put the tile in the cache
+        putTileIntoCache(pState, pDrawable);
 
-		// tell our caller we've finished and it should update its view
-		if (mTileRequestCompleteHandler != null) {
-			mTileRequestCompleteHandler.sendEmptyMessage(MapTile.MAPTILE_SUCCESS_ID);
-		}
+        // tell our caller we've finished and it should update its view
+        if (mTileRequestCompleteHandler != null) {
+            mTileRequestCompleteHandler.sendEmptyMessage(MapTile.MAPTILE_SUCCESS_ID);
+        }
 
-		if (DEBUGMODE) {
-			logger.debug("MapTile request complete: " + pState.getMapTile());
-		}
-	}
+        if (DEBUGMODE) {
+            logger.debug("MapTile request complete: " + pState.getMapTile());
+        }
+    }
 
-	/**
-	 * Called by implementation class methods indicating that they have failed to retrieve the requested map tile. a
-	 * MAPTILE_FAIL_ID message is sent.
-	 * 
-	 * @param pState
-	 *            the map tile request state object
-	 */
-	@Override
-	public void mapTileRequestFailed(final MapTileRequestState pState) {
-		if (mTileRequestCompleteHandler != null) {
-			mTileRequestCompleteHandler.sendEmptyMessage(MapTile.MAPTILE_FAIL_ID);
-		}
+    /**
+     * Called by implementation class methods indicating that they have failed to retrieve the requested map tile. a MAPTILE_FAIL_ID message is sent.
+     * 
+     * @param pState
+     *            the map tile request state object
+     */
+    @Override
+    public void mapTileRequestFailed(final MapTileRequestState pState) {
+        if (mTileRequestCompleteHandler != null) {
+            mTileRequestCompleteHandler.sendEmptyMessage(MapTile.MAPTILE_FAIL_ID);
+        }
 
-		if (DEBUGMODE) {
-			logger.debug("MapTile request failed: " + pState.getMapTile());
-		}
-	}
+        if (DEBUGMODE) {
+            logger.debug("MapTile request failed: " + pState.getMapTile());
+        }
+    }
 
-	/**
-	 * Called by implementation class methods indicating that they have produced an expired result that can be used but
-	 * better results may be delivered later. The tile is added to the cache, and a MAPTILE_SUCCESS_ID message is sent.
-	 * 
-	 * @param pState
-	 *            the map tile request state object
-	 * @param pDrawable
-	 *            the Drawable of the map tile
-	 */
-	@Override
-	public void mapTileRequestExpiredTile(MapTileRequestState pState, Drawable pDrawable) {
-		// Put the expired tile into the cache
-		putExpiredTileIntoCache(pState, pDrawable);
+    /**
+     * Called by implementation class methods indicating that they have produced an expired result that can be used but better results may be
+     * delivered later. The tile is added to the cache, and a MAPTILE_SUCCESS_ID message is sent.
+     * 
+     * @param pState
+     *            the map tile request state object
+     * @param pDrawable
+     *            the Drawable of the map tile
+     */
+    @Override
+    public void mapTileRequestExpiredTile(MapTileRequestState pState, Drawable pDrawable) {
+        // Put the expired tile into the cache
+        putExpiredTileIntoCache(pState, pDrawable);
 
-		// tell our caller we've finished and it should update its view
-		if (mTileRequestCompleteHandler != null) {
-			mTileRequestCompleteHandler.sendEmptyMessage(MapTile.MAPTILE_SUCCESS_ID);
-		}
+        // tell our caller we've finished and it should update its view
+        if (mTileRequestCompleteHandler != null) {
+            mTileRequestCompleteHandler.sendEmptyMessage(MapTile.MAPTILE_SUCCESS_ID);
+        }
 
-		if (DEBUGMODE) {
-			logger.debug("MapTile request complete: " + pState.getMapTile());
-		}
-	}
+        if (DEBUGMODE) {
+            logger.debug("MapTile request complete: " + pState.getMapTile());
+        }
+    }
 
-	protected void putTileIntoCache(MapTileRequestState pState, Drawable pDrawable) {
-		final MapTile tile = pState.getMapTile();
-		if (pDrawable != null) {
-			mTileCache.putTile(tile, pDrawable);
-		}
-	}
+    protected void putTileIntoCache(MapTileRequestState pState, Drawable pDrawable) {
+        final MapTile tile = pState.getMapTile();
+        if (pDrawable != null) {
+            mTileCache.putTile(tile, pDrawable);
+        }
+    }
 
-	protected void putExpiredTileIntoCache(MapTileRequestState pState, Drawable pDrawable) {
-		final MapTile tile = pState.getMapTile();
-		if (pDrawable != null && !mTileCache.containsTile(tile)) {
-			mTileCache.putTile(tile, pDrawable);
-		}
-	}
+    protected void putExpiredTileIntoCache(MapTileRequestState pState, Drawable pDrawable) {
+        final MapTile tile = pState.getMapTile();
+        if (pDrawable != null && !mTileCache.containsTile(tile)) {
+            mTileCache.putTile(tile, pDrawable);
+        }
+    }
 
-	public void setTileRequestCompleteHandler(final Handler handler) {
-		mTileRequestCompleteHandler = handler;
-	}
+    public void setTileRequestCompleteHandler(final Handler handler) {
+        mTileRequestCompleteHandler = handler;
+    }
 
-	public void ensureCapacity(final int pCapacity) {
-		mTileCache.ensureCapacity(pCapacity);
-	}
+    public void ensureCapacity(final int pCapacity) {
+        mTileCache.ensureCapacity(pCapacity);
+    }
 
-	public void clearTileCache() {
-		mTileCache.clear();
-	}
+    public void clearTileCache() {
+        mTileCache.clear();
+    }
 
-	/**
-	 * Whether to use the network connection if it's available.
-	 */
-	@Override
-	public boolean useDataConnection() {
-		return mUseDataConnection;
-	}
+    /**
+     * Whether to use the network connection if it's available.
+     */
+    @Override
+    public boolean useDataConnection() {
+        return mUseDataConnection;
+    }
 
-	/**
-	 * Set whether to use the network connection if it's available.
-	 * 
-	 * @param pMode
-	 *            if true use the network connection if it's available. if false don't use the network connection even
-	 *            if it's available.
-	 */
-	public void setUseDataConnection(final boolean pMode) {
-		mUseDataConnection = pMode;
-	}
+    /**
+     * Set whether to use the network connection if it's available.
+     * 
+     * @param pMode
+     *            if true use the network connection if it's available. if false don't use the network connection even if it's available.
+     */
+    public void setUseDataConnection(final boolean pMode) {
+        mUseDataConnection = pMode;
+    }
 
-	/**
-	 * Recreate the cache using scaled versions of the tiles currently in it
-	 * 
-	 * @param pNewZoomLevel
-	 *            the zoom level that we need now
-	 * @param pOldZoomLevel
-	 *            the previous zoom level that we should get the tiles to rescale
-	 * @param pViewPort
-	 *            the view port we need tiles for
-	 */
-	public void rescaleCache(final int pNewZoomLevel, final int pOldZoomLevel, final Rect pViewPort, final boolean resizeOnly) {
+    /**
+     * Recreate the cache using scaled versions of the tiles currently in it
+     * 
+     * @param pNewZoomLevel
+     *            the zoom level that we need now
+     * @param pOldZoomLevel
+     *            the previous zoom level that we should get the tiles to rescale
+     * @param pViewPort
+     *            the view port we need tiles for
+     */
+    public void rescaleCache(final int pNewZoomLevel, final int pOldZoomLevel, final Rect pViewPort, final boolean resizeOnly) {
 
-		if (pNewZoomLevel == pOldZoomLevel) {
-			return;
-		}
-		final int tileSize = getTileSource().getTileSizePixels();
-		final int worldSize_2 = TileSystem.MapSize(pNewZoomLevel) >> 1;
-		final Rect viewPort = new Rect(pViewPort);
-		viewPort.offset(worldSize_2, worldSize_2);
+        if (pNewZoomLevel == pOldZoomLevel) {
+            return;
+        }
+        final int tileSize = getTileSource().getTileSizePixels();
+        final int worldSize_2 = TileSystem.MapSize(pNewZoomLevel) >> 1;
+        final Rect viewPort = new Rect(pViewPort);
+        viewPort.offset(worldSize_2, worldSize_2);
 
-		final ScaleTileLooper tileLooper = pNewZoomLevel > pOldZoomLevel ? new ZoomInTileLooper(pOldZoomLevel, resizeOnly)
-				: new ZoomOutTileLooper(pOldZoomLevel, resizeOnly);
-		tileLooper.loop(null, pNewZoomLevel, tileSize, viewPort);
-	}
+        final ScaleTileLooper tileLooper = pNewZoomLevel > pOldZoomLevel ? new ZoomInTileLooper(pOldZoomLevel, resizeOnly) : new ZoomOutTileLooper(
+                pOldZoomLevel, resizeOnly);
+        tileLooper.loop(null, pNewZoomLevel, tileSize, viewPort);
+    }
 
-	private abstract class ScaleTileLooper extends TileLooper {
+    private abstract class ScaleTileLooper extends TileLooper {
 
-		/**
-		 * new (scaled) tiles to add to cache NB first generate all and then put all in cache, otherwise the ones we
-		 * need will be pushed out
-		 */
-		protected final HashMap<MapTile, Bitmap> mNewTiles;
+        /**
+         * new (scaled) tiles to add to cache NB first generate all and then put all in cache, otherwise the ones we need will be pushed out
+         */
+        protected final HashMap<MapTile, Bitmap> mNewTiles;
 
-		protected final int mOldZoomLevel;
-		protected int mDiff;
-		protected int mTileSize_2;
-		protected Rect mSrcRect;
-		protected Rect mDestRect;
-		protected Paint mDebugPaint;
+        protected final int mOldZoomLevel;
+        protected int mDiff;
+        protected int mTileSize_2;
+        protected Rect mSrcRect;
+        protected Rect mDestRect;
+        protected Paint mDebugPaint;
 
-		protected boolean resizeOnly;
+        protected boolean resizeOnly;
 
-		public ScaleTileLooper(final int pOldZoomLevel, boolean resizeOnly) {
-			mOldZoomLevel = pOldZoomLevel;
-			mNewTiles = new HashMap<MapTile, Bitmap>();
-			mSrcRect = new Rect();
-			mDestRect = new Rect();
-			mDebugPaint = new Paint();
-			this.resizeOnly = resizeOnly;
-		}
+        public ScaleTileLooper(final int pOldZoomLevel, boolean resizeOnly) {
+            mOldZoomLevel = pOldZoomLevel;
+            mNewTiles = new HashMap<MapTile, Bitmap>();
+            mSrcRect = new Rect();
+            mDestRect = new Rect();
+            mDebugPaint = new Paint();
+            this.resizeOnly = resizeOnly;
+        }
 
-		@Override
-		public void initialiseLoop(final int pZoomLevel, final int pTileSizePx) {
-			mDiff = Math.abs(pZoomLevel - mOldZoomLevel);
-			mTileSize_2 = pTileSizePx >> mDiff;
-		}
+        @Override
+        public void initialiseLoop(final int pZoomLevel, final int pTileSizePx) {
+            mDiff = Math.abs(pZoomLevel - mOldZoomLevel);
+            mTileSize_2 = pTileSizePx >> mDiff;
+        }
 
-		@Override
-		public void handleTile(final Canvas pCanvas, final int pTileSizePx, final MapTile pTile, final int pX, final int pY) {
+        @Override
+        public void handleTile(final Canvas pCanvas, final int pTileSizePx, final MapTile pTile, final int pX, final int pY) {
 
-			// Get tile from cache.
-			// If it's found then no need to created scaled version.
-			// If not found (null) them we've initiated a new request for it,
-			// and now we'll create a scaled version until the request completes.
-			if (!resizeOnly) {
+            // Get tile from cache.
+            // If it's found then no need to created scaled version.
+            // If not found (null) them we've initiated a new request for it,
+            // and now we'll create a scaled version until the request completes.
+            if (!resizeOnly) {
 
-				final Drawable requestedTile = getMapTile(pTile);
+                final Drawable requestedTile = getMapTile(pTile);
 
-				if (requestedTile == null) {
-					try {
-						handleTile(pTileSizePx, pTile, pX, pY);
-					} catch (final OutOfMemoryError e) {
-						logger.error("OutOfMemoryError rescaling cache");
-					}
-				}
-			} else
-				try {
-					handleTile(pTileSizePx, pTile, pX, pY);
-				} catch (final OutOfMemoryError e) {
-					logger.error("OutOfMemoryError rescaling cache");
-				}
-		}
+                if (requestedTile == null) {
+                    try {
+                        handleTile(pTileSizePx, pTile, pX, pY);
+                    } catch (final OutOfMemoryError e) {
+                        logger.error("OutOfMemoryError rescaling cache");
+                    }
+                }
+            } else
+                try {
+                    handleTile(pTileSizePx, pTile, pX, pY);
+                } catch (final OutOfMemoryError e) {
+                    logger.error("OutOfMemoryError rescaling cache");
+                }
+        }
 
-		@Override
-		public void finaliseLoop() {
-			// now add the new ones, pushing out the old ones
-			while (!mNewTiles.isEmpty()) {
-				final MapTile tile = mNewTiles.keySet().iterator().next();
-				final Bitmap bitmap = mNewTiles.remove(tile);
-				final ExpirableBitmapDrawable drawable = new ReusableBitmapDrawable(bitmap);
-				drawable.setState(new int[] { ExpirableBitmapDrawable.EXPIRED });
-				drawable.setIsScaled(true);
-				Drawable existingTile = mTileCache.getMapTile(tile);
-				if (existingTile == null || ExpirableBitmapDrawable.isDrawableExpired(existingTile)) {
-					logger.debug("putting the scaled tile in the cache " + tile);
-					putExpiredTileIntoCache(new MapTileRequestState(tile, new MapTileModuleProviderBase[0], null), drawable);
-				}
-			}
-		}
+        @Override
+        public void finaliseLoop() {
+            // now add the new ones, pushing out the old ones
+            while (!mNewTiles.isEmpty()) {
+                final MapTile tile = mNewTiles.keySet().iterator().next();
+                final Bitmap bitmap = mNewTiles.remove(tile);
+                final ExpirableBitmapDrawable drawable = new ReusableBitmapDrawable(bitmap);
+                drawable.setState(new int[] { ExpirableBitmapDrawable.EXPIRED });
+                drawable.setIsScaled(true);
+                Drawable existingTile = mTileCache.getMapTile(tile);
+                if (existingTile == null || ExpirableBitmapDrawable.isDrawableExpired(existingTile)) {
+                    logger.debug("putting the scaled tile in the cache " + tile);
+                    putExpiredTileIntoCache(new MapTileRequestState(tile, new MapTileModuleProviderBase[0], null), drawable);
+                }
+            }
+        }
 
-		protected abstract void handleTile(int pTileSizePx, MapTile pTile, int pX, int pY);
-	}
+        protected abstract void handleTile(int pTileSizePx, MapTile pTile, int pX, int pY);
+    }
 
-	private class ZoomInTileLooper extends ScaleTileLooper {
+    private class ZoomInTileLooper extends ScaleTileLooper {
 
-		public ZoomInTileLooper(final int pOldZoomLevel, boolean resizeOnly) {
-			super(pOldZoomLevel, resizeOnly);
-			this.resizeOnly = resizeOnly;
-		}
+        public ZoomInTileLooper(final int pOldZoomLevel, boolean resizeOnly) {
+            super(pOldZoomLevel, resizeOnly);
+            this.resizeOnly = resizeOnly;
+        }
 
-		@Override
-		public void handleTile(final int pTileSizePx, final MapTile pTile, final int pX, final int pY) {
-			// get the correct fraction of the tile from cache and scale up
+        @Override
+        public void handleTile(final int pTileSizePx, final MapTile pTile, final int pX, final int pY) {
+            // get the correct fraction of the tile from cache and scale up
 
-			final MapTile oldTile = new MapTile(mOldZoomLevel, pTile.getX() >> mDiff, pTile.getY() >> mDiff);
-			final Drawable oldDrawable = mTileCache.getMapTile(oldTile);
+            final MapTile oldTile = new MapTile(mOldZoomLevel, pTile.getX() >> mDiff, pTile.getY() >> mDiff);
+            final Drawable oldDrawable = mTileCache.getMapTile(oldTile);
 
-			if (oldDrawable instanceof BitmapDrawable) {
-				// final Bitmap oldBitmap = ((BitmapDrawable) oldDrawable).getBitmap();
-				final int xx = (pX % (1 << mDiff)) * mTileSize_2;
-				final int yy = (pY % (1 << mDiff)) * mTileSize_2;
-				mSrcRect.set(xx, yy, xx + mTileSize_2, yy + mTileSize_2);
-				mDestRect.set(0, 0, pTileSizePx, pTileSizePx);
+            if (oldDrawable instanceof BitmapDrawable) {
+                // final Bitmap oldBitmap = ((BitmapDrawable) oldDrawable).getBitmap();
+                final int xx = (pX % (1 << mDiff)) * mTileSize_2;
+                final int yy = (pY % (1 << mDiff)) * mTileSize_2;
+                mSrcRect.set(xx, yy, xx + mTileSize_2, yy + mTileSize_2);
+                mDestRect.set(0, 0, pTileSizePx, pTileSizePx);
 
-				// Try to get a bitmap from the pool, otherwise allocate a new one
-				Bitmap bitmap = BitmapPool.getInstance().obtainSizedBitmapFromPool(pTileSizePx, pTileSizePx);
-				if (bitmap == null) {
-					bitmap = Bitmap.createBitmap(pTileSizePx, pTileSizePx, Bitmap.Config.ARGB_8888);
-				}
+                // Try to get a bitmap from the pool, otherwise allocate a new one
+                Bitmap bitmap = BitmapPool.getInstance().obtainSizedBitmapFromPool(pTileSizePx, pTileSizePx);
+                if (bitmap == null) {
+                    bitmap = Bitmap.createBitmap(pTileSizePx, pTileSizePx, Bitmap.Config.ARGB_8888);
+                }
 
-				final Canvas canvas = new Canvas(bitmap);
-				// canvas.drawBitmap(oldBitmap, mSrcRect, mDestRect, null);
+                final Canvas canvas = new Canvas(bitmap);
+                // canvas.drawBitmap(oldBitmap, mSrcRect, mDestRect, null);
 
-				final boolean isReusable = oldDrawable instanceof ReusableBitmapDrawable;
-				boolean success = false;
-				if (isReusable) {
-					((ReusableBitmapDrawable) oldDrawable).beginUsingDrawable();
-				}
-				try {
-					if (!isReusable || ((ReusableBitmapDrawable) oldDrawable).isBitmapValid()) {
-						final Bitmap oldBitmap = ((BitmapDrawable) oldDrawable).getBitmap();
-						canvas.drawBitmap(oldBitmap, mSrcRect, mDestRect, null);
-						success = true;
-						if (DEBUGMODE) {
-							logger.debug("Created scaled tile: " + pTile);
-							mDebugPaint.setTextSize(40);
-							canvas.drawText("scaled", 50, 50, mDebugPaint);
-						}
-					}
-				} finally {
-					if (isReusable) {
-						((ReusableBitmapDrawable) oldDrawable).finishUsingDrawable();
-					}
-				}
-				if (success)
-					mNewTiles.put(pTile, bitmap);
-			}
-		}
-	}
+                final boolean isReusable = oldDrawable instanceof ReusableBitmapDrawable;
+                boolean success = false;
+                if (isReusable) {
+                    ((ReusableBitmapDrawable) oldDrawable).beginUsingDrawable();
+                }
+                try {
+                    if (!isReusable || ((ReusableBitmapDrawable) oldDrawable).isBitmapValid()) {
+                        final Bitmap oldBitmap = ((BitmapDrawable) oldDrawable).getBitmap();
+                        canvas.drawBitmap(oldBitmap, mSrcRect, mDestRect, null);
+                        success = true;
+                        if (DEBUGMODE) {
+                            logger.debug("Created scaled tile: " + pTile);
+                            mDebugPaint.setTextSize(40);
+                            canvas.drawText("scaled", 50, 50, mDebugPaint);
+                        }
+                    }
+                } finally {
+                    if (isReusable) {
+                        ((ReusableBitmapDrawable) oldDrawable).finishUsingDrawable();
+                    }
+                }
+                if (success)
+                    mNewTiles.put(pTile, bitmap);
+            }
+        }
+    }
 
-	private class ZoomOutTileLooper extends ScaleTileLooper {
-		private static final int MAX_ZOOM_OUT_DIFF = 4;
+    private class ZoomOutTileLooper extends ScaleTileLooper {
+        private static final int MAX_ZOOM_OUT_DIFF = 4;
 
-		public ZoomOutTileLooper(final int pOldZoomLevel, final boolean resizeOnly) {
-			super(pOldZoomLevel, resizeOnly);
-		}
+        public ZoomOutTileLooper(final int pOldZoomLevel, final boolean resizeOnly) {
+            super(pOldZoomLevel, resizeOnly);
+        }
 
-		@Override
-		protected void handleTile(final int pTileSizePx, final MapTile pTile, final int pX, final int pY) {
+        @Override
+        protected void handleTile(final int pTileSizePx, final MapTile pTile, final int pX, final int pY) {
 
-			if (mDiff >= MAX_ZOOM_OUT_DIFF) {
-				return;
-			}
+            if (mDiff >= MAX_ZOOM_OUT_DIFF) {
+                return;
+            }
 
-			// get many tiles from cache and make one tile from them
-			final int xx = pTile.getX() << mDiff;
-			final int yy = pTile.getY() << mDiff;
-			final int numTiles = 1 << mDiff;
-			Bitmap bitmap = null;
-			Canvas canvas = null;
-			for (int x = 0; x < numTiles; x++) {
-				for (int y = 0; y < numTiles; y++) {
-					final MapTile oldTile = new MapTile(mOldZoomLevel, xx + x, yy + y);
-					final Drawable oldDrawable = mTileCache.getMapTile(oldTile);
-					if (oldDrawable instanceof BitmapDrawable) {
-						final Bitmap oldBitmap = ((BitmapDrawable) oldDrawable).getBitmap();
-						if (oldBitmap != null) {
-							if (bitmap == null) {
-								bitmap = BitmapPool.getInstance().obtainSizedBitmapFromPool(pTileSizePx, pTileSizePx);
-								if (bitmap == null) {
-									bitmap = Bitmap.createBitmap(pTileSizePx, pTileSizePx, Bitmap.Config.ARGB_8888);
-								}
-								canvas = new Canvas(bitmap);
-								canvas.drawColor(Color.LTGRAY);
-							}
-							mDestRect.set(x * mTileSize_2, y * mTileSize_2, (x + 1) * mTileSize_2, (y + 1) * mTileSize_2);
-							if (oldBitmap != null) {
-								canvas.drawBitmap(oldBitmap, null, mDestRect, null);
-								mTileCache.mCachedTiles.remove(oldBitmap);
-							}
-						}
-					}
-				}
-			}
+            // get many tiles from cache and make one tile from them
+            final int xx = pTile.getX() << mDiff;
+            final int yy = pTile.getY() << mDiff;
+            final int numTiles = 1 << mDiff;
+            Bitmap bitmap = null;
+            Canvas canvas = null;
+            for (int x = 0; x < numTiles; x++) {
+                for (int y = 0; y < numTiles; y++) {
+                    final MapTile oldTile = new MapTile(mOldZoomLevel, xx + x, yy + y);
+                    final Drawable oldDrawable = mTileCache.getMapTile(oldTile);
+                    if (oldDrawable instanceof BitmapDrawable) {
+                        final Bitmap oldBitmap = ((BitmapDrawable) oldDrawable).getBitmap();
+                        if (oldBitmap != null) {
+                            if (bitmap == null) {
+                                bitmap = BitmapPool.getInstance().obtainSizedBitmapFromPool(pTileSizePx, pTileSizePx);
+                                if (bitmap == null) {
+                                    bitmap = Bitmap.createBitmap(pTileSizePx, pTileSizePx, Bitmap.Config.ARGB_8888);
+                                }
+                                canvas = new Canvas(bitmap);
+                                canvas.drawColor(Color.LTGRAY);
+                            }
+                            mDestRect.set(x * mTileSize_2, y * mTileSize_2, (x + 1) * mTileSize_2, (y + 1) * mTileSize_2);
+                            if (oldBitmap != null) {
+                                canvas.drawBitmap(oldBitmap, null, mDestRect, null);
+                                mTileCache.mCachedTiles.remove(oldBitmap);
+                            }
+                        }
+                    }
+                }
+            }
 
-			if (bitmap != null) {
-				mNewTiles.put(pTile, bitmap);
-				if (DEBUGMODE) {
-					logger.debug("Created scaled tile: " + pTile);
-					mDebugPaint.setTextSize(40);
-					canvas.drawText("scaled", 50, 50, mDebugPaint);
-				}
-			}
-		}
-	}
+            if (bitmap != null) {
+                mNewTiles.put(pTile, bitmap);
+                if (DEBUGMODE) {
+                    logger.debug("Created scaled tile: " + pTile);
+                    mDebugPaint.setTextSize(40);
+                    canvas.drawText("scaled", 50, 50, mDebugPaint);
+                }
+            }
+        }
+    }
 
-	public MapTileCache getTileCache() {
-		return mTileCache;
-	}
+    public MapTileCache getTileCache() {
+        return mTileCache;
+    }
 
 }
