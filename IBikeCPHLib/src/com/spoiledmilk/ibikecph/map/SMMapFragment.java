@@ -100,23 +100,27 @@ public class SMMapFragment extends MapFragmentBase implements MapListener, OnMap
         lastLoc = location;
         // locationOverlay.onLocationChanged(location, locationOverlay.getMyLocationProvider());
         if (getTrackingMode()) {
-            if (!noTracking) {
-                int offsset = 0;
-                if (getMapActivity().findViewById(R.id.pinInfoLayout).getVisibility() == View.VISIBLE) {
-                    offsset = Util.dp2px(50);
-                    mapView.locationArrowOffsset = offsset;
-                } else {
-                    mapView.locationArrowOffsset = 0;
-                }
-                mapView.getController().animateToWithOffsset(location.getLatitude(), location.getLongitude(), offsset);// (new
-                // GeoPoint(location));
-            }
+            animateMap(location);
         }
         if (!tileSourceSet) {
             refreshMapTileSource(location);
             tileSourceSet = true;
         }
         mapView.lastLocation = location;
+    }
+
+    public void animateMap(Location location) {
+        if (!noTracking) {
+            int offsset = 0;
+            if (getMapActivity().findViewById(R.id.pinInfoLayout).getVisibility() == View.VISIBLE) {
+                offsset = Util.dp2px(50);
+                mapView.locationArrowOffsset = offsset;
+            } else {
+                mapView.locationArrowOffsset = 0;
+            }
+            mapView.getController().animateToWithOffsset(location.getLatitude(), location.getLongitude(), offsset);// (new
+            // GeoPoint(location));
+        }
     }
 
     public Location getPinLocation() {

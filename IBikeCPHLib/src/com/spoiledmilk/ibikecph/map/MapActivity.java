@@ -81,7 +81,7 @@ public class MapActivity extends FragmentActivity implements SMHttpRequestListen
     RelativeLayout leftContainer;
     protected View mapDisabledView;
     FrameLayout mapContainer;
-    Button btnSearch;
+    ImageButton btnSearch;
     ImageButton btnSaveFavorite;
     SMHttpRequest.Address address;
     Location currentLocation;
@@ -190,7 +190,7 @@ public class MapActivity extends FragmentActivity implements SMHttpRequestListen
             }
 
         });
-        btnSearch = (Button) findViewById(R.id.btnSearch);
+        btnSearch = (ImageButton) findViewById(R.id.btnSearch);
         btnSearch.setOnClickListener(new OnClickListener() {
 
             @Override

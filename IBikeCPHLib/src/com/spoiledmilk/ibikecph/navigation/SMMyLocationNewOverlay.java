@@ -528,8 +528,7 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
                     navigationFragment.rotateMap();
                     navigationFragment.animateMap(location);
                 } else if (mapFragment != null) {
-                    // mapFragment.onLocationChanged(location);
-                    mMapView.getController().animateTo(location.getLatitude(), location.getLongitude());
+                    mapFragment.animateMap(location);
                 }
             } else {
                 // Get new drawing bounds

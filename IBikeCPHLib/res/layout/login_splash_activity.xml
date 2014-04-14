@@ -102,9 +102,9 @@
         android:id="@+id/buttonsContainer"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:baselineAligned="true"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:baselineAligned="true"
         android:orientation="horizontal"
         android:weightSum="1.0" >
 
@@ -168,6 +168,7 @@
 
     <ProgressBar
         android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"

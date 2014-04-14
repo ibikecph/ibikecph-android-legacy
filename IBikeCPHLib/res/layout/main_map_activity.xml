@@ -114,15 +114,16 @@
                 android:textColor="@color/White" />
         </RelativeLayout>
 
-        <Button
+        <ImageButton
             android:id="@+id/btnSearch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignRight="@+id/btnTrack"
             android:layout_alignTop="@+id/imgSwiper"
             android:layout_marginRight="6dp"
-            android:background="@drawable/btn_search_selector"
-            android:contentDescription="@string/app_name" />
+            android:background="@null"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/btn_search_selector" />
 
         <ImageView
             android:id="@+id/imgSwiper"
@@ -136,6 +137,7 @@
 
         <ProgressBar
             android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
