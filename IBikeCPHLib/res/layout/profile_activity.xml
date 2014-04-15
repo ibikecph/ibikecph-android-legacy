@@ -112,7 +112,7 @@
                 android:src="@drawable/icon_email" />
 
             <EditText
-                android:id="@+id/textNewPassword"
+                android:id="@+id/textOldPassword"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignLeft="@+id/textName"
@@ -128,13 +128,27 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/textNewPassword"
-                android:layout_alignRight="@+id/textNewPassword"
-                android:layout_alignTop="@+id/textNewPassword"
+                android:layout_alignBottom="@+id/textOldPassword"
+                android:layout_alignRight="@+id/textOldPassword"
+                android:layout_alignTop="@+id/textOldPassword"
                 android:background="@null"
                 android:contentDescription="@string/app_name"
                 android:paddingRight="15dp"
                 android:src="@drawable/icon_pass" />
+
+            <EditText
+                android:id="@+id/textNewPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/textName"
+                android:layout_alignRight="@+id/textName"
+                android:layout_below="@+id/textOldPassword"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/input_on_black_selector"
+                android:inputType="textPassword"
+                android:paddingLeft="10dp"
+                android:paddingRight="25dp"
+                android:textSize="14sp" />
 
             <EditText
                 android:id="@+id/textPasswordConfirm"

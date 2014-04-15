@@ -96,12 +96,9 @@ public class LoginActivity extends Activity implements FBLoginListener {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-
                             Looper.myLooper();
                             Looper.prepare();
-
                             showProgressDialog();
-
                             userData = new UserData(textEmail.getText().toString(), textPassword.getText().toString());
                             Message message = HTTPAccountHandler.performLogin(userData);
                             handler.sendMessage(message);
@@ -123,6 +120,7 @@ public class LoginActivity extends Activity implements FBLoginListener {
                     Bundle data = msg.getData();
                     Boolean success = data.getBoolean("success");
                     if (success) {
+                        IbikeApplication.savePassword(textPassword.getText().toString());
                         LOG.d("fbdebug apitoken = " + data.getString("auth_token"));
                         String auth_token = data.getString("auth_token");
                         int id = data.getInt("id");
@@ -199,15 +197,12 @@ public class LoginActivity extends Activity implements FBLoginListener {
         new Thread(new Runnable() {
             @Override
             public void run() {
-
                 Looper.myLooper();
                 Looper.prepare();
-
                 showProgressDialog();
                 LOG.d("fbdebug fbtoken = " + Session.getActiveSession().getAccessToken());
                 Message message = HTTPAccountHandler.performFacebookLogin(Session.getActiveSession().getAccessToken());
                 handler.sendMessage(message);
-
                 dismissProgressDialog();
 
             }

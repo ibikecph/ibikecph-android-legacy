@@ -115,6 +115,7 @@ public class LoginDialog {
                     Bundle data = msg.getData();
                     Boolean success = data.getBoolean("success");
                     if (success) {
+                        IbikeApplication.savePassword(textPassword.getText().toString());
                         String auth_token = data.getString("auth_token");
                         int id = data.getInt("id");
                         launchMainMapActivity(auth_token, id);

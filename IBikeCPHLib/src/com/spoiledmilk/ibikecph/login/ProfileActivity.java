@@ -47,7 +47,7 @@ public class ProfileActivity extends Activity implements ImagerPrefetcherListene
     TextView textTitle;
     ImageButton btnBack;
     Button btnLogout;
-    EditText textName, textEmail, textNewPassword, textPasswordConfirm;
+    EditText textName, textEmail, textOldPassword, textNewPassword, textPasswordConfirm;
     TexturedButton btnSave;
     Button btnDelete;
     ImageView pictureContainer;
@@ -108,6 +108,7 @@ public class ProfileActivity extends Activity implements ImagerPrefetcherListene
         textEmail = (EditText) findViewById(R.id.textEmail);
         textNewPassword = (EditText) findViewById(R.id.textNewPassword);
         textPasswordConfirm = (EditText) findViewById(R.id.textPasswordConfirm);
+        textOldPassword = (EditText) findViewById(R.id.textOldPassword);
         btnSave = (TexturedButton) findViewById(R.id.btnSave);
         btnSave.setTextureResource(R.drawable.btn_pattern_repeteable);
         btnSave.setBackgroundResource(R.drawable.btn_blue_selector);
@@ -263,6 +264,9 @@ public class ProfileActivity extends Activity implements ImagerPrefetcherListene
         textTitle.setTypeface(IbikeApplication.getNormalFont());
         btnLogout.setText(IbikeApplication.getString("logout"));
         btnLogout.setTypeface(IbikeApplication.getNormalFont());
+        textOldPassword.setHint(IbikeApplication.getString("old_password"));
+        textOldPassword.setHintTextColor(getResources().getColor(R.color.HintColor));
+        textOldPassword.setTypeface(IbikeApplication.getNormalFont());
         textNewPassword.setHint(IbikeApplication.getString("account_password_placeholder"));
         textNewPassword.setHintTextColor(getResources().getColor(R.color.HintColor));
         textNewPassword.setTypeface(IbikeApplication.getNormalFont());
@@ -315,6 +319,15 @@ public class ProfileActivity extends Activity implements ImagerPrefetcherListene
                 validationMessage = IbikeApplication.getString("register_error_invalid_email");
                 ret = false;
             }
+        }
+        if (textOldPassword.getText() == null) {
+            validationMessage = IbikeApplication.getString("register_error_passwords");
+            ret = false;
+        }
+        if (textOldPassword.getText() != null && !IbikeApplication.getPassword().equals(textOldPassword.getText().toString())
+                && !IbikeApplication.getPassword().equals(textOldPassword.getText().toString())) {
+            validationMessage = IbikeApplication.getString("register_error_passwords");
+            ret = false;
         }
         userData.setName(textName.getText().toString());
         userData.setEmail(textEmail.getText().toString());
