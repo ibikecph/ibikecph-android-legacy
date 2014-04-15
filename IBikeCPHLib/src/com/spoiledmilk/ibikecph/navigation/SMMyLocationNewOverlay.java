@@ -20,12 +20,9 @@ import org.osmdroid.views.overlay.Overlay.Snappable;
 import org.osmdroid.views.overlay.SafeDrawOverlay;
 import org.osmdroid.views.overlay.mylocation.IMyLocationConsumer;
 import org.osmdroid.views.overlay.mylocation.IMyLocationProvider;
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import org.osmdroid.views.safecanvas.ISafeCanvas;
 import org.osmdroid.views.safecanvas.SafePaint;
 import org.osmdroid.views.util.constants.MapViewConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -35,7 +32,6 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.location.Location;
-import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -47,15 +43,6 @@ import com.spoiledmilk.ibikecph.navigation.routing_engine.SMRoute;
 import com.spoiledmilk.ibikecph.util.LOG;
 
 public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocationConsumer, IOverlayMenuProvider, Snappable {
-    private static final Logger logger = LoggerFactory.getLogger(MyLocationNewOverlay.class);
-
-    // ===========================================================
-    // Constants
-    // ===========================================================
-
-    // ===========================================================
-    // Fields
-    // ===========================================================
 
     protected final SafePaint mPaint = new SafePaint(Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG | Paint.ANTI_ALIAS_FLAG);
     protected final SafePaint mCirclePaint = new SafePaint();
@@ -123,80 +110,34 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
         // this.context = context;
         if (myLocationProvider == null)
             throw new RuntimeException("You must pass an IMyLocationProvider to enableMyLocation()");
-
         mMyLocationProvider = myLocationProvider;
         mMapView = mapView;
-
         mCirclePaint.setARGB(0, 100, 100, 255);
         mCirclePaint.setAntiAlias(true);
-
-        try {
-            mPersonBitmap = mResourceProxy.getBitmap(ResourceProxy.person);
-            mDirectionArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.direction_arrow);
-        } catch (OutOfMemoryError e) {
-            System.gc();
-            mMapView.getTileProvider().clearTileCache();
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mPersonBitmap = mResourceProxy.getBitmap(ResourceProxy.person);
-                        mDirectionArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.direction_arrow);
-                    } catch (OutOfMemoryError e) {
-                    }
-                }
-            }, 1000);
-        }
-
+        mPersonBitmap = mResourceProxy.getBitmap(ResourceProxy.person);
+        mDirectionArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.direction_arrow);
         mDirectionArrowCenterX = mDirectionArrowBitmap.getWidth() / 2 - 0.5f;
         mDirectionArrowCenterY = mDirectionArrowBitmap.getHeight() / 2 - 0.5f;
-
         // Calculate position of person icon's feet, scaled to screen density
         mPersonHotspot = new PointF(24.0f * mScale + 0.5f, 39.0f * mScale + 0.5f);
     }
 
     protected void drawMyLocation(final ISafeCanvas canvas, final MapView mapView, final Location lastFix) {
-
         final Projection pj = mapView.getProjection();
         final int zoomDiff = MapViewConstants.MAXIMUM_ZOOMLEVEL - pj.getZoomLevelFloor();
-
-        if (route != null) {
-            // isTooFarFromRoute = route.distanceFromRoute > SMRoute.MAX_DISTANCE_FROM_PATH;
-        }
-
-        if (mapView.tracking) {
-            if (navigationFragment != null) {
-                // LOG.d("locationAnimate from drawMyLocatin");
-                navigationFragment.rotateMap();
-                navigationFragment.animateMap(lastFix);
-            } else if (mapFragment != null) {
-                // mapFragment.onLocationChanged(lastFix);
-            } else {
-                mapView.getController().animateTo(lastFix.getLatitude(), lastFix.getLongitude());
-            }
-        }
-
         canvas.getMatrix(mMatrix);
         mMatrix.getValues(mMatrixValues);
-
         mDirectionRotater.reset();
-
-        // LOG.d("direction shown = " + mapView.directionShown + " isPinch zooming = " + mapView.isPinchZooming);
 
         if (resId != com.spoiledmilk.ibikecph.R.drawable.tracking_dot && route != null) { // && mapView.directionShown
                                                                                           // && isDirection
-
             instructionBearing = 0;
-
             if (isTooFarFromRoute) {
                 // instructionBearing = -mapOrientation - compassOrientation;
                 instructionBearing = -mapOrientation;
-
                 if (lastLocation != null && lastLocation.hasBearing()) {
                     instructionBearing -= lastLocation.getBearing();
                 }
-
             } else {
                 instructionBearing = (float) route.lastCorrectedHeading;
             }
@@ -211,7 +152,6 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
                 mDirectionRotater.setRotate(instructionBearing, ((mMapCoords.x >> zoomDiff)) - mDirectionArrowBitmap.getWidth() / 2,
                         ((mMapCoords.y >> zoomDiff)) - mDirectionArrowBitmap.getHeight() / 2);
             }
-
             try {
                 final Bitmap rotatedDirection = Bitmap.createBitmap(mDirectionArrowBitmap, 0, 0, (int) (mDirectionArrowBitmap.getWidth()),
                         (int) (mDirectionArrowBitmap.getHeight()), mDirectionRotater, true);
@@ -245,18 +185,14 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
             }
             mDirectionRotater.setTranslate(-mPersonHotspot.x, -mPersonHotspot.y);
             mDirectionRotater.postScale(1 / mMatrixValues[Matrix.MSCALE_X], 1 / mMatrixValues[Matrix.MSCALE_Y]);
-            if (mapView.getMapOrientation() != 0f) {
-                mDirectionRotater.postScale(0.75f, 0.75f);
-            }
+            // if (mapView.getMapOrientation() != 0f) {
+            // mDirectionRotater.postScale(0.75f, 0.75f);
+            // }
             mDirectionRotater.postTranslate(mMapCoords.x >> zoomDiff, mMapCoords.y >> zoomDiff);
             canvas.drawBitmap(mPersonBitmap, mDirectionRotater, mPaint);
         }
 
     }
-
-    // ===========================================================
-    // Getter & Setter
-    // ===========================================================
 
     /**
      * If enabled, an accuracy circle will be drawn around your current position.
@@ -282,9 +218,9 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
     }
 
     protected void setMyLocationProvider(IMyLocationProvider myLocationProvider) {
-        if (mMyLocationProvider != null)
+        if (mMyLocationProvider != null) {
             mMyLocationProvider.stopLocationProvider();
-
+        }
         mMyLocationProvider = myLocationProvider;
     }
 
@@ -308,21 +244,15 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
     }
 
     protected Rect getMyLocationDrawingBounds(int zoomLevel, Location lastFix, Rect reuse) {
-        if (reuse == null)
+        if (reuse == null) {
             reuse = new Rect();
-
+        }
         final int zoomDiff = MapViewConstants.MAXIMUM_ZOOMLEVEL - zoomLevel;
         final int posX = mMapCoords.x >> zoomDiff;
         final int posY = mMapCoords.y >> zoomDiff;
-
         // Start with the bitmap bounds
-        if (lastFix.hasBearing()) {
-            // Get a square bounding box around the object, and expand by the length of the diagonal
-            // so as to allow for extra space for rotating
-            int widestEdge = (int) Math.ceil(Math.max(mDirectionArrowBitmap.getWidth(), mDirectionArrowBitmap.getHeight()) * Math.sqrt(2));
-            reuse.set(posX, posY, posX + widestEdge, posY + widestEdge);
-            reuse.offset((int) -widestEdge / 2, (int) -widestEdge / 2);
-        } else if (route != null && route.getWaypoints() != null && route.getWaypoints().size() > 1) {
+        if (resId != com.spoiledmilk.ibikecph.R.drawable.tracking_dot && route != null && route.getWaypoints() != null
+                && route.getWaypoints().size() > 1) {
             int widestEdge = (int) Math.ceil(Math.max(mDirectionArrowBitmap.getWidth(), mDirectionArrowBitmap.getHeight()) * Math.sqrt(2));
             reuse.set(posX, posY, posX + widestEdge, posY + widestEdge);
             reuse.offset((int) -widestEdge / 2, (int) -widestEdge / 2);
@@ -330,41 +260,21 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
             reuse.set(posX, posY, posX + mPersonBitmap.getWidth(), posY + mPersonBitmap.getHeight());
             reuse.offset((int) -mPersonHotspot.x, (int) -mPersonHotspot.y);
         }
-
-        // Add in the accuracy circle if enabled
-        // if (mDrawAccuracyEnabled) {
-        // final int radius = (int) FloatMath.ceil(lastFix.getAccuracy()
-        // / (float) TileSystem.GroundResolution(lastFix.getLatitude(), zoomLevel));
-        // reuse.union(posX - radius, posY - radius, posX + radius, posY + radius);
-        // final int strokeWidth = (int) FloatMath.ceil(mCirclePaint.getStrokeWidth() == 0 ? 1 :
-        // mCirclePaint.getStrokeWidth());
-        // reuse.inset(-strokeWidth, -strokeWidth);
-        // }
-
         reuse.offset(mMapView.getWidth() / 2, mMapView.getHeight() / 2);
-
         return reuse;
     }
-
-    // ===========================================================
-    // Methods from SuperClass/Interfaces
-    // ===========================================================
 
     @Override
     protected void drawSafe(ISafeCanvas canvas, MapView mapView, boolean shadow) {
         if (shadow) {
             return;
         }
-
         if (isMyLocationEnabled()) {
             if (mLocation == null && route != null) {
                 if (SMLocationManager.getInstance().hasValidLocation()) {
                     mLocation = getSnappedLocation(SMLocationManager.getInstance().getLastValidLocation(), route);
                 } else if (SMLocationManager.getInstance().getLastKnownLocation() != null) {
                     mLocation = getSnappedLocation(SMLocationManager.getInstance().getLastKnownLocation(), route);
-                }
-                if (mapView.tracking) {
-                    // mMapController.animateTo(new GeoPoint(mLocation));
                 }
             }
             if (mLocation != null) {
@@ -381,9 +291,6 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
             final double xDiff = x - mMapCoords.x;
             final double yDiff = y - mMapCoords.y;
             final boolean snap = xDiff * xDiff + yDiff * yDiff < 64;
-            if (DEBUGMODE) {
-                logger.debug("snap=" + snap);
-            }
             return snap;
         } else {
             return false;
@@ -395,7 +302,6 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
         if (event.getAction() == MotionEvent.ACTION_MOVE) {
             this.disableFollowLocation();
         }
-
         return super.onTouchEvent(event, mapView);
     }
 
