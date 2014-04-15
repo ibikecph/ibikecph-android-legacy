@@ -62,7 +62,6 @@ public class LoginActivity extends Activity implements FBLoginListener {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.login_activity);
-
         textTitle = (TextView) findViewById(R.id.textTitle);
         textTitle.setVisibility(View.VISIBLE);
         btnBack = (ImageButton) findViewById(R.id.btnBack);
@@ -171,9 +170,9 @@ public class LoginActivity extends Activity implements FBLoginListener {
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
-
+        textEmail.setText(IbikeApplication.getEmail());
+        textPassword.setText(IbikeApplication.getPassword());
         Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
-
     }
 
     private void performFBLogin(Bundle savedInstanceState) {

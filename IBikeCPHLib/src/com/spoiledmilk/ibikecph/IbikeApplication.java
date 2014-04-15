@@ -128,4 +128,27 @@ public class IbikeApplication extends Application {
     public static boolean isWelcomeScreenSeen() {
         return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("welcone_seen", false);
     }
+
+    public static void saveEmail(String email) {
+        PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putString("email", email).commit();
+    }
+
+    public static String getEmail() {
+        return PreferenceManager.getDefaultSharedPreferences(getContext()).getString("email", "");
+    }
+
+    public static void savePassword(String password) {
+        PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putString("password", password).commit();
+    }
+
+    public static String getPassword() {
+        return PreferenceManager.getDefaultSharedPreferences(getContext()).getString("password", "");
+    }
+
+    public static void logout() {
+        PreferenceManager.getDefaultSharedPreferences(getContext()).edit().remove("email").commit();
+        PreferenceManager.getDefaultSharedPreferences(getContext()).edit().remove("password").commit();
+        PreferenceManager.getDefaultSharedPreferences(getContext()).edit().remove("auth_token").commit();
+        PreferenceManager.getDefaultSharedPreferences(getContext()).edit().remove("id").commit();
+    }
 }

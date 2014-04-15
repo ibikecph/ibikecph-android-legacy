@@ -34,239 +34,242 @@ import com.spoiledmilk.ibikecph.util.ImageData;
 import com.spoiledmilk.ibikecph.util.ImagerPrefetcherListener;
 
 public class RegisterActivity extends Activity implements ImagerPrefetcherListener {
-	TextView textTitle;
-	ImageButton btnBack;
-	Button btnLogout;
-	EditText textName;
-	EditText textEmail;
-	EditText textNewPassword;
-	EditText textPasswordConfirm;
-	TexturedButton btnRegister;
+    TextView textTitle;
+    ImageButton btnBack;
+    Button btnLogout;
+    EditText textName;
+    EditText textEmail;
+    EditText textNewPassword;
+    EditText textPasswordConfirm;
+    TexturedButton btnRegister;
 
-	Handler handler;
+    Handler handler;
 
-	UserData userData;
+    UserData userData;
 
-	ProgressBar progressBar;
+    ProgressBar progressBar;
 
-	String validationMessage;
-	String base64Image = "";
-	private static final int IMAGE_REQUEST = 1888;
+    String validationMessage;
+    String base64Image = "";
+    private static final int IMAGE_REQUEST = 1888;
 
-	public static final int RESULT_USER_DELETED = 101;
-	public static final int RESULT_ACCOUNT_REGISTERED = 102;
-	public static final int RESULT_NO_ACTION = 103;
+    public static final int RESULT_USER_DELETED = 101;
+    public static final int RESULT_ACCOUNT_REGISTERED = 102;
+    public static final int RESULT_NO_ACTION = 103;
 
-	boolean inProgress = false;
+    boolean inProgress = false;
 
-	@Override
-	public void onCreate(final Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.register_activity);
-		textTitle = (TextView) findViewById(R.id.textTitle);
-		textTitle.setVisibility(View.VISIBLE);
-		progressBar = (ProgressBar) findViewById(R.id.progressBar);
-		btnBack = (ImageButton) findViewById(R.id.btnBack);
-		btnBack.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				setResult(RESULT_NO_ACTION);
-				finish();
-				overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-			}
+        setContentView(R.layout.register_activity);
+        textTitle = (TextView) findViewById(R.id.textTitle);
+        textTitle.setVisibility(View.VISIBLE);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        btnBack = (ImageButton) findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                setResult(RESULT_NO_ACTION);
+                finish();
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+            }
 
-		});
+        });
 
-		textName = (EditText) findViewById(R.id.textName);
-		textEmail = (EditText) findViewById(R.id.textEmail);
-		textNewPassword = (EditText) findViewById(R.id.textNewPassword);
-		textPasswordConfirm = (EditText) findViewById(R.id.textPasswordConfirm);
-		btnRegister = (TexturedButton) findViewById(R.id.btnRegister);
-		btnRegister.setTextureResource(R.drawable.btn_pattern_repeteable);
-		btnRegister.setBackgroundResource(R.drawable.btn_blue_selector);
-		btnRegister.setTextColor(Color.WHITE);
-		btnRegister.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (validateInput() && !inProgress) {
-					inProgress = true;
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							Looper.myLooper();
-							Looper.prepare();
+        textName = (EditText) findViewById(R.id.textName);
+        textEmail = (EditText) findViewById(R.id.textEmail);
+        textNewPassword = (EditText) findViewById(R.id.textNewPassword);
+        textPasswordConfirm = (EditText) findViewById(R.id.textPasswordConfirm);
+        btnRegister = (TexturedButton) findViewById(R.id.btnRegister);
+        btnRegister.setTextureResource(R.drawable.btn_pattern_repeteable);
+        btnRegister.setBackgroundResource(R.drawable.btn_blue_selector);
+        btnRegister.setTextColor(Color.WHITE);
+        btnRegister.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (validateInput() && !inProgress) {
+                    inProgress = true;
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Looper.myLooper();
+                            Looper.prepare();
+                            RegisterActivity.this.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    progressBar.setVisibility(View.VISIBLE);
+                                }
+                            });
+                            Message message = HTTPAccountHandler.performRegister(userData, RegisterActivity.this);
+                            Boolean success = message.getData().getBoolean("success", false);
+                            if (success) {
+                                IbikeApplication.saveEmail(userData.getEmail());
+                                IbikeApplication.savePassword(userData.getPassword());
+                            }
+                            handler.sendMessage(message);
+                            IbikeApplication.getTracker().sendEvent("Register", "Completed", userData.getEmail(), (long) 0);
+                            RegisterActivity.this.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    progressBar.setVisibility(View.GONE);
+                                }
+                            });
 
-							RegisterActivity.this.runOnUiThread(new Runnable() {
-								@Override
-								public void run() {
-									progressBar.setVisibility(View.VISIBLE);
-								}
-							});
+                        }
+                    }).start();
+                } else if (!inProgress) {
+                    launchAlertDialog(validationMessage);
+                }
+            }
+        });
 
-							Message message = HTTPAccountHandler.performRegister(userData, RegisterActivity.this);
-							handler.sendMessage(message);
-							IbikeApplication.getTracker().sendEvent("Register", "Completed", userData.getEmail(), (long) 0);
-							RegisterActivity.this.runOnUiThread(new Runnable() {
-								@Override
-								public void run() {
-									progressBar.setVisibility(View.GONE);
-								}
-							});
+        if (handler == null) {
+            handler = new Handler(new Handler.Callback() {
 
-						}
-					}).start();
-				} else if (!inProgress) {
-					launchAlertDialog(validationMessage);
-				}
-			}
-		});
+                @Override
+                public boolean handleMessage(Message msg) {
 
-		if (handler == null) {
-			handler = new Handler(new Handler.Callback() {
+                    Bundle data = msg.getData();
+                    int msgType = data.getInt("type");
+                    Boolean success = false;
+                    inProgress = false;
+                    switch (msgType) {
+                        case HTTPAccountHandler.REGISTER_USER:
+                            success = data.getBoolean("success");
+                            if (!success) {
+                                launchAlertDialog(data.getString("info"));
+                            } else {
+                                setResult(RESULT_ACCOUNT_REGISTERED);
+                                finish();
+                                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                            }
+                            break;
+                        case HTTPAccountHandler.ERROR:
+                            launchAlertDialog(IbikeApplication.getString("Error"));
+                            break;
+                    }
+                    return true;
+                }
+            });
+        }
 
-				@Override
-				public boolean handleMessage(Message msg) {
+    }
 
-					Bundle data = msg.getData();
-					int msgType = data.getInt("type");
-					Boolean success = false;
-					inProgress = false;
-					switch (msgType) {
-					case HTTPAccountHandler.REGISTER_USER:
-						success = data.getBoolean("success");
-						if (!success) {
-							launchAlertDialog(data.getString("info"));
-						} else {
-							setResult(RESULT_ACCOUNT_REGISTERED);
-							finish();
-							overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-						}
-						break;
-					case HTTPAccountHandler.ERROR:
-						launchAlertDialog(IbikeApplication.getString("Error"));
-						break;
-					}
-					return true;
-				}
-			});
-		}
+    @Override
+    public void onResume() {
+        super.onResume();
+        initStrings();
+    }
 
-	}
+    @Override
+    public void onPause() {
+        super.onPause();
+        progressBar.setVisibility(View.GONE);
+    }
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		initStrings();
-	}
+    public void onImageContainerClick(View v) {
+        Intent pickIntent = new Intent();
+        pickIntent.setType("image/*");
+        pickIntent.setAction(Intent.ACTION_GET_CONTENT);
+        Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        String pickTitle = "";
+        Intent chooserIntent = Intent.createChooser(pickIntent, pickTitle);
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { takePhotoIntent });
+        startActivityForResult(chooserIntent, IMAGE_REQUEST);
+    }
 
-	@Override
-	public void onPause() {
-		super.onPause();
-		progressBar.setVisibility(View.GONE);
-	}
+    private void initStrings() {
+        textTitle.setText(IbikeApplication.getString("create_account"));
+        textTitle.setTypeface(IbikeApplication.getNormalFont());
+        textTitle.setVisibility(View.VISIBLE);
+        textNewPassword.setHint(IbikeApplication.getString("register_password_placeholder"));
+        textNewPassword.setHintTextColor(getResources().getColor(R.color.HintColor));
+        textNewPassword.setTypeface(IbikeApplication.getNormalFont());
+        textPasswordConfirm.setHint(IbikeApplication.getString("register_password_repeat_placeholder"));
+        textPasswordConfirm.setHintTextColor(getResources().getColor(R.color.HintColor));
+        textPasswordConfirm.setTypeface(IbikeApplication.getNormalFont());
+        btnRegister.setText(IbikeApplication.getString("register_save"));
+        btnRegister.setTypeface(IbikeApplication.getNormalFont());
+        textName.setHint(IbikeApplication.getString("register_name_placeholder"));
+        textName.setHintTextColor(getResources().getColor(R.color.HintColor));
+        textName.setTypeface(IbikeApplication.getNormalFont());
+        textEmail.setHint(IbikeApplication.getString("register_email_placeholder"));
+        textEmail.setHintTextColor(getResources().getColor(R.color.HintColor));
+        textEmail.setTypeface(IbikeApplication.getNormalFont());
+    }
 
-	public void onImageContainerClick(View v) {
-		Intent pickIntent = new Intent();
-		pickIntent.setType("image/*");
-		pickIntent.setAction(Intent.ACTION_GET_CONTENT);
-		Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-		String pickTitle = "";
-		Intent chooserIntent = Intent.createChooser(pickIntent, pickTitle);
-		chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { takePhotoIntent });
-		startActivityForResult(chooserIntent, IMAGE_REQUEST);
-	}
+    private void launchAlertDialog(String msg) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
+        builder.setMessage(msg).setTitle(IbikeApplication.getString("Error"));
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 
-	private void initStrings() {
-		textTitle.setText(IbikeApplication.getString("create_account"));
-		textTitle.setTypeface(IbikeApplication.getNormalFont());
-		textTitle.setVisibility(View.VISIBLE);
-		textNewPassword.setHint(IbikeApplication.getString("register_password_placeholder"));
-		textNewPassword.setHintTextColor(getResources().getColor(R.color.HintColor));
-		textNewPassword.setTypeface(IbikeApplication.getNormalFont());
-		textPasswordConfirm.setHint(IbikeApplication.getString("register_password_repeat_placeholder"));
-		textPasswordConfirm.setHintTextColor(getResources().getColor(R.color.HintColor));
-		textPasswordConfirm.setTypeface(IbikeApplication.getNormalFont());
-		btnRegister.setText(IbikeApplication.getString("register_save"));
-		btnRegister.setTypeface(IbikeApplication.getNormalFont());
-		textName.setHint(IbikeApplication.getString("register_name_placeholder"));
-		textName.setHintTextColor(getResources().getColor(R.color.HintColor));
-		textName.setTypeface(IbikeApplication.getNormalFont());
-		textEmail.setHint(IbikeApplication.getString("register_email_placeholder"));
-		textEmail.setHintTextColor(getResources().getColor(R.color.HintColor));
-		textEmail.setTypeface(IbikeApplication.getNormalFont());
-	}
+    private boolean validateInput() {
+        boolean ret = true;
+        if (textName.getText().toString().length() == 0 || textEmail.getText().toString().length() == 0
+                || textNewPassword.getText().toString().length() == 0 || textPasswordConfirm.getText().toString().length() == 0) {
+            validationMessage = IbikeApplication.getString("register_error_fields");
+            ret = false;
+        } else if (!textNewPassword.getText().toString().equals(textPasswordConfirm.getText().toString())) {
+            validationMessage = IbikeApplication.getString("register_error_passwords");
+            ret = false;
+        } else if (textNewPassword.getText().toString().length() < 3) {
+            validationMessage = IbikeApplication.getString("register_error_passwords_short");
+            ret = false;
+        } else {
+            int atIndex = textEmail.getText().toString().indexOf('@');
+            if (atIndex < 1) {
+                validationMessage = IbikeApplication.getString("register_error_invalid_email");
+                ret = false;
+            }
+            int pointIndex = textEmail.getText().toString().indexOf('.', atIndex);
+            if (pointIndex < atIndex || pointIndex == textEmail.getText().toString().length() - 1) {
+                validationMessage = IbikeApplication.getString("register_error_invalid_email");
+                ret = false;
+            }
+        }
+        userData = new UserData(textName.getText().toString(), textEmail.getText().toString(), textNewPassword.getText().toString(),
+                textPasswordConfirm.getText().toString(), base64Image, "image.png");
+        return ret;
+    }
 
-	private void launchAlertDialog(String msg) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
-		builder.setMessage(msg).setTitle(IbikeApplication.getString("Error"));
-		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.dismiss();
-			}
-		});
-		AlertDialog dialog = builder.create();
-		dialog.show();
-	}
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            progressBar.setVisibility(View.VISIBLE);
+            AsyncImageFetcher aif = new AsyncImageFetcher(this, this);
+            aif.execute(data);
+        }
+    }
 
-	private boolean validateInput() {
-		boolean ret = true;
-		if (textName.getText().toString().length() == 0 || textEmail.getText().toString().length() == 0
-				|| textNewPassword.getText().toString().length() == 0 || textPasswordConfirm.getText().toString().length() == 0) {
-			validationMessage = IbikeApplication.getString("register_error_fields");
-			ret = false;
-		} else if (!textNewPassword.getText().toString().equals(textPasswordConfirm.getText().toString())) {
-			validationMessage = IbikeApplication.getString("register_error_passwords");
-			ret = false;
-		} else if (textNewPassword.getText().toString().length() < 3) {
-			validationMessage = IbikeApplication.getString("register_error_passwords_short");
-			ret = false;
-		} else {
-			int atIndex = textEmail.getText().toString().indexOf('@');
-			if (atIndex < 1) {
-				validationMessage = IbikeApplication.getString("register_error_invalid_email");
-				ret = false;
-			}
-			int pointIndex = textEmail.getText().toString().indexOf('.', atIndex);
-			if (pointIndex < atIndex || pointIndex == textEmail.getText().toString().length() - 1) {
-				validationMessage = IbikeApplication.getString("register_error_invalid_email");
-				ret = false;
-			}
-		}
-		userData = new UserData(textName.getText().toString(), textEmail.getText().toString(), textNewPassword.getText().toString(),
-				textPasswordConfirm.getText().toString(), base64Image, "image.png");
-		return ret;
-	}
+    @Override
+    public void onStart() {
+        super.onStart();
+        EasyTracker.getInstance().activityStart(this);
+    }
 
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
-			progressBar.setVisibility(View.VISIBLE);
-			AsyncImageFetcher aif = new AsyncImageFetcher(this, this);
-			aif.execute(data);
-		}
-	}
+    @Override
+    public void onStop() {
+        super.onStop();
+        EasyTracker.getInstance().activityStop(this);
+    }
 
-	@Override
-	public void onStart() {
-		super.onStart();
-		EasyTracker.getInstance().activityStart(this);
-	}
-
-	@Override
-	public void onStop() {
-		super.onStop();
-		EasyTracker.getInstance().activityStop(this);
-	}
-
-	@Override
-	public void onImagePrefetched(ImageData imageData) {
-		if (imageData != null && imageData.bmp != null && imageData.base64 != null) {
-			base64Image = imageData.base64;
-			((ImageView) findViewById(R.id.pictureContainer)).setImageDrawable(imageData.bmp);
-		} else {
-			Toast.makeText(this, "Error fetching the image", Toast.LENGTH_SHORT).show();
-		}
-		progressBar.setVisibility(View.GONE);
-	}
+    @Override
+    public void onImagePrefetched(ImageData imageData) {
+        if (imageData != null && imageData.bmp != null && imageData.base64 != null) {
+            base64Image = imageData.base64;
+            ((ImageView) findViewById(R.id.pictureContainer)).setImageDrawable(imageData.bmp);
+        } else {
+            Toast.makeText(this, "Error fetching the image", Toast.LENGTH_SHORT).show();
+        }
+        progressBar.setVisibility(View.GONE);
+    }
 
 }
