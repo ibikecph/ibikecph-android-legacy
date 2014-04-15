@@ -720,7 +720,24 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
             mapView.setMapOrientation(0);
             locationOverlay.mapOrientation = 0;
         }
+    }
 
+    public void rotateMap(float orientation) {
+        if (mapView.getMapOrientation() == orientation) {
+            return;
+        }
+        if (-mapView.getMapOrientation() < 0) {
+            mapView.getOverlayManager().previousBearing = 360 - mapView.getMapOrientation();
+        } else {
+            mapView.getOverlayManager().previousBearing = -mapView.getMapOrientation();
+        }
+        if (-orientation < 0) {
+            mapView.getOverlayManager().currentBearing = 360 - orientation;
+        } else {
+            mapView.getOverlayManager().currentBearing = -orientation;
+        }
+        locationOverlay.mapOrientation = orientation;
+        mapView.setMapOrientation(orientation);
     }
 
     @Override

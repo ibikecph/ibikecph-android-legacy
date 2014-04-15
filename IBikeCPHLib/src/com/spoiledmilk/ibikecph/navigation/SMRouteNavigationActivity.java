@@ -326,6 +326,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
                         mapFragment.animateTo(turn.getLocation());
                     }
                     stopTrackingUser();
+                    mapFragment.rotateMap(-turn.azimuth);
                 }
             }
 
@@ -617,24 +618,10 @@ public class SMRouteNavigationActivity extends FragmentActivity {
         findViewById(R.id.normalDarkOverlay).setVisibility(View.GONE);
         findViewById(R.id.normalProgressBar).setVisibility(View.GONE);
         findViewById(R.id.progressBar).setVisibility(View.GONE);
-        // if (stopDialog != null && stopDialog.isShowing())
-        // stopDialog.dismiss();
     }
 
     public void setInstructionViewState(InstrcutionViewState newState) {
-
-        // if (mapFragment != null && !mapFragment.currentlyRouting
-        // && instructionsViewState ==
-        // SMRouteNavigationActivity.InstrcutionViewState.Invisible
-        // && newState == SMRouteNavigationActivity.InstrcutionViewState.Normal)
-        // return;
-
-        // if (instructionsViewState == newState) {
-        // return;
-        // }
-
         instructionList.smoothScrollToPosition(0);
-
         if (newState == InstrcutionViewState.Maximized) {
             pullTouchMax.setVisibility(View.VISIBLE);
             pullTouchNormal.setVisibility(View.GONE);
@@ -710,66 +697,6 @@ public class SMRouteNavigationActivity extends FragmentActivity {
                     .enableMyLocation(mapFragment.locationProvider == null ? mapFragment.locationProvider = new GpsMyLocationProvider(this)
                             : mapFragment.locationProvider);
         }
-
-        // enter state actions
-        // switch (newState) {
-        // case Invisible:
-        // findViewById(R.id.mapTopDisabledView).setVisibility(View.GONE);
-        // break;
-        // case Normal:
-        // findViewById(R.id.mapTopDisabledView).setVisibility(View.GONE);
-        // findViewById(R.id.pullTouchNormal).setVisibility(View.VISIBLE);
-        // findViewById(R.id.pullTouchMax).setVisibility(View.GONE);
-        // instructionsView.setVisibility(View.VISIBLE);
-        // View mapContainer = findViewById(R.id.map_container);
-        // RelativeLayout.LayoutParams lParams = (RelativeLayout.LayoutParams)
-        // mapContainer.getLayoutParams();
-        // lParams.addRule(RelativeLayout.ABOVE, R.id.instructionsView);
-        // lParams.alignWithParent = true;
-        // mapContainer.setLayoutParams(lParams);
-        // isMaximized = false;
-        // break;
-        // case Maximized:
-        // findViewById(R.id.mapTopDisabledView).setVisibility(View.VISIBLE);
-        // findViewById(R.id.pullTouchNormal).setVisibility(View.GONE);
-        // findViewById(R.id.pullTouchMax).setVisibility(View.VISIBLE);
-        // isMaximized = false;
-        // instructionsViewMax.setClickable(true);
-        // instructionsViewMax.setVisibility(View.VISIBLE);
-        // break;
-        // case Minimized:
-        // findViewById(R.id.mapTopDisabledView).setVisibility(View.GONE);
-        // findViewById(R.id.pullTouchNormal).setVisibility(View.GONE);
-        // findViewById(R.id.pullTouchMax).setVisibility(View.GONE);
-        // isMaximized = false;
-        // instructionsViewMin.setVisibility(View.VISIBLE);
-        // break;
-        // }
-        //
-        // if (newState != InstrcutionViewState.Maximized) {
-        // if (hasDarkImage()) {
-        // btnClose.setImageResource(R.drawable.btn_close);
-        // viewDistance.setBackgroundResource(R.drawable.distance_white);
-        // textTime.setTextColor(Color.BLACK);
-        // }
-        // darkenedView.setVisibility(View.GONE);
-        // instructionsViewMax.clearAnimation();
-        //
-        // // paramsInstructionsMax.bottomMargin = -(int)
-        // (Util.getScreenHeight());
-        // // paramsInstructionsMax.topMargin = (int) (Util.getScreenHeight() -
-        // instructionsView.getHeight() -
-        // // Util.dp2px(10));
-        // // instructionsViewMax.setLayoutParams(paramsInstructionsMax);
-        // mapFragment.locationOverlay.enableMyLocation(new
-        // GpsMyLocationProvider(this));
-        // }
-        // if (newState == InstrcutionViewState.Normal) {
-        // findViewById(R.id.pullTouchNormal).setVisibility(View.VISIBLE);
-        // } else {
-        // findViewById(R.id.pullTouchNormal).setVisibility(View.GONE);
-        // }
-
         instructionsViewState = newState;
     }
 
@@ -822,19 +749,10 @@ public class SMRouteNavigationActivity extends FragmentActivity {
     public void setOverview(String destination, String distance, String viaStreets) {
         ((TextView) overviewLayout.findViewById(R.id.overviewDestination)).setTypeface(IbikeApplication.getBoldFont());
         ((TextView) overviewLayout.findViewById(R.id.overviewDestination)).setText(destination);
-        // ((TextView)
-        // overviewLayout.findViewById(R.id.overviewDistanceAndVia)).setTypeface(IbikeApplication.getNormalFont());
         String distanceAndVia = distance + ", " + IbikeApplication.getString("via") + " " + viaStreets;
-        // if (distanceAndVia.length() > 32)
-        // distanceAndVia = distanceAndVia.substring(0, 32) + "...";
         ((TextView) overviewLayout.findViewById(R.id.overviewDistanceAndVia)).setText(distanceAndVia);
         EasyTracker.getInstance().setContext(this);
         IbikeApplication.getTracker().sendEvent("Route", "Overview", destination, (long) 0);
-    }
-
-    public void updateInstructionsView(SMTurnInstruction turn) {
-        // if (instructionsViewState == InstrcutionViewState.Invisible)
-        // setInstructionViewState(InstrcutionViewState.Normal);
     }
 
     @Override
@@ -855,7 +773,6 @@ public class SMRouteNavigationActivity extends FragmentActivity {
                 viewPager.setCurrentItem(0);
             }
             viewPager.getAdapter().finishUpdate(viewPager);
-            updateInstructionsView(turnInstructions.get(0));
             adapter = getInstructionsAdapter();
             adapter.setRoute(mapFragment.route);
             adapter.notifyDataSetChanged();
@@ -864,7 +781,6 @@ public class SMRouteNavigationActivity extends FragmentActivity {
         } else {
             setInstructionViewState(InstrcutionViewState.Invisible);
         }
-        // resizeList();
         pagerAdapter.setInstructionsUpdated(false);
         instructionsUpdated = false;
         if (turns == null) {
@@ -951,8 +867,6 @@ public class SMRouteNavigationActivity extends FragmentActivity {
                         if (!slidden) {
                             leftContainer.setVisibility(View.GONE);
                             mapDisabledView.setVisibility(View.GONE);
-                            // mapFragment.mapView.setEnabled(true);
-                            // mapFragment.mapView.invalidate();
                             leftContainer.invalidate();
                         } else {
                             leftContainer.setVisibility(View.VISIBLE);
@@ -971,8 +885,6 @@ public class SMRouteNavigationActivity extends FragmentActivity {
                     if (leftmargin == 0) {
                         leftContainer.setVisibility(View.GONE);
                         mapDisabledView.setVisibility(View.GONE);
-                        // mapFragment.mapView.setEnabled(true);
-                        // mapFragment.mapView.invalidate();
                         leftContainer.invalidate();
                     }
                     posX = 0;
@@ -995,7 +907,6 @@ public class SMRouteNavigationActivity extends FragmentActivity {
         if (animationInstructions != null && animationInstructions.isInitialized()) {
             animationInstructions.cancel();
         }
-
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             if (System.currentTimeMillis() - lastDownTimestamp <= DOUBLE_TAP_PERIOD) {
                 isDoubleTap = true;
@@ -1040,13 +951,11 @@ public class SMRouteNavigationActivity extends FragmentActivity {
             return;
 
         }
-
         if (event.getRawY() > Util.getScreenHeight() - Util.dp2px(40)) {
             pullHandleMax.setBackgroundColor(Color.TRANSPARENT);
         } else {
             pullHandleMax.setBackgroundColor(getPullHandeBackground());
         }
-
         darkenedView.getBackground().setAlpha(Util.yToAlpha((int) event.getRawY()));
         animationInstructions = new TranslateAnimation(0, 0, lastY, event.getY());
         animationInstructions.setFillAfter(true);
