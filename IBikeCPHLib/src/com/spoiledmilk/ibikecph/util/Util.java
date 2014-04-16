@@ -32,6 +32,7 @@ import android.net.NetworkInfo;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.Menu;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -226,6 +227,7 @@ public class Util {
 
     public static void launchNoConnectionDialog(Context ctx) {
         final Dialog dialog = new Dialog(ctx);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_no_connection);
         TextView text = (TextView) dialog.findViewById(R.id.textNetworkError);
         text.setTypeface(IbikeApplication.getNormalFont());
