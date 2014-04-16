@@ -152,7 +152,7 @@ public class SMRoute implements SMHttpRequestListener {
 
                         boolean ok = parseFromJson(jRoot, null, isRouteBroken);
 
-                        logWaypoints();
+//                        logWaypoints();
 
                         if (ok) {
                             approachingTurn = false;
@@ -838,13 +838,13 @@ public class SMRoute implements SMHttpRequestListener {
         return viaStreets;
     }
 
-    public void logWaypoints() {
-        Iterator<Location> it = waypoints.iterator();
-        while (it.hasNext()) {
-            Location loc = it.next();
-            LOG.d("waypoint = " + loc.getLatitude() + " , " + loc.getLongitude() + "\n");
-        }
-        LOG.d("///////////////////////////////////////////");
-    }
+    // public void logWaypoints() {
+    // Iterator<Location> it = waypoints.iterator();
+    // while (it.hasNext()) {
+    // Location loc = it.next();
+    // LOG.d("waypoint = " + loc.getLatitude() + " , " + loc.getLongitude() + "\n");
+    // }
+    // LOG.d("///////////////////////////////////////////");
+    // }
 
 }

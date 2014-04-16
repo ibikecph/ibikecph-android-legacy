@@ -499,8 +499,9 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
                 mMapCoords.offset(-worldSize_2, -worldSize_2);
                 if (navigationFragment != null) {
                     navigationFragment.animateMap(mLocation);
+                } else if (mapFragment != null) {
+                    mapFragment.animateMap(mLocation);
                 }
-                // mMapController.animateTo(new GeoPoint(mLocation));
             }
         }
         // LOG.d("invalidating the map from the location change ");

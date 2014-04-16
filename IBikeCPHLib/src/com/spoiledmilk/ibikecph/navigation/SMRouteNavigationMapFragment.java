@@ -529,7 +529,7 @@ public class SMRouteNavigationMapFragment extends MapFragmentBase implements SMR
 
             if (location != null) {
                 mapView.getController().animateToForTracking(location.getLatitude(), location.getLongitude(), Math.toRadians(orientation),
-                        mapView.locationArrowOffsset, routingStarted); // mapView.directionShown &&
+                        mapView.locationArrowOffsset, routingStarted);
             }
         }
     }
