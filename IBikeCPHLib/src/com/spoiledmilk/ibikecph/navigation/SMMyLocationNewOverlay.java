@@ -40,7 +40,6 @@ import com.spoiledmilk.ibikecph.map.SMMapFragment;
 import com.spoiledmilk.ibikecph.navigation.routing_engine.SMGPSUtil;
 import com.spoiledmilk.ibikecph.navigation.routing_engine.SMLocationManager;
 import com.spoiledmilk.ibikecph.navigation.routing_engine.SMRoute;
-import com.spoiledmilk.ibikecph.util.LOG;
 
 public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocationConsumer, IOverlayMenuProvider, Snappable {
 
@@ -128,7 +127,13 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
         canvas.getMatrix(mMatrix);
         mMatrix.getValues(mMatrixValues);
         mDirectionRotater.reset();
-
+        // Calculate real scale including accounting for rotation
+        float scaleX = (float) Math.sqrt(mMatrixValues[Matrix.MSCALE_X] * mMatrixValues[Matrix.MSCALE_X] + mMatrixValues[Matrix.MSKEW_Y]
+                * mMatrixValues[Matrix.MSKEW_Y]);
+        float scaleY = (float) Math.sqrt(mMatrixValues[Matrix.MSCALE_Y] * mMatrixValues[Matrix.MSCALE_Y] + mMatrixValues[Matrix.MSKEW_X]
+                * mMatrixValues[Matrix.MSKEW_X]);
+        final double x = mMapCoords.x >> zoomDiff;
+        final double y = mMapCoords.y >> zoomDiff;
         if (resId != com.spoiledmilk.ibikecph.R.drawable.tracking_dot && route != null) { // && mapView.directionShown
                                                                                           // && isDirection
             instructionBearing = 0;
@@ -141,30 +146,38 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
             } else {
                 instructionBearing = (float) route.lastCorrectedHeading;
             }
-            if (mapView.isPinchZooming) {
-                Point mCurScreenCoords = new Point();
-                pj.toMapPixels(new GeoPoint(lastFix), mCurScreenCoords);
-                float sx = mapView.scaleDiffFloat, sy = mapView.scaleDiffFloat;
-                mDirectionRotater.setScale(sx, sy, mCurScreenCoords.x, mCurScreenCoords.y);
-                mDirectionRotater.postRotate(instructionBearing, ((mMapCoords.x >> zoomDiff)) - mDirectionArrowBitmap.getWidth() / 2,
-                        ((mMapCoords.y >> zoomDiff)) - mDirectionArrowBitmap.getHeight() / 2);
-            } else {
-                mDirectionRotater.setRotate(instructionBearing, ((mMapCoords.x >> zoomDiff)) - mDirectionArrowBitmap.getWidth() / 2,
-                        ((mMapCoords.y >> zoomDiff)) - mDirectionArrowBitmap.getHeight() / 2);
-            }
-            try {
-                final Bitmap rotatedDirection = Bitmap.createBitmap(mDirectionArrowBitmap, 0, 0, (int) (mDirectionArrowBitmap.getWidth()),
-                        (int) (mDirectionArrowBitmap.getHeight()), mDirectionRotater, true);
-                mPaint.setAntiAlias(true);
-                mPaint.setDither(true);
-                canvas.drawBitmap(rotatedDirection, (((mMapCoords.x >> zoomDiff)) - rotatedDirection.getWidth() / 2),
-                        (((mMapCoords.y >> zoomDiff)) - rotatedDirection.getHeight() / 2), this.mPaint);
-            } catch (Exception e) {
-                if (e != null) {
-                    LOG.e("", e);
-                }
-                canvas.drawBitmap(mDirectionArrowBitmap, mDirectionRotater, mPaint);
-            }
+            // if (mapView.isPinchZooming) {
+            // Point mCurScreenCoords = new Point();
+            // pj.toMapPixels(new GeoPoint(lastFix), mCurScreenCoords);
+            // float sx = mapView.scaleDiffFloat, sy = mapView.scaleDiffFloat;
+            // mDirectionRotater.setScale(sx, sy, mCurScreenCoords.x, mCurScreenCoords.y);
+            // mDirectionRotater.postRotate(instructionBearing, ((mMapCoords.x >> zoomDiff)) - mDirectionArrowBitmap.getWidth() / 2,
+            // ((mMapCoords.y >> zoomDiff)) - mDirectionArrowBitmap.getHeight() / 2);
+            // } else {
+            mDirectionRotater.setRotate(instructionBearing, ((mMapCoords.x >> zoomDiff)) - mDirectionArrowBitmap.getWidth() / 2,
+                    ((mMapCoords.y >> zoomDiff)) - mDirectionArrowBitmap.getHeight() / 2);
+            // }
+            // try {
+            // final Bitmap rotatedDirection = Bitmap.createBitmap(mDirectionArrowBitmap, 0, 0, (int) (mDirectionArrowBitmap.getWidth()),
+            // (int) (mDirectionArrowBitmap.getHeight()), mDirectionRotater, true);
+            // mPaint.setAntiAlias(true);
+            // mPaint.setDither(true);
+            // canvas.drawBitmap(rotatedDirection, (((mMapCoords.x >> zoomDiff)) - rotatedDirection.getWidth() / 2),
+            // (((mMapCoords.y >> zoomDiff)) - rotatedDirection.getHeight() / 2), this.mPaint);
+            // } catch (Exception e) {
+            // if (e != null) {
+            // LOG.e("", e);
+            // }
+            // canvas.drawBitmap(mDirectionArrowBitmap, mDirectionRotater, mPaint);
+            // }
+            canvas.save();
+            // Rotate the icon
+            canvas.rotate(instructionBearing, x, y);
+            // Counteract any scaling that may be happening so the icon stays the same size
+            canvas.scale(1 / scaleX, 1 / scaleY, x, y);
+            // Draw the bitmap
+            canvas.drawBitmap(mDirectionArrowBitmap, x - mDirectionArrowCenterX, y - mDirectionArrowCenterY, mPaint);
+            canvas.restore();
         } else if (resId != com.spoiledmilk.ibikecph.R.drawable.tracking_dot && lastFix.hasBearing()) {
             /*
              * Rotate the direction-Arrow according to the bearing we are driving. And draw it to the canvas.
@@ -176,20 +189,24 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
             canvas.drawBitmap(mDirectionArrowBitmap, mDirectionRotater, mPaint);
 
         } else {
-            // LOG.d("SMMylocation drawing without the orientation");
-            if (mapView.isPinchZooming) {
-                Point mCurScreenCoords = new Point();
-                pj.toMapPixels(new GeoPoint(lastFix), mCurScreenCoords);
-                float sx = mapView.scaleDiffFloat, sy = mapView.scaleDiffFloat;
-                mDirectionRotater.setScale(sx, sy, mCurScreenCoords.x, mCurScreenCoords.y);
-            }
-            mDirectionRotater.setTranslate(-mPersonHotspot.x, -mPersonHotspot.y);
-            mDirectionRotater.postScale(1 / mMatrixValues[Matrix.MSCALE_X], 1 / mMatrixValues[Matrix.MSCALE_Y]);
-            // if (mapView.getMapOrientation() != 0f) {
-            // mDirectionRotater.postScale(0.75f, 0.75f);
+            // if (mapView.isPinchZooming) {
+            // Point mCurScreenCoords = new Point();
+            // pj.toMapPixels(new GeoPoint(lastFix), mCurScreenCoords);
+            // float sx = mapView.scaleDiffFloat, sy = mapView.scaleDiffFloat;
+            // mDirectionRotater.setScale(sx, sy, mCurScreenCoords.x, mCurScreenCoords.y);
             // }
-            mDirectionRotater.postTranslate(mMapCoords.x >> zoomDiff, mMapCoords.y >> zoomDiff);
-            canvas.drawBitmap(mPersonBitmap, mDirectionRotater, mPaint);
+            // mDirectionRotater.setTranslate(-mPersonHotspot.x, -mPersonHotspot.y);
+            // mDirectionRotater.postScale(1 / mMatrixValues[Matrix.MSCALE_X], 1 / mMatrixValues[Matrix.MSCALE_Y]);
+            // mDirectionRotater.postTranslate(mMapCoords.x >> zoomDiff, mMapCoords.y >> zoomDiff);
+            // canvas.drawBitmap(mPersonBitmap, mDirectionRotater, mPaint);
+            canvas.save();
+            // Unrotate the icon if the maps are rotated so the little man stays upright
+            canvas.rotate(-mMapView.getMapOrientation(), x, y);
+            // Counteract any scaling that may be happening so the icon stays the same size
+            canvas.scale(1 / scaleX, 1 / scaleY, x, y);
+            // Draw the bitmap
+            canvas.drawBitmap(mPersonBitmap, x - mPersonHotspot.x, y - mPersonHotspot.y, mPaint);
+            canvas.restore();
         }
 
     }
@@ -444,7 +461,13 @@ public class SMMyLocationNewOverlay extends SafeDrawOverlay implements IMyLocati
                     mMyLocationRect.union(mMyLocationPreviousRect);
                 }
                 // Invalidate the bounds
-                mMapView.postInvalidate(mMyLocationRect.left, mMyLocationRect.top, mMyLocationRect.right, mMyLocationRect.bottom);
+                mMapView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mMapView.invalidateMapCoordinates(mMyLocationRect);
+                    }
+                });
+                // mMapView.postInvalidate(mMyLocationRect.left, mMyLocationRect.top, mMyLocationRect.right, mMyLocationRect.bottom);
             }
         }
         for (final Runnable runnable : mRunOnFirstFix) {
