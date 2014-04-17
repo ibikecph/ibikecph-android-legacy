@@ -13,7 +13,6 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
@@ -21,8 +20,6 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
@@ -31,7 +28,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -49,7 +45,7 @@ import com.spoiledmilk.ibikecph.util.Config;
 import com.spoiledmilk.ibikecph.util.LOG;
 import com.spoiledmilk.ibikecph.util.Util;
 
-public class SMRouteNavigationActivity extends FragmentActivity {
+public class SMRouteNavigationActivity extends FragmentActivity implements View.OnTouchListener, View.OnClickListener {
 
     public enum InstrcutionViewState {
         Invisible, Minimized, Normal, Maximized;
@@ -69,21 +65,20 @@ public class SMRouteNavigationActivity extends FragmentActivity {
     Button btnStart;
     RelativeLayout instructionsView, instructionsViewMax, leftContainer, parentContainer, routeFinishedContainer, reportProblemsView,
             instructionsViewMaxContainer;
-    LinearLayout instructionsViewMin;
-    ImageButton pullHandleMax, pullHandle, pullHandleMin;
+    ImageButton pullHandleMax, pullHandle, imageButtonPullHandleMin;
     protected ListView instructionList;
     protected InstructionListAdapter adapter;
     ImageButton btnTrack, btnClose;
     RelativeLayout viewDistance;
     ViewPager viewPager;
     InstructionsPagerAdapter pagerAdapter;
-    ImageView imgCargoSlider;
     ImageButton imgClose;
+    ImageView imgCargoSlider;
     TextView textGoodRide, textReport2, textRecalculating, textCargo, textBicycle, textTime, textReport, textDestAddress;
     ProgressBar progressBar;
     public ArrayList<String> turns;
     RelativeLayout.LayoutParams paramsForInstMaxContainer;
-    View mapTopDisabledView, pullTouchNormal, pullTouchMax, mapDisabledView, darkenedView;
+    View mapTopDisabledView, pullTouchNormal, viewPullTouchMaxExtended, mapDisabledView, darkenedView;
     RelativeLayout.LayoutParams paramsInstructionsMaxNormal = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
             (int) (Util.getScreenHeight()));
     RelativeLayout.LayoutParams paramsInstructionsMaxMaximized = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -108,23 +103,9 @@ public class SMRouteNavigationActivity extends FragmentActivity {
         paramsForInstMaxContainer.addRule(RelativeLayout.CENTER_HORIZONTAL);
         paramsForInstMaxContainer.topMargin = 0;
         instructionsViewMaxContainer.setLayoutParams(paramsForInstMaxContainer);
-
         routeFinishedContainer = (RelativeLayout) findViewById(R.id.routeFinishedContainer);
         imgClose = (ImageButton) findViewById(R.id.imgClose);
-        imgClose.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                Bundle conData = new Bundle();
-                conData.putInt("overlaysShown", getOverlaysShown());
-                Intent intent = new Intent();
-                intent.putExtras(conData);
-                setResult(MapActivity.RESULT_RETURN_FROM_NAVIGATION, intent);
-                setResult(MapActivity.RESULT_RETURN_FROM_NAVIGATION);
-                finish();
-                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-            }
-
-        });
+        imgClose.setOnClickListener(this);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         textGoodRide = (TextView) findViewById(R.id.textGoodRide);
         textRecalculating = (TextView) findViewById(R.id.textRecalculating);
@@ -147,142 +128,37 @@ public class SMRouteNavigationActivity extends FragmentActivity {
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         parentContainer.setLayoutParams(params);
         imgCargoSlider = (ImageView) findViewById(R.id.imgCargoSlider);
-        imgCargoSlider.setOnTouchListener(new OnTouchListener() {
-            // Swipe the view horizontally
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return onSliderTouch(v, event);
-            }
-
-        });
-
+        imgCargoSlider.setOnTouchListener(this);
         darkenedView = findViewById(R.id.darkenedView);
         darkenedView.setBackgroundColor(Color.BLACK);
         viewDistance = (RelativeLayout) findViewById(R.id.viewDistance);
         textTime = (TextView) findViewById(R.id.textTime);
-
         mapDisabledView = findViewById(R.id.mapDisabledView);
-        mapDisabledView.setOnTouchListener(new OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                // used to disable the map touching when sliden
-                return onSliderTouch(v, event);
-            }
-
-        });
-
+        mapDisabledView.setOnTouchListener(this);
         paramsInstructionsMaxNormal.topMargin = (int) (Util.getScreenHeight() - Util.dp2px(146));
         paramsInstructionsMaxNormal.bottomMargin = -(int) ((Util.getScreenHeight()));
         paramsInstructionsMaxMaximized.topMargin = INSTRUCTIONS_TOP_MARGIN;
         paramsInstructionsMaxMinimized.topMargin = (int) (Util.getScreenHeight() - Util.getScreenHeight() / 10);
         paramsInstructionsMaxMinimized.bottomMargin = -(int) ((Util.getScreenHeight()));
-
         overviewLayout = (RelativeLayout) findViewById(R.id.overviewLayout);
-
         btnStart = (Button) overviewLayout.findViewById(R.id.btnStart);
-        btnStart.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewDistance.setVisibility(View.VISIBLE);
-                btnStart.setEnabled(false);
-                hideOverview();
-                textTime.setText(mapFragment.getEstimatedArrivalTime());
-                mapFragment.startRouting();
-                IbikeApplication.getTracker().sendEvent("Route", "Overview", mapFragment.destination, (long) 0);
-                // instructionsView.setVisibility(View.VISIBLE);
-                setInstructionViewState(InstrcutionViewState.Normal);
-                RelativeLayout.LayoutParams paramsBtnTrack = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
-                        RelativeLayout.LayoutParams.WRAP_CONTENT);
-                paramsBtnTrack.setMargins(Util.dp2px(10), Util.dp2px(10), Util.dp2px(10), Util.dp2px(10));
-                paramsBtnTrack.alignWithParent = true;
-                paramsBtnTrack.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-                paramsBtnTrack.addRule(RelativeLayout.ABOVE, instructionsView.getId());
-                btnTrack.setLayoutParams(paramsBtnTrack);
-                startTrackingUser();
-            }
-        });
-
+        btnStart.setOnClickListener(this);
         btnClose = ((ImageButton) findViewById(R.id.btnClose));
-        btnClose.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showStopDlg();
-            }
-        });
-
-        // Darken the button on touch :
-        btnClose.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View arg0, MotionEvent me) {
-                if (me.getAction() == MotionEvent.ACTION_DOWN) {
-                    btnClose.setColorFilter(Color.argb(150, 155, 155, 155));
-                    return false;
-                } else if (me.getAction() == MotionEvent.ACTION_UP || me.getAction() == MotionEvent.ACTION_CANCEL) {
-                    btnClose.setColorFilter(Color.argb(0, 155, 155, 155));
-                    return false;
-                }
-                return false;
-            }
-
-        });
-
+        btnClose.setOnClickListener(this);
+        btnClose.setOnTouchListener(this);
         // increased touch area for the normal pull handle
         pullTouchNormal = findViewById(R.id.pullTouchNormal);
-        pullTouchNormal.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View arg0, MotionEvent event) {
-                isPulledFromNormal = true;
-                return onPullHandleTouch(null, event);
-            }
-        });
-
+        pullTouchNormal.setOnTouchListener(this);
         // increased touch area for the max pull handle
-        pullTouchMax = findViewById(R.id.pullTouchMax);
-        pullTouchMax.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View arg0, MotionEvent event) {
-                isPulledFromNormal = false;
-                yFix = Util.dp2px(16);
-                return onPullHandleTouch(null, event);
-            }
-        });
-
+        viewPullTouchMaxExtended = findViewById(R.id.viewPullTouchMaxExtended);
+        viewPullTouchMaxExtended.setOnTouchListener(this);
         mapTopDisabledView = findViewById(R.id.mapTopDisabledView);
-        mapTopDisabledView.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View arg0, MotionEvent event) {
-                isPulledFromNormal = false;
-                yFix = Util.dp2px(42);
-                // return onPullHandleTouch(null, event);
-                return true;
-            }
-        });
-
+        mapTopDisabledView.setOnTouchListener(this);
         instructionsView = (RelativeLayout) findViewById(R.id.instructionsView);
         instructionsView.setBackgroundColor(Color.BLACK);
         pullHandle = (ImageButton) instructionsView.findViewById(R.id.imgPullHandle);
-        pullHandle.setOnTouchListener(new OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View arg0, MotionEvent event) {
-                isPulledFromNormal = true;
-                return onPullHandleTouch(null, event);
-            }
-
-        });
-
-        instructionsViewMin = (LinearLayout) findViewById(R.id.instructionsViewMin);
-        pullHandleMin = (ImageButton) instructionsViewMin.findViewById(R.id.imgPullHandleMin);
-        pullHandleMin.setOnTouchListener(new OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View arg0, MotionEvent arg1) {
-                return onPullHandleTouch(arg0, arg1);
-            }
-
-        });
-
+        pullHandle.setOnTouchListener(this);
+        imageButtonPullHandleMin = (ImageButton) findViewById(R.id.imageButtonPullHandleMin);
         instructionsViewMax = (RelativeLayout) findViewById(R.id.instructionsViewMax);
         params = new RelativeLayout.LayoutParams((int) Util.getScreenWidth(), RelativeLayout.LayoutParams.WRAP_CONTENT);
         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
@@ -291,20 +167,10 @@ public class SMRouteNavigationActivity extends FragmentActivity {
         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         findViewById(R.id.overviewLayout).setLayoutParams(params);
         pullHandleMax = (ImageButton) instructionsViewMax.findViewById(R.id.imgPullHandleMax);
-        pullHandleMax.setOnTouchListener(new OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View arg0, MotionEvent arg1) {
-                isPulledFromNormal = false;
-                return onPullHandleTouch(arg0, arg1);
-            }
-
-        });
-
+        pullHandleMax.setOnTouchListener(this);
         instructionList = (ListView) instructionsViewMax.findViewById(R.id.listView);
         instructionList.addFooterView(reportProblemsView);
         setInstructionViewState(InstrcutionViewState.Invisible);
-
         FragmentManager fm = this.getSupportFragmentManager();
         mapFragment = getMapFragment();
         if (savedInstanceState == null) {
@@ -313,95 +179,19 @@ public class SMRouteNavigationActivity extends FragmentActivity {
             fm.beginTransaction().replace(R.id.map_container, mapFragment).commit();
         }
         viewPager = (ViewPager) instructionsView.findViewById(R.id.viewPager);
-        viewPager.setOnPageChangeListener(new OnPageChangeListener() {
-
-            @Override
-            public void onPageSelected(int position) {
-                if (!instructionsUpdated || (mapFragment.isRecalculation && !mapFragment.getTrackingMode())) {
-                    SMTurnInstruction turn = mapFragment.route.getTurnInstructions().get(position);
-                    if (turn.drivingDirection == SMTurnInstruction.TurnDirection.ReachedYourDestination
-                            || turn.drivingDirection == SMTurnInstruction.TurnDirection.ReachingDestination) {
-                        mapFragment.animateTo(mapFragment.route.getEndLocation());
-                    } else {
-                        mapFragment.animateTo(turn.getLocation());
-                    }
-                    stopTrackingUser();
-                    mapFragment.rotateMap(-turn.azimuth);
-                }
-            }
-
-            @Override
-            public void onPageScrolled(int arg0, float arg1, int arg2) {
-
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int arg0) {
-
-            }
-        });
-
+        viewPager.setOnPageChangeListener(new PagerListener());
         pagerAdapter = getPagerAdapter();
         viewPager.setAdapter(pagerAdapter);
-        viewPager.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                // used to disable viewPager swiping when the left menu is
-                // opened
-                return slidden;
-            }
-        });
-
+        viewPager.setOnTouchListener(this);
         btnTrack = (ImageButton) findViewById(R.id.btnTrack);
-        btnTrack.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!mapFragment.getTrackingMode()) {
-                    startTrackingUser();
-                } else {
-                    mapFragment.switchTracking();
-                    changeTrackingIcon();
-                }
-            }
-
-        });
-
-        textReport.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                launchReportIssuesActivity();
-            }
-
-        });
-
+        btnTrack.setOnClickListener(this);
+        textReport.setOnClickListener(this);
         textReport2 = (TextView) findViewById(R.id.textReport2);
-        textReport2.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                launchReportIssuesActivity();
-            }
-
-        });
+        textReport2.setOnClickListener(this);
         textDestAddress = (TextView) findViewById(R.id.textDestAddress);
         textDestAddress.setTypeface(IbikeApplication.getNormalFont());
         Config.OSRM_SERVER = Config.OSRM_SERVER_BICYCLE;
-
-        if (savedInstanceState != null) {
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    Intent intent = new Intent(SMRouteNavigationActivity.this, getSplashActivityClass());
-                    intent.putExtra("timeout", 0);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
-                    finish();
-                }
-            }, 400);
-        }
-
         instructionsViewMax.setLayoutParams(paramsInstructionsMaxNormal);
-
         RelativeLayout.LayoutParams paramsBtnTrack = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
         paramsBtnTrack.setMargins(Util.dp2px(10), Util.dp2px(10), Util.dp2px(10), Util.dp2px(10));
@@ -409,56 +199,10 @@ public class SMRouteNavigationActivity extends FragmentActivity {
         paramsBtnTrack.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
         paramsBtnTrack.addRule(RelativeLayout.ABOVE, overviewLayout.getId());
         btnTrack.setLayoutParams(paramsBtnTrack);
-
         instructionsView.measure(0, 0);
         instructionsViewHeight = instructionsView.getMeasuredHeight();
-
         turns = new ArrayList<String>();
-
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-    }
-
-    public void launchReportIssuesActivity() {
-        generateTurnStrings();
-        Intent i = new Intent(SMRouteNavigationActivity.this, IssuesActivity.class);
-        Bundle b = new Bundle();
-        b.putStringArrayList("turns", turns);
-        b.putString("startLoc", mapFragment.startLocation.toString());
-        b.putString("endLoc", mapFragment.endLocation.toString());
-        String source = mapFragment.source;
-        if (source == null || source.equals("")) {
-            source = IbikeApplication.getString("current_position");
-        }
-        b.putString("startName", source);
-        b.putString("endName", mapFragment.destination);
-        i.putExtras(b);
-        startActivity(i);
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-    }
-
-    protected Class<?> getSplashActivityClass() {
-        return SplashActivity.class;
-    }
-
-    protected SMRouteNavigationMapFragment getMapFragment() {
-        if (mapFragment == null)
-            return mapFragment = new SMRouteNavigationMapFragment();
-        else
-            return mapFragment;
-    }
-
-    protected InstructionsPagerAdapter getPagerAdapter() {
-        return new InstructionsPagerAdapter(getSupportFragmentManager(), mapFragment, this);
-    }
-
-    @Override
-    public void onLowMemory() {
-        try {
-            if (mapFragment != null && mapFragment.mapView != null && mapFragment.mapView.getTileProvider() != null)
-                mapFragment.mapView.getTileProvider().clearTileCache();
-        } catch (Exception e) {
-
-        }
     }
 
     long lastUpTimestamp = 0, timestamp;
@@ -520,18 +264,6 @@ public class SMRouteNavigationActivity extends FragmentActivity {
         findViewById(R.id.progressBar).setVisibility(View.GONE);
     }
 
-    // private void restartRouting() {
-    // stopTrackingUser();
-    // mapFragment.routingStarted = false;
-    // mapFragment.recalculateRoute();
-    // translate(-maxSlide, true);
-    // setInstructionViewState(InstrcutionViewState.Invisible);
-    // overviewLayout.setVisibility(View.VISIBLE);
-    // btnStart.setEnabled(true);
-    // mapFragment.restartRoute();
-    // textTime.setText(mapFragment.getEstimatedArrivalTime());
-    // }
-
     public void showRouteOverview() {
         stopTrackingUser();
         mapFragment.routingStarted = false;
@@ -572,7 +304,6 @@ public class SMRouteNavigationActivity extends FragmentActivity {
         textRecalculating.setTypeface(IbikeApplication.getNormalFont());
         textRecalculating.setText(IbikeApplication.getString("calculating_new_route"));
         turns = new ArrayList<String>();
-        // resizeList();
         btnStart.setText(IbikeApplication.getString("start_route"));
         String st = "Start: " + IbikeApplication.getString("current_position") + " (" + mapFragment.startLocation.getLatitude() + ","
                 + mapFragment.startLocation.getLongitude() + ") End: " + mapFragment.destination + " (" + mapFragment.endLocation.getLatitude() + ","
@@ -623,7 +354,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
     public void setInstructionViewState(InstrcutionViewState newState) {
         instructionList.smoothScrollToPosition(0);
         if (newState == InstrcutionViewState.Maximized) {
-            pullTouchMax.setVisibility(View.VISIBLE);
+            viewPullTouchMaxExtended.setVisibility(View.VISIBLE);
             pullTouchNormal.setVisibility(View.GONE);
             mapTopDisabledView.setVisibility(View.VISIBLE);
             instructionsViewMax.setLayoutParams(paramsInstructionsMaxMaximized);
@@ -636,7 +367,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
             }
             darkenedView.getBackground().setAlpha(200);
         } else if (newState == InstrcutionViewState.Normal) {
-            pullTouchMax.setVisibility(View.GONE);
+            viewPullTouchMaxExtended.setVisibility(View.GONE);
             pullTouchNormal.setVisibility(View.VISIBLE);
             mapTopDisabledView.setVisibility(View.GONE);
             instructionsViewMax.setLayoutParams(paramsInstructionsMaxNormal);
@@ -656,7 +387,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
             paramsBtnTrack.addRule(RelativeLayout.ABOVE, instructionsView.getId());
             btnTrack.setLayoutParams(paramsBtnTrack);
         } else if (newState == InstrcutionViewState.Minimized) {
-            pullTouchMax.setVisibility(View.GONE);
+            viewPullTouchMaxExtended.setVisibility(View.GONE);
             pullTouchNormal.setVisibility(View.GONE);
             mapTopDisabledView.setVisibility(View.GONE);
             instructionsViewMax.setLayoutParams(paramsInstructionsMaxMinimized);
@@ -668,7 +399,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
             }
             instructionsView.setVisibility(View.GONE);
             instructionsViewMax.setVisibility(View.GONE);
-            instructionsViewMin.setVisibility(View.VISIBLE);
+            imageButtonPullHandleMin.setVisibility(View.VISIBLE);
             RelativeLayout.LayoutParams paramsBtnTrack = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
                     RelativeLayout.LayoutParams.WRAP_CONTENT);
             paramsBtnTrack.setMargins(Util.dp2px(10), Util.dp2px(10), Util.dp2px(10), Util.dp2px(10));
@@ -677,7 +408,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
             paramsBtnTrack.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             btnTrack.setLayoutParams(paramsBtnTrack);
         } else if (newState == InstrcutionViewState.Invisible) {
-            pullTouchMax.setVisibility(View.GONE);
+            viewPullTouchMaxExtended.setVisibility(View.GONE);
             pullTouchNormal.setVisibility(View.GONE);
             mapTopDisabledView.setVisibility(View.GONE);
             instructionsViewMax.setLayoutParams(paramsInstructionsMaxNormal);
@@ -689,9 +420,8 @@ public class SMRouteNavigationActivity extends FragmentActivity {
             }
             instructionsView.setVisibility(View.GONE);
             instructionsViewMax.setVisibility(View.GONE);
-            instructionsViewMin.setVisibility(View.GONE);
+            imageButtonPullHandleMin.setVisibility(View.GONE);
         }
-
         if (newState != InstrcutionViewState.Maximized && mapFragment != null && mapFragment.locationOverlay != null) {
             mapFragment.locationOverlay
                     .enableMyLocation(mapFragment.locationProvider == null ? mapFragment.locationProvider = new GpsMyLocationProvider(this)
@@ -723,27 +453,9 @@ public class SMRouteNavigationActivity extends FragmentActivity {
     }
 
     protected void showStopDlg() {
-        try {
-            FragmentManager fm = getSupportFragmentManager();
-            FinishRouteDialog roteFinishDialog = new FinishRouteDialog();
-            roteFinishDialog.show(fm, "dialog_stop");
-        } catch (Exception e) {
-            System.gc();
-            mapFragment.mapView.getTileProvider().clearTileCache();
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        FragmentManager fm = getSupportFragmentManager();
-                        FinishRouteDialog roteFinishDialog = new FinishRouteDialog();
-                        roteFinishDialog.show(fm, "dialog_stop");
-                    } catch (Exception e) {
-                        finish();
-                    }
-                }
-            }, 500);
-        }
+        FragmentManager fm = getSupportFragmentManager();
+        FinishRouteDialog roteFinishDialog = new FinishRouteDialog();
+        roteFinishDialog.show(fm, "dialog_stop");
     }
 
     public void setOverview(String destination, String distance, String viaStreets) {
@@ -761,9 +473,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
     }
 
     public void reloadInstructions(List<SMTurnInstruction> turnInstructions, boolean isRecalc) {
-
         instructionsUpdated = true;
-
         if (turnInstructions.size() > 0) {
             LOG.d("instructions updated");
             pagerAdapter.setInstructionsUpdated(true);
@@ -802,7 +512,6 @@ public class SMRouteNavigationActivity extends FragmentActivity {
             findViewById(R.id.normalDarkOverlay).setVisibility(View.VISIBLE);
             findViewById(R.id.normalProgressBar).setVisibility(View.VISIBLE);
         }
-
     }
 
     public void hideProgressBar() {
@@ -815,7 +524,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 
     // ***** Translate animation for the cargo/bicycle container *****
 
-    void translate(float deltaX, final boolean finalAnim) {
+    private void translate(float deltaX, final boolean finalAnim) {
         // mapFragment.mapView.setEnabled(false);
         float newX = posX + deltaX;
         if (slidden) {
@@ -918,7 +627,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
             mapFragment.locationOverlay.disableMyLocation();
             lastY = event.getY();
             instructionsView.setVisibility(View.GONE);
-            instructionsViewMin.setVisibility(View.INVISIBLE);
+            imageButtonPullHandleMin.setVisibility(View.INVISIBLE);
             instructionsViewMax.setVisibility(View.VISIBLE);
             darkenedView.setVisibility(View.VISIBLE);
             darkenedView.getBackground().setAlpha(Util.yToAlpha((int) event.getRawY()));
@@ -1022,6 +731,176 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 
     public void updateTime(String estimatedArrivalTime) {
         textTime.setText(estimatedArrivalTime);
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        boolean ret = false;
+        if (v.getId() == R.id.imgCargoSlider) {
+            ret = onSliderTouch(v, event);
+        } else if (v.getId() == R.id.mapDisabledView) {
+            // used to disable the map touching when sliden
+            return onSliderTouch(v, event);
+        } else if (v.getId() == R.id.btnClose) {
+            // darken the button on touch
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                btnClose.setColorFilter(Color.argb(150, 155, 155, 155));
+                return false;
+            } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+                btnClose.setColorFilter(Color.argb(0, 155, 155, 155));
+                return false;
+            }
+            return false;
+        } else if (v.getId() == R.id.viewPullTouchMaxExtended) {
+            // TODO
+            // isPulledFromNormal = false;
+            // yFix = Util.dp2px(16);
+            // LOG.d("pullTouchMax onTouch");
+            // return onPullHandleTouch(null, event);
+        } else if (v.getId() == R.id.pullTouchNormal) {
+            isPulledFromNormal = true;
+            return onPullHandleTouch(null, event);
+        } else if (v.getId() == R.id.mapTopDisabledView) {
+            isPulledFromNormal = false;
+            yFix = Util.dp2px(42);
+            // return onPullHandleTouch(null, event);
+            return true;
+        } else if (v.getId() == R.id.viewPager) {
+            // used to disable viewPager swiping when the left menu is
+            // opened
+            return slidden;
+        } else if (v.getId() == R.id.imgPullHandle) {
+            isPulledFromNormal = true;
+            return onPullHandleTouch(null, event);
+        } else if (v.getId() == R.id.imgPullHandleMax) {
+            isPulledFromNormal = false;
+            LOG.d("pullHandleMax onTouch");
+            return onPullHandleTouch(v, event);
+        } else if (v.getId() == R.id.imageButtonPullHandleMin) {
+            return onPullHandleTouch(v, event);
+        }
+        return ret;
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.imgClose) {
+            onCloseClick();
+        } else if (v.getId() == R.id.btnStart) {
+            onStartClick();
+        } else if (v.getId() == R.id.btnClose) {
+            showStopDlg();
+        } else if (v.getId() == R.id.btnTrack) {
+            if (!mapFragment.getTrackingMode()) {
+                startTrackingUser();
+            } else {
+                mapFragment.switchTracking();
+                changeTrackingIcon();
+            }
+        } else if (v.getId() == R.id.textReport || v.getId() == R.id.textReport2) {
+            launchReportIssuesActivity();
+        }
+    }
+
+    private void onCloseClick() {
+        Bundle conData = new Bundle();
+        conData.putInt("overlaysShown", getOverlaysShown());
+        Intent intent = new Intent();
+        intent.putExtras(conData);
+        setResult(MapActivity.RESULT_RETURN_FROM_NAVIGATION, intent);
+        setResult(MapActivity.RESULT_RETURN_FROM_NAVIGATION);
+        finish();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+    }
+
+    private void onStartClick() {
+        viewDistance.setVisibility(View.VISIBLE);
+        btnStart.setEnabled(false);
+        hideOverview();
+        textTime.setText(mapFragment.getEstimatedArrivalTime());
+        mapFragment.startRouting();
+        IbikeApplication.getTracker().sendEvent("Route", "Overview", mapFragment.destination, (long) 0);
+        setInstructionViewState(InstrcutionViewState.Normal);
+        RelativeLayout.LayoutParams paramsBtnTrack = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        paramsBtnTrack.setMargins(Util.dp2px(10), Util.dp2px(10), Util.dp2px(10), Util.dp2px(10));
+        paramsBtnTrack.alignWithParent = true;
+        paramsBtnTrack.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        paramsBtnTrack.addRule(RelativeLayout.ABOVE, instructionsView.getId());
+        btnTrack.setLayoutParams(paramsBtnTrack);
+        startTrackingUser();
+    }
+
+    public void launchReportIssuesActivity() {
+        generateTurnStrings();
+        Intent i = new Intent(SMRouteNavigationActivity.this, IssuesActivity.class);
+        Bundle b = new Bundle();
+        b.putStringArrayList("turns", turns);
+        b.putString("startLoc", mapFragment.startLocation.toString());
+        b.putString("endLoc", mapFragment.endLocation.toString());
+        String source = mapFragment.source;
+        if (source == null || source.equals("")) {
+            source = IbikeApplication.getString("current_position");
+        }
+        b.putString("startName", source);
+        b.putString("endName", mapFragment.destination);
+        i.putExtras(b);
+        startActivity(i);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+    }
+
+    protected Class<?> getSplashActivityClass() {
+        return SplashActivity.class;
+    }
+
+    protected SMRouteNavigationMapFragment getMapFragment() {
+        if (mapFragment == null)
+            return mapFragment = new SMRouteNavigationMapFragment();
+        else
+            return mapFragment;
+    }
+
+    protected InstructionsPagerAdapter getPagerAdapter() {
+        return new InstructionsPagerAdapter(getSupportFragmentManager(), mapFragment, this);
+    }
+
+    @Override
+    public void onLowMemory() {
+        try {
+            if (mapFragment != null && mapFragment.mapView != null && mapFragment.mapView.getTileProvider() != null) {
+                mapFragment.mapView.getTileProvider().clearTileCache();
+            }
+        } catch (Exception e) {
+
+        }
+    }
+
+    private class PagerListener implements OnPageChangeListener {
+
+        @Override
+        public void onPageSelected(int position) {
+            if (!instructionsUpdated || (mapFragment.isRecalculation && !mapFragment.getTrackingMode())) {
+                SMTurnInstruction turn = mapFragment.route.getTurnInstructions().get(position);
+                if (turn.drivingDirection == SMTurnInstruction.TurnDirection.ReachedYourDestination
+                        || turn.drivingDirection == SMTurnInstruction.TurnDirection.ReachingDestination) {
+                    mapFragment.animateTo(mapFragment.route.getEndLocation());
+                } else {
+                    mapFragment.animateTo(turn.getLocation());
+                }
+                stopTrackingUser();
+                mapFragment.rotateMap(-turn.azimuth);
+            }
+        }
+
+        @Override
+        public void onPageScrolled(int arg0, float arg1, int arg2) {
+
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int arg0) {
+
+        }
     }
 
 }
