@@ -253,4 +253,12 @@
         </TextView>
     </RelativeLayout>
 
+    <View
+        android:id="@+id/mapTopDisabledView"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_alignParentTop="true"
+        android:background="@null"
+        android:visibility="gone" />
+
 </RelativeLayout>

@@ -15,7 +15,7 @@
         android:visibility="gone" />
 
     <View
-        android:id="@+id/pullTouchNormal"
+        android:id="@+id/viewPullTouchNormalExtended"
         android:layout_width="60dp"
         android:layout_height="54dp"
         android:layout_alignParentBottom="true"
@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="#1a1a1a"
-        android:visibility="gone" >
+        android:visibility="visible" >
 
         <ImageButton
             android:id="@+id/imgPullHandle"
@@ -83,91 +83,78 @@
     <!-- Layout params for the  instructionsViewMaxContainer have been set in the code -->
 
     <RelativeLayout
-        android:id="@+id/instructionsViewMaxContainer"
+        android:id="@+id/instructionsViewMax"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignTop="@id/instructionsView"
+        android:layout_centerHorizontal="true"
         android:layout_marginBottom="-500dp"
-        android:layout_marginTop="0dp"
-        android:background="@null" >
+        android:background="@null"
+        android:minHeight="720dp"
+        android:visibility="visible" >
 
-        <View
-            android:id="@+id/mapTopDisabledView"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_alignParentTop="true"
-            android:background="@null"
-            android:visibility="gone" />
-
-        <RelativeLayout
-            android:id="@+id/instructionsViewMax"
-            android:layout_width="match_parent"
-            android:layout_height="720dp"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="56dp"
-            android:background="@null"
-            android:visibility="visible" >
-
-            <ImageView
-                android:id="@+id/imgHandleBackground"
-                android:layout_width="40dp"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/imgPullHandleMax"
-                android:layout_alignTop="@+id/imgPullHandleMax"
-                android:layout_centerHorizontal="true"
-                android:background="#1a1a1a"
-                android:contentDescription="@string/app_name" />
-
-            <View
-                android:id="@+id/view_background"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_below="@id/imgHandleBackground"
-                android:background="@color/White" />
-
-            <ImageButton
-                android:id="@+id/imgPullHandleMax"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:background="#1a1a1a"
-                android:contentDescription="@string/app_name"
-                android:paddingBottom="5dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:paddingTop="7dp"
-                android:src="@drawable/mover" />
-
-            <ListView
-                android:id="@+id/listView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/imgPullHandleMax"
-                android:background="@null"
-                android:footerDividersEnabled="false" />
-        </RelativeLayout>
-
-        <View
-            android:id="@+id/maximizedDarkOverlay"
-            android:layout_width="wrap_content"
+        <ImageView
+            android:id="@+id/imgHandleBackground"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/instructionsViewMax"
-            android:layout_alignLeft="@id/instructionsViewMax"
-            android:layout_alignRight="@id/instructionsViewMax"
-            android:layout_alignTop="@id/instructionsViewMax"
-            android:background="#141414"
-            android:visibility="gone" >
-        </View>
+            android:layout_alignBottom="@+id/imgPullHandleMax"
+            android:layout_alignTop="@+id/imgPullHandleMax"
+            android:layout_centerHorizontal="true"
+            android:background="#1a1a1a"
+            android:contentDescription="@string/app_name" />
 
         <View
-            android:id="@+id/viewPullTouchMaxExtended"
-            android:layout_width="60dp"
-            android:layout_height="50dp"
+            android:id="@+id/view_background"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@id/imgHandleBackground"
+            android:background="@color/White" />
+
+        <ImageButton
+            android:id="@+id/imgPullHandleMax"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="50dp"
+            android:background="#1a1a1a"
+            android:contentDescription="@string/app_name"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="7dp"
+            android:src="@drawable/mover" />
+
+        <ListView
+            android:id="@+id/listView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/imgPullHandleMax"
             android:background="@null"
-            android:visibility="gone" />
+            android:footerDividersEnabled="false"
+            android:scrollbars="none" />
     </RelativeLayout>
+
+    <View
+        android:id="@+id/viewListDarkOverlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/instructionsViewMax"
+        android:layout_alignLeft="@id/instructionsViewMax"
+        android:layout_alignRight="@id/instructionsViewMax"
+        android:layout_alignTop="@id/instructionsViewMax"
+        android:background="#141414"
+        android:visibility="gone" >
+    </View>
+
+    <View
+        android:id="@+id/viewPullTouchMaxExtended"
+        android:layout_width="60dp"
+        android:layout_height="50dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:background="@null"
+        android:visibility="gone" />
 
 </merge>

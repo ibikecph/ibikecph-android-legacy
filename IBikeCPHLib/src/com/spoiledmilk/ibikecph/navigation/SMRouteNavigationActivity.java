@@ -63,8 +63,7 @@ public class SMRouteNavigationActivity extends FragmentActivity implements View.
     protected SMRouteNavigationMapFragment mapFragment;
     protected RelativeLayout overviewLayout;
     Button btnStart;
-    RelativeLayout instructionsView, instructionsViewMax, leftContainer, parentContainer, routeFinishedContainer, reportProblemsView,
-            instructionsViewMaxContainer;
+    RelativeLayout instructionsView, instructionsViewMax, leftContainer, parentContainer, routeFinishedContainer, reportProblemsView;
     ImageButton pullHandleMax, pullHandle, imageButtonPullHandleMin;
     protected ListView instructionList;
     protected InstructionListAdapter adapter;
@@ -96,13 +95,6 @@ public class SMRouteNavigationActivity extends FragmentActivity implements View.
         LayoutInflater inflater = LayoutInflater.from(this);
         reportProblemsView = (RelativeLayout) inflater.inflate(R.layout.report_problems_view, null);
         textReport = (TextView) reportProblemsView.findViewById(R.id.textReport);
-        instructionsViewMaxContainer = (RelativeLayout) findViewById(R.id.instructionsViewMaxContainer);
-        paramsForInstMaxContainer = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
-                RelativeLayout.LayoutParams.MATCH_PARENT);
-        paramsForInstMaxContainer.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-        paramsForInstMaxContainer.addRule(RelativeLayout.CENTER_HORIZONTAL);
-        paramsForInstMaxContainer.topMargin = 0;
-        instructionsViewMaxContainer.setLayoutParams(paramsForInstMaxContainer);
         routeFinishedContainer = (RelativeLayout) findViewById(R.id.routeFinishedContainer);
         imgClose = (ImageButton) findViewById(R.id.imgClose);
         imgClose.setOnClickListener(this);
@@ -135,11 +127,6 @@ public class SMRouteNavigationActivity extends FragmentActivity implements View.
         textTime = (TextView) findViewById(R.id.textTime);
         mapDisabledView = findViewById(R.id.mapDisabledView);
         mapDisabledView.setOnTouchListener(this);
-        paramsInstructionsMaxNormal.topMargin = (int) (Util.getScreenHeight() - Util.dp2px(146));
-        paramsInstructionsMaxNormal.bottomMargin = -(int) ((Util.getScreenHeight()));
-        paramsInstructionsMaxMaximized.topMargin = INSTRUCTIONS_TOP_MARGIN;
-        paramsInstructionsMaxMinimized.topMargin = (int) (Util.getScreenHeight() - Util.getScreenHeight() / 10);
-        paramsInstructionsMaxMinimized.bottomMargin = -(int) ((Util.getScreenHeight()));
         overviewLayout = (RelativeLayout) findViewById(R.id.overviewLayout);
         btnStart = (Button) overviewLayout.findViewById(R.id.btnStart);
         btnStart.setOnClickListener(this);
@@ -147,7 +134,7 @@ public class SMRouteNavigationActivity extends FragmentActivity implements View.
         btnClose.setOnClickListener(this);
         btnClose.setOnTouchListener(this);
         // increased touch area for the normal pull handle
-        pullTouchNormal = findViewById(R.id.pullTouchNormal);
+        pullTouchNormal = findViewById(R.id.viewPullTouchNormalExtended);
         pullTouchNormal.setOnTouchListener(this);
         // increased touch area for the max pull handle
         viewPullTouchMaxExtended = findViewById(R.id.viewPullTouchMaxExtended);
@@ -156,6 +143,12 @@ public class SMRouteNavigationActivity extends FragmentActivity implements View.
         mapTopDisabledView.setOnTouchListener(this);
         instructionsView = (RelativeLayout) findViewById(R.id.instructionsView);
         instructionsView.setBackgroundColor(Color.BLACK);
+        paramsInstructionsMaxNormal.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        paramsInstructionsMaxNormal.addRule(RelativeLayout.ALIGN_TOP, instructionsView.getId());
+        paramsInstructionsMaxNormal.bottomMargin = -(int) ((Util.getScreenHeight()));
+        paramsInstructionsMaxMaximized.topMargin = INSTRUCTIONS_TOP_MARGIN;
+        paramsInstructionsMaxMinimized.topMargin = (int) (Util.getScreenHeight() - Util.getScreenHeight() / 10);
+        paramsInstructionsMaxMinimized.bottomMargin = -(int) ((Util.getScreenHeight()));
         pullHandle = (ImageButton) instructionsView.findViewById(R.id.imgPullHandle);
         pullHandle.setOnTouchListener(this);
         imageButtonPullHandleMin = (ImageButton) findViewById(R.id.imageButtonPullHandleMin);
@@ -345,7 +338,7 @@ public class SMRouteNavigationActivity extends FragmentActivity implements View.
     public void onPause() {
         super.onPause();
         instructionList.setAdapter(null);
-        findViewById(R.id.maximizedDarkOverlay).setVisibility(View.GONE);
+        findViewById(R.id.viewListDarkOverlay).setVisibility(View.GONE);
         findViewById(R.id.normalDarkOverlay).setVisibility(View.GONE);
         findViewById(R.id.normalProgressBar).setVisibility(View.GONE);
         findViewById(R.id.progressBar).setVisibility(View.GONE);
@@ -421,11 +414,6 @@ public class SMRouteNavigationActivity extends FragmentActivity implements View.
             instructionsView.setVisibility(View.GONE);
             instructionsViewMax.setVisibility(View.GONE);
             imageButtonPullHandleMin.setVisibility(View.GONE);
-        }
-        if (newState != InstrcutionViewState.Maximized && mapFragment != null && mapFragment.locationOverlay != null) {
-            mapFragment.locationOverlay
-                    .enableMyLocation(mapFragment.locationProvider == null ? mapFragment.locationProvider = new GpsMyLocationProvider(this)
-                            : mapFragment.locationProvider);
         }
         instructionsViewState = newState;
     }
@@ -505,7 +493,7 @@ public class SMRouteNavigationActivity extends FragmentActivity implements View.
 
     public void showProgressBar() {
         if (instructionsViewState == InstrcutionViewState.Maximized) {
-            findViewById(R.id.maximizedDarkOverlay).setVisibility(View.VISIBLE);
+            findViewById(R.id.viewListDarkOverlay).setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.VISIBLE);
             textRecalculating.setVisibility(View.VISIBLE);
         } else if (instructionsViewState == InstrcutionViewState.Normal) {
@@ -515,7 +503,7 @@ public class SMRouteNavigationActivity extends FragmentActivity implements View.
     }
 
     public void hideProgressBar() {
-        findViewById(R.id.maximizedDarkOverlay).setVisibility(View.GONE);
+        findViewById(R.id.viewListDarkOverlay).setVisibility(View.GONE);
         findViewById(R.id.normalDarkOverlay).setVisibility(View.GONE);
         findViewById(R.id.normalProgressBar).setVisibility(View.GONE);
         textRecalculating.setVisibility(View.GONE);
@@ -624,14 +612,15 @@ public class SMRouteNavigationActivity extends FragmentActivity implements View.
                 lastDownTimestamp = 0;
             }
             lastDownTimestamp = System.currentTimeMillis();
-            mapFragment.locationOverlay.disableMyLocation();
+            mapFragment.mapView.setNoRendering(true);
             lastY = event.getY();
-            instructionsView.setVisibility(View.GONE);
+            instructionsView.setVisibility(View.INVISIBLE);
             imageButtonPullHandleMin.setVisibility(View.INVISIBLE);
             instructionsViewMax.setVisibility(View.VISIBLE);
             darkenedView.setVisibility(View.VISIBLE);
             darkenedView.getBackground().setAlpha(Util.yToAlpha((int) event.getRawY()));
         } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+            mapFragment.mapView.setNoRendering(true);
             if (isDoubleTap && System.currentTimeMillis() - lastDownTimestamp <= DOUBLE_TAP_PERIOD) {
                 if (instructionsViewState == InstrcutionViewState.Normal) {
                     setInstructionViewState(InstrcutionViewState.Maximized);
@@ -644,15 +633,9 @@ public class SMRouteNavigationActivity extends FragmentActivity implements View.
                 setInstructionViewState(InstrcutionViewState.Maximized);
             } else if (event.getRawY() < 9 * Util.getScreenHeight() / 10) {
                 instructionList.smoothScrollToPosition(0);
-                mapFragment.locationOverlay
-                        .enableMyLocation(mapFragment.locationProvider == null ? mapFragment.locationProvider = new GpsMyLocationProvider(this)
-                                : mapFragment.locationProvider);
                 setInstructionViewState(InstrcutionViewState.Normal);
             } else {
                 instructionList.smoothScrollToPosition(0);
-                mapFragment.locationOverlay
-                        .enableMyLocation(mapFragment.locationProvider == null ? mapFragment.locationProvider = new GpsMyLocationProvider(this)
-                                : mapFragment.locationProvider);
                 setInstructionViewState(InstrcutionViewState.Minimized);
             }
             instructionsViewMax.clearAnimation();
@@ -665,13 +648,16 @@ public class SMRouteNavigationActivity extends FragmentActivity implements View.
         } else {
             pullHandleMax.setBackgroundColor(getPullHandeBackground());
         }
-        darkenedView.getBackground().setAlpha(Util.yToAlpha((int) event.getRawY()));
-        animationInstructions = new TranslateAnimation(0, 0, lastY, event.getY());
-        animationInstructions.setFillAfter(true);
-        animationInstructions.setFillBefore(true);
-        lastY = event.getY();
-        animationInstructions.setDuration(0);
-        instructionsViewMax.startAnimation(animationInstructions);
+        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            darkenedView.getBackground().setAlpha(Util.yToAlpha((int) event.getRawY()));
+            animationInstructions = new TranslateAnimation(0, 0, lastY, event.getY());
+            animationInstructions.setFillAfter(true);
+            animationInstructions.setFillBefore(true);
+            lastY = event.getY();
+            animationInstructions.setDuration(0);
+            instructionsViewMax.startAnimation(animationInstructions);
+        }
+
     }
 
     protected int getPullHandeBackground() {
@@ -757,9 +743,10 @@ public class SMRouteNavigationActivity extends FragmentActivity implements View.
             // yFix = Util.dp2px(16);
             // LOG.d("pullTouchMax onTouch");
             // return onPullHandleTouch(null, event);
-        } else if (v.getId() == R.id.pullTouchNormal) {
-            isPulledFromNormal = true;
-            return onPullHandleTouch(null, event);
+        } else if (v.getId() == R.id.viewPullTouchNormalExtended) {
+            // TODO
+            // isPulledFromNormal = true;
+            // return onPullHandleTouch(null, event);
         } else if (v.getId() == R.id.mapTopDisabledView) {
             isPulledFromNormal = false;
             yFix = Util.dp2px(42);

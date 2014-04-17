@@ -219,10 +219,14 @@ public class Util {
     // swiping
     public static int yToAlpha(int y) {
         int minAlpha = 0;
-        int maxAlpha = 255;
+        int maxAlpha = 240;
         double percentage = y / Util.getScreenHeight();
         percentage = 1.0d - percentage;
-        return (int) (minAlpha + percentage * (maxAlpha - minAlpha));
+        int ret = (int) (minAlpha + percentage * (maxAlpha - minAlpha));
+        if (y > 3 * Util.getScreenHeight() / 4) {
+            ret = minAlpha;
+        }
+        return ret;
     }
 
     public static void launchNoConnectionDialog(Context ctx) {
