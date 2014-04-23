@@ -296,7 +296,6 @@ public class LeftMenu extends Fragment {
         listAdapter = getAdapter();
         favoritesList.setAdapter(listAdapter);
         textNewFavorite.setTextColor(getAddFavoriteTextColor());
-        // reloadFavorites();
         btnEditFavorites.setEnabled(IbikeApplication.isUserLogedIn() && favorites != null && favorites.size() != 0 && !isEditMode);
         updateControls();
     }
@@ -510,9 +509,6 @@ public class LeftMenu extends Fragment {
     protected FavoritesAdapter getAdapter() {
         if (adapter == null) {
             adapter = new FavoritesAdapter(getActivity(), favorites, this);
-        } else {
-            favorites.clear();
-            adapter.notifyDataSetChanged();
         }
         return adapter;
     }

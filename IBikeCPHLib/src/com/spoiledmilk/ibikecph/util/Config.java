@@ -17,7 +17,7 @@ public class Config {
 	public static final String GEOCODER = "http://geo.oiorest.dk/adresser";
 	// TODO uncomment this before submission
 	// public static final String ALTERNATE_TILESOURCE = "IBikeCPH";
-	public static final String ALTERNATE_TILESOURCE = "Mapnik";
+	public static final String ALTERNATE_TILESOURCE = "CycleMap";
 	public static final String USER_AGENT = "IBikeCPH/1.1";
 	public static boolean LOG_ENABLED = true;
 	public static final String HOCKEY_APP_ID = "f145bf4833683cfaa1744bf799eee64b";
