@@ -495,7 +495,6 @@ public class MapActivity extends FragmentActivity implements SMHttpRequestListen
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (resultCode == ProfileActivity.RESULT_USER_DELETED) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage(IbikeApplication.getString("account_deleted"));
