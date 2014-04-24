@@ -1065,10 +1065,11 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants, Mu
             }
         }
 
-        if (mGestureDetector.onTouchEvent(rotatedEvent)) {
-            return true;
+        if (!(tracking && isPinchZooming)) {
+            if (mGestureDetector.onTouchEvent(rotatedEvent)) {
+                return true;
+            }
         }
-
         return false;
     }
 
