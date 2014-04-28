@@ -337,6 +337,22 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants, Mu
         return new BoundingBoxE6(neGeoPoint.getLatitudeE6(), neGeoPoint.getLongitudeE6(), swGeoPoint.getLatitudeE6(), swGeoPoint.getLongitudeE6());
     }
 
+    public BoundingBoxE6 getBoundingBox(int zoomLevel) {
+        return getBoundingBox(getWidth(), getHeight(), zoomLevel);
+    }
+
+    public BoundingBoxE6 getBoundingBox(final int pViewWidth, final int pViewHeight, final int zoomLevel) {
+
+        final int world_2 = TileSystem.MapSize(zoomLevel) / 2;
+        final Rect screenRect = getScreenRect(null);
+        screenRect.offset(world_2, world_2);
+
+        final IGeoPoint neGeoPoint = TileSystem.PixelXYToLatLong(screenRect.right, screenRect.top, zoomLevel, null);
+        final IGeoPoint swGeoPoint = TileSystem.PixelXYToLatLong(screenRect.left, screenRect.bottom, zoomLevel, null);
+
+        return new BoundingBoxE6(neGeoPoint.getLatitudeE6(), neGeoPoint.getLongitudeE6(), swGeoPoint.getLatitudeE6(), swGeoPoint.getLongitudeE6());
+    }
+
     /**
      * Gets the current bounds of the screen in <I>screen coordinates</I>.
      */
@@ -491,12 +507,26 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants, Mu
     public void zoomToBoundingBox(final BoundingBoxE6 boundingBox) {
         final BoundingBoxE6 currentBox = getBoundingBox();
 
-        // Calculated required zoom based on latitude span
-        final double maxZoomLatitudeSpan = mZoomLevel == getMaxZoomLevel() ? currentBox.getLatitudeSpanE6() : currentBox.getLatitudeSpanE6()
-                / Math.pow(2, getMaxZoomLevel() - mZoomLevel);
+        int currentBoxLatSpan = currentBox.getLatitudeSpanE6();
+        int requiredBoxLatSpan = boundingBox.getLatitudeSpanE6();
 
-        final double requiredLatitudeZoom = getMaxZoomLevel()
-                - Math.ceil(Math.log(boundingBox.getLatitudeSpanE6() / maxZoomLatitudeSpan) / Math.log(2));
+        final BoundingBoxE6 newBox = getBoundingBox(15);
+        int newBoxLatSpan = newBox.getLatitudeSpanE6();
+
+        // Calculated required zoom based on latitude span
+        double maxZoomLatitudeSpan;
+        if (mZoomLevel == getMaxZoomLevel()) {
+            maxZoomLatitudeSpan = currentBox.getLatitudeSpanE6();
+        } else {
+            int zoomDiff = (int) (getMaxZoomLevel() - mZoomLevel);
+            int factor = (int) Math.pow(2, zoomDiff);
+            maxZoomLatitudeSpan = currentBoxLatSpan / factor;
+        }
+
+        double latitudeRatio = boundingBox.getLatitudeSpanE6() / maxZoomLatitudeSpan;
+        double latitudeRatioLog = Math.log(latitudeRatio) / Math.log(2);
+        double latitudeCeil = Math.ceil(latitudeRatioLog);
+        final double requiredLatitudeZoom = getMaxZoomLevel() - latitudeCeil;
 
         // Calculated required zoom based on longitude span
         final double maxZoomLongitudeSpan = mZoomLevel == getMaxZoomLevel() ? currentBox.getLongitudeSpanE6() : currentBox.getLongitudeSpanE6()

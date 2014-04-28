@@ -1,19 +1,20 @@
 // Created by plusminus on 19:06:38 - 25.09.2008
 package org.osmdroid.util;
 
-import android.graphics.PointF;
-import android.location.Location;
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import org.osmdroid.views.util.constants.MapViewConstants;
+import static org.osmdroid.util.MyMath.gudermann;
+import static org.osmdroid.util.MyMath.gudermannInverse;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.osmdroid.util.MyMath.gudermann;
-import static org.osmdroid.util.MyMath.gudermannInverse;
+import org.osmdroid.views.util.constants.MapViewConstants;
+
+import android.graphics.PointF;
+import android.location.Location;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
 
 /**
  * 
@@ -209,6 +210,11 @@ public class BoundingBoxE6 implements Parcelable, Serializable, MapViewConstants
         maxLon += padding;
         minLat -= padding;
         minLon -= padding;
+
+        // Log.d("", "BoundingBoxE6 fromLocations location[0] = " + locations.get(0).getLatitude() + "," + locations.get(0).getLongitude()
+        // + " ; location[last] = " + locations.get(locations.size() - 1).getLatitude() + ","
+        // + locations.get(locations.size() - 1).getLongitude() + " ; northeast = " + maxLat + "," + minLon + " ; southwest = " + minLat + ","
+        // + maxLon);
 
         return new BoundingBoxE6(maxLat, minLon, minLat, maxLon);
     }

@@ -206,8 +206,20 @@ public class RegisterDialog {
 
     private boolean validateInput(String name, String email, String password, String passwordConfirm) {
         boolean ret = true;
-        if (name.length() == 0 || email.length() == 0 || password.length() == 0 || passwordConfirm.length() == 0) {
-            validationMessage = IbikeApplication.getString("register_error_fields");
+        if (name.length() == 0) {
+            validationMessage = IbikeApplication.getString("name_blank");
+            ret = false;
+        } else if (email.length() == 0) {
+            validationMessage = IbikeApplication.getString("email_blank");
+            ret = false;
+        } else if (password.length() == 0) {
+            validationMessage = IbikeApplication.getString("password_blank");
+            ret = false;
+        } else if (passwordConfirm.length() == 0) {
+            validationMessage = IbikeApplication.getString("password_confirm_blank");
+            ret = false;
+        } else if (textPasswordConfirm.getText().toString().length() < 3) {
+            validationMessage = IbikeApplication.getString("password_short");
             ret = false;
         } else if (!validEmail(email)) {
             ret = false;

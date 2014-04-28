@@ -212,11 +212,28 @@ public class RegisterActivity extends Activity implements ImagerPrefetcherListen
         dialog.show();
     }
 
+    // "email_blank" = "Email can't be blank";
+    // "name_blank" = "Name can't be blank";
+    // "password_blank" = "Password can't be blank";
+    // "password_confirm_blank" = "Password confirmation can't be blank";
+    // "password_short" = "Password is too short (minimum is 3 characters)";
+
     private boolean validateInput() {
         boolean ret = true;
-        if (textName.getText().toString().length() == 0 || textEmail.getText().toString().length() == 0
-                || textNewPassword.getText().toString().length() == 0 || textPasswordConfirm.getText().toString().length() == 0) {
-            validationMessage = IbikeApplication.getString("register_error_fields");
+        if (textName.getText().toString().length() == 0) {
+            validationMessage = IbikeApplication.getString("name_blank");
+            ret = false;
+        } else if (textEmail.getText().toString().length() == 0) {
+            validationMessage = IbikeApplication.getString("email_blank");
+            ret = false;
+        } else if (textNewPassword.getText().toString().length() == 0) {
+            validationMessage = IbikeApplication.getString("password_blank");
+            ret = false;
+        } else if (textPasswordConfirm.getText().toString().length() == 0) {
+            validationMessage = IbikeApplication.getString("password_confirm_blank");
+            ret = false;
+        } else if (textPasswordConfirm.getText().toString().length() < 3) {
+            validationMessage = IbikeApplication.getString("password_short");
             ret = false;
         } else if (!textNewPassword.getText().toString().equals(textPasswordConfirm.getText().toString())) {
             validationMessage = IbikeApplication.getString("register_error_passwords");

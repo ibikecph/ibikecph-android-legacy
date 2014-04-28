@@ -571,3 +571,9 @@
 "error_no_gps" = "GPS location not found";
 
 "old_password" = "Current password";
+
+"email_blank" = "Email can't be blank";
+"name_blank" = "Name can't be blank";
+"password_blank" = "Password can't be blank";
+"password_confirm_blank" = "Password confirmation can't be blank";
+"password_short" = "Password is too short (minimum is 3 characters)";

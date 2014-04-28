@@ -286,3 +286,9 @@
 "error_no_gps" = "GPS lokationen blev ikke fundet";
 
 "old_password" = "Gammel adgangskode";
+
+"email_blank" = "Email skal udfyldes";
+"name_blank" = "Navn skal udfyldes";
+"password_blank" = "Kodeord skal udfyldes";
+"password_confirm_blank" = "Bekræft kodeord skal udfyldes";
+"password_short" = "Kodeord er for kort (mindst 3 tegn)";
