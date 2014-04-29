@@ -506,13 +506,7 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants, Mu
      */
     public void zoomToBoundingBox(final BoundingBoxE6 boundingBox) {
         final BoundingBoxE6 currentBox = getBoundingBox();
-
         int currentBoxLatSpan = currentBox.getLatitudeSpanE6();
-        int requiredBoxLatSpan = boundingBox.getLatitudeSpanE6();
-
-        final BoundingBoxE6 newBox = getBoundingBox(15);
-        int newBoxLatSpan = newBox.getLatitudeSpanE6();
-
         // Calculated required zoom based on latitude span
         double maxZoomLatitudeSpan;
         if (mZoomLevel == getMaxZoomLevel()) {
@@ -526,7 +520,10 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants, Mu
         double latitudeRatio = boundingBox.getLatitudeSpanE6() / maxZoomLatitudeSpan;
         double latitudeRatioLog = Math.log(latitudeRatio) / Math.log(2);
         double latitudeCeil = Math.ceil(latitudeRatioLog);
-        final double requiredLatitudeZoom = getMaxZoomLevel() - latitudeCeil;
+        double requiredLatitudeZoom = getMaxZoomLevel() - latitudeCeil;
+        if (latitudeCeil >= 5d) {
+            requiredLatitudeZoom--;
+        }
 
         // Calculated required zoom based on longitude span
         final double maxZoomLongitudeSpan = mZoomLevel == getMaxZoomLevel() ? currentBox.getLongitudeSpanE6() : currentBox.getLongitudeSpanE6()
