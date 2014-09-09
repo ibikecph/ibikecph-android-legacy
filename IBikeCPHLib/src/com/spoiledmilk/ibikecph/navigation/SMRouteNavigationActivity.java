@@ -84,6 +84,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 	public ArrayList<String> turns;
 	RelativeLayout.LayoutParams paramsForInstMaxContainer;
 	View mapTopDisabledView, pullTouchNormal, pullTouchMax, mapDisabledView, darkenedView;
+	private TextView textGreen;
 	RelativeLayout.LayoutParams paramsInstructionsMaxNormal = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
 			(int) (Util.getScreenHeight()));
 	RelativeLayout.LayoutParams paramsInstructionsMaxMaximized = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -91,6 +92,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 	RelativeLayout.LayoutParams paramsInstructionsMaxMinimized = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
 			(int) (Util.getScreenHeight()));
 	InstrcutionViewState instructionsViewState = InstrcutionViewState.Invisible;
+
 
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
@@ -129,6 +131,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		textRecalculating = (TextView) findViewById(R.id.textRecalculating);
 		textBicycle = (TextView) findViewById(R.id.textBicycle);
 		textCargo = (TextView) findViewById(R.id.textCargo);
+		textGreen = (TextView) findViewById(R.id.textGreen);
 		FrameLayout.LayoutParams rootParams = new FrameLayout.LayoutParams((int) (9 * Util.getScreenWidth() / 5),
 				FrameLayout.LayoutParams.MATCH_PARENT);
 		findViewById(R.id.root_layout).setLayoutParams(rootParams);
@@ -380,7 +383,7 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		});
 		textDestAddress = (TextView) findViewById(R.id.textDestAddress);
 		textDestAddress.setTypeface(IbikeApplication.getNormalFont());
-		Config.OSRM_SERVER = Config.OSRM_SERVER_BICYCLE;
+		Config.OSRM_SERVER = Config.OSRM_SERVER_FAST;
 
 		if (savedInstanceState != null) {
 			final Handler handler = new Handler();
@@ -459,27 +462,64 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 	public void onBicycleContainerClick(View v) {
 		bicycleTypeChanged = true;
 		mapFragment.locationOverlay.disableMyLocation();
+		
 		v.setBackgroundResource(R.color.BlueListBackground);
 		((ImageView) findViewById(R.id.imgBicycle)).setImageResource(R.drawable.normal_white);
 		textBicycle.setTextColor(getResources().getColor(R.color.White));
-		findViewById(R.id.cargoContainer).setBackgroundResource(R.color.LeftGreyBackground);
-		((ImageView) findViewById(R.id.imgCargo)).setImageResource(R.drawable.cargo_grey);
-		textCargo.setTextColor(getResources().getColor(R.color.TextLightGrey));
-		Config.OSRM_SERVER = Config.OSRM_SERVER_BICYCLE;
+		
+		setCargoContainerInactive();
+		setGreenContainerInactive();
+		
+		Config.OSRM_SERVER = Config.OSRM_SERVER_FAST;
 		getRouteForNewBicycleType();
 	}
 
 	public void onCargoContainerClick(View v) {
 		bicycleTypeChanged = true;
 		mapFragment.locationOverlay.disableMyLocation();
+		
 		v.setBackgroundResource(R.color.BlueListBackground);
 		((ImageView) findViewById(R.id.imgCargo)).setImageResource(R.drawable.cargo_white);
 		textCargo.setTextColor(getResources().getColor(R.color.White));
+		
+		setBicycleContainerInactive();
+		setGreenContainerInactive();
+		
+		Config.OSRM_SERVER = Config.OSRM_SERVER_CARGO;
+		getRouteForNewBicycleType();
+	}
+	
+	public void onGreenContainerClick(View v) {
+		bicycleTypeChanged = true;
+		mapFragment.locationOverlay.disableMyLocation();
+		
+		v.setBackgroundResource(R.color.BlueListBackground);
+		((ImageView) findViewById(R.id.imgGreen)).setImageResource(R.drawable.green_white);
+		((TextView) v.findViewById(R.id.textGreen)).setTextColor(getResources().getColor(R.color.White));
+		
+		setBicycleContainerInactive();
+		setCargoContainerInactive();
+		
+		Config.OSRM_SERVER = Config.OSRM_SERVER_GREEN;
+		getRouteForNewBicycleType();
+	}
+
+	private void setBicycleContainerInactive() {
 		findViewById(R.id.bicycleContainer).setBackgroundResource(R.color.LeftGreyBackground);
 		((ImageView) findViewById(R.id.imgBicycle)).setImageResource(R.drawable.normal_grey);
 		textBicycle.setTextColor(getResources().getColor(R.color.TextLightGrey));
-		Config.OSRM_SERVER = Config.OSRM_SERVER_CARGO;
-		getRouteForNewBicycleType();
+	}
+	
+	private void setCargoContainerInactive() {
+		findViewById(R.id.cargoContainer).setBackgroundResource(R.color.LeftGreyBackground);
+		((ImageView) findViewById(R.id.imgCargo)).setImageResource(R.drawable.cargo_grey);
+		textCargo.setTextColor(getResources().getColor(R.color.TextLightGrey));
+	}
+	
+	private void setGreenContainerInactive() {
+		findViewById(R.id.greenContainer).setBackgroundResource(R.color.LeftGreyBackground);
+		((ImageView) findViewById(R.id.imgGreen)).setImageResource(R.drawable.green_grey);
+		textGreen.setTextColor(getResources().getColor(R.color.TextLightGrey));
 	}
 
 	protected boolean hasDarkImage() {
@@ -548,6 +588,9 @@ public class SMRouteNavigationActivity extends FragmentActivity {
 		textCargo.setText(IbikeApplication.getString("bike_type_2"));
 		textCargo.setTextColor(getResources().getColor(R.color.TextLightGrey));
 		textCargo.setTypeface(IbikeApplication.getNormalFont());
+		textGreen.setText(IbikeApplication.getString("bike_type_3"));
+		textGreen.setTextColor(getResources().getColor(R.color.TextLightGrey));
+		textGreen.setTypeface(IbikeApplication.getNormalFont());
 		textBicycle.setText(IbikeApplication.getString("bike_type_1"));
 		textBicycle.setTypeface(IbikeApplication.getNormalFont());
 		textGoodRide.setText(IbikeApplication.getString("good_ride"));

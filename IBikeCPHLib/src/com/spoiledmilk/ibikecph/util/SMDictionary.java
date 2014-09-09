@@ -19,6 +19,7 @@ import android.content.res.AssetManager;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.util.Log;
 
 import com.spoiledmilk.ibikecph.IbikeApplication;
 import com.spoiledmilk.ibikecph.util.IbikePreferences.Language;
@@ -73,6 +74,7 @@ public class SMDictionary {
 					Spanned value = Html.fromHtml(matcher.group(2)
 							.replace("\\\"", "\"").replace("\\\'", "\'")
 							.replace("\\n", "<br>").replace("\\\\", "\\"));
+					Log.d("debug", matcher.group(1) + " : " + value);
 					map.put(matcher.group(1), value);
 				}
 			}
