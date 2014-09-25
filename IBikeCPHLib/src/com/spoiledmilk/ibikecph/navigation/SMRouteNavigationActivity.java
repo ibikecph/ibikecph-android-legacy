@@ -8,9 +8,12 @@ package com.spoiledmilk.ibikecph.navigation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
@@ -18,6 +21,8 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
@@ -26,6 +31,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -43,7 +49,7 @@ import com.spoiledmilk.ibikecph.util.Config;
 import com.spoiledmilk.ibikecph.util.LOG;
 import com.spoiledmilk.ibikecph.util.Util;
 
-public class SMRouteNavigationActivity extends FragmentActivity implements View.OnTouchListener, View.OnClickListener {
+public class SMRouteNavigationActivity extends FragmentActivity {
 
     public enum InstrcutionViewState {
         Invisible, Minimized, Normal, Maximized;

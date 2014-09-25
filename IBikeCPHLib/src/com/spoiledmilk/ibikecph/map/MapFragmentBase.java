@@ -179,8 +179,8 @@ public class MapFragmentBase extends Fragment implements SMLocationListener {
 			if (loc != null) {
 				float distanceFromCopenhagenKm = loc.distanceTo(locCopenhagen) / 1000.0f;
 				if (distanceFromCopenhagenKm > 1000) { // TODO: change the tile source to use IBIKECPH after testing
-//					mapView.setTileSource(TileSourceFactory.getTileSource(TileSourceFactory.IBIKECPH.name()));
-					 mapView.setTileSource(TileSourceFactory.getTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE.name()));
+					mapView.setTileSource(TileSourceFactory.getTileSource(TileSourceFactory.IBIKECPH.name()));
+//					 mapView.setTileSource(TileSourceFactory.getTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE.name()));
 				}
 
 				else {
