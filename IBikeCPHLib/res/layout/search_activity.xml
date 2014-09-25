@@ -9,7 +9,7 @@
     <RelativeLayout
         android:id="@+id/navBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="58dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:background="@drawable/route_enter_header"
@@ -18,7 +18,7 @@
         <ImageView
             android:id="@+id/imgLogo"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:contentDescription="@string/app_name"
@@ -27,7 +27,7 @@
         <Button
             android:id="@+id/btnBack"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:background="@drawable/btn_back_white_selector" />
@@ -35,7 +35,7 @@
         <com.spoiledmilk.ibikecph.controls.TexturedButton
             android:id="@+id/btnStart"
             android:layout_width="65dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_alignBottom="@+id/btnBack"
             android:layout_alignParentRight="true"
             android:layout_alignTop="@+id/btnBack"
@@ -48,14 +48,54 @@
     <ImageView
         android:id="@+id/imgInput"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="90dp"
         android:layout_below="@+id/navBar"
         android:layout_centerHorizontal="true"
         android:layout_marginLeft="	10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="8dp"
-        android:background="@drawable/routeenterinputbg"
+        android:background="@drawable/white_rectangle"
         android:contentDescription="@string/app_name" />
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:layout_above="@+id/textB"
+        android:layout_alignLeft="@+id/textB"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="4dp"
+        android:layout_toLeftOf="@+id/btnSwitch"
+        android:background="#D1D1D1" />
+
+    <TextView
+        android:id="@+id/textview_a"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:layout_alignLeft="@id/imgInput"
+        android:layout_alignTop="@id/imgInput"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/red_circle"
+        android:gravity="center"
+        android:text="A"
+        android:textColor="#ffffff"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/textview_b"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:layout_alignBottom="@id/imgInput"
+        android:layout_alignLeft="@id/imgInput"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:background="@drawable/red_circle"
+        android:gravity="center"
+        android:text="B"
+        android:textColor="#ffffff"
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
     <ImageView
         android:id="@+id/imgCurrentLoc"
@@ -72,8 +112,8 @@
         android:id="@+id/textCurrentLoc"
         android:layout_width="180dp"
         android:layout_height="42dp"
-        android:layout_above="@+id/textB"
-        android:layout_marginBottom="4dp"
+        android:layout_alignBottom="@id/textview_a"
+        android:layout_alignTop="@id/textview_a"
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@+id/imgCurrentLoc"
         android:clickable="true"
@@ -86,10 +126,10 @@
         android:id="@+id/textA"
         android:layout_width="wrap_content"
         android:layout_height="42dp"
-        android:layout_above="@+id/textB"
+        android:layout_alignBottom="@id/textview_a"
         android:layout_alignLeft="@+id/textB"
         android:layout_alignRight="@+id/btnSwitch"
-        android:layout_marginBottom="4dp"
+        android:layout_alignTop="@id/textview_a"
         android:clickable="true"
         android:gravity="center_vertical|left"
         android:lines="1"
@@ -103,10 +143,10 @@
         android:id="@+id/textB"
         android:layout_width="wrap_content"
         android:layout_height="42dp"
-        android:layout_alignBottom="@+id/imgInput"
+        android:layout_alignBottom="@+id/textview_b"
         android:layout_alignLeft="@+id/imgInput"
         android:layout_alignRight="@+id/btnSwitch"
-        android:layout_marginBottom="0dp"
+        android:layout_alignTop="@+id/textview_b"
         android:layout_marginLeft="50dp"
         android:clickable="true"
         android:gravity="center_vertical|left"

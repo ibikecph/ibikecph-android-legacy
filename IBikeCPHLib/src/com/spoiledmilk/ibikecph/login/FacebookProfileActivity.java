@@ -35,248 +35,245 @@ import com.spoiledmilk.ibikecph.util.Util;
 
 public class FacebookProfileActivity extends Activity {
 
-	private ImageButton btnBack;
-	private Button btnLogout;
-	private TextView textTitle;
-	private TextView textLogedIn;
-	private TextView textName;
-	private TextView textLinked;
-	private Button btnDelete;
-	private Handler handler;
-	private ProgressBar progressBar;
-	private ImageView pictureContainer;
-	private String username = "";
-	public static final int RESULT_USER_DELETED = 101;
+    private ImageButton btnBack;
+    private Button btnLogout;
+    private TextView textTitle;
+    private TextView textLogedIn;
+    private TextView textName;
+    private TextView textLinked;
+    private Button btnDelete;
+    private Handler handler;
+    private ProgressBar progressBar;
+    private ImageView pictureContainer;
+    private String username = "";
+    public static final int RESULT_USER_DELETED = 101;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_facebook_profile);
-		pictureContainer = (ImageView) findViewById(R.id.pictureContainer);
-		textTitle = (TextView) findViewById(R.id.textTitle);
-		textTitle.setVisibility(View.VISIBLE);
-		textLogedIn = (TextView) findViewById(R.id.textLogedIn);
-		textName = (TextView) findViewById(R.id.textName);
-		textLinked = (TextView) findViewById(R.id.textLinked);
-		btnDelete = (Button) findViewById(R.id.btnDelete);
-		progressBar = (ProgressBar) findViewById(R.id.progressBar);
-		btnBack = (ImageButton) findViewById(R.id.btnBack);
-		btnBack.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				finish();
-				overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-			}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_facebook_profile);
+        pictureContainer = (ImageView) findViewById(R.id.pictureContainer);
+        textTitle = (TextView) findViewById(R.id.textTitle);
+        textTitle.setVisibility(View.VISIBLE);
+        textLogedIn = (TextView) findViewById(R.id.textLogedIn);
+        textName = (TextView) findViewById(R.id.textName);
+        textLinked = (TextView) findViewById(R.id.textLinked);
+        btnDelete = (Button) findViewById(R.id.btnDelete);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        btnBack = (ImageButton) findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                finish();
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+            }
 
-		});
-		btnLogout = (Button) findViewById(R.id.btnLogout);
-		btnLogout.setVisibility(View.VISIBLE);
-		btnLogout.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				logout();
-				finish();
-				overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-			}
+        });
+        btnLogout = (Button) findViewById(R.id.btnLogout);
+        btnLogout.setVisibility(View.VISIBLE);
+        btnLogout.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logout();
+                finish();
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+            }
 
-		});
+        });
 
-		if (handler == null) {
-			handler = new Handler(new Handler.Callback() {
+        if (handler == null) {
+            handler = new Handler(new Handler.Callback() {
 
-				@Override
-				public boolean handleMessage(Message msg) {
+                @Override
+                public boolean handleMessage(Message msg) {
 
-					Bundle data = msg.getData();
-					int msgType = data.getInt("type");
-					Boolean success = false;
-					switch (msgType) {
-					case HTTPAccountHandler.DELETE_USER:
-						success = data.getBoolean("success");
-						if (success) {
-							PreferenceManager.getDefaultSharedPreferences(FacebookProfileActivity.this).edit().remove("email").commit();
-							PreferenceManager.getDefaultSharedPreferences(FacebookProfileActivity.this).edit().remove("auth_token")
-									.commit();
-							PreferenceManager.getDefaultSharedPreferences(FacebookProfileActivity.this).edit().remove("id").commit();
-							IbikeApplication.setIsFacebookLogin(false);
-							setResult(RESULT_USER_DELETED);
-							(new DB(FacebookProfileActivity.this)).deleteFavorites();
-							finish();
-							overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-						} else {
-							launchAlertDialog(data.getString("info"));
-						}
-						break;
-					case HTTPAccountHandler.ERROR:
-						logout();
-						Util.launchNoConnectionDialog(FacebookProfileActivity.this);
-						break;
-					}
-					return true;
-				}
-			});
-		}
-		progressBar.setVisibility(View.VISIBLE);
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				final Message message = HTTPAccountHandler.performGetUser(new UserData(IbikeApplication.getAuthToken(), PreferenceManager
-						.getDefaultSharedPreferences(FacebookProfileActivity.this).getInt("id", -1)));
-				final Bundle data = message.getData();
-				Boolean success = false;
-				success = data.getBoolean("success");
-				if (success) {
-					username = data.getString("name");
-					LoadImageFromWebOperations(data.getString("image_url"));
-				} else
-					FacebookProfileActivity.this.runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							logout();
-							Util.showSimpleMessageDlg(FacebookProfileActivity.this, "Error fetching the user id = "
-									+ PreferenceManager.getDefaultSharedPreferences(FacebookProfileActivity.this).getInt("id", -1)
-									+ " auth token = " + IbikeApplication.getAuthToken() + (message != null ? message.toString() : ""));
-							progressBar.setVisibility(View.GONE);
-						}
-					});
-			}
-		}).start();
+                    Bundle data = msg.getData();
+                    int msgType = data.getInt("type");
+                    Boolean success = false;
+                    switch (msgType) {
+                        case HTTPAccountHandler.DELETE_USER:
+                            success = data.getBoolean("success");
+                            if (success) {
+                                PreferenceManager.getDefaultSharedPreferences(FacebookProfileActivity.this).edit().remove("email").commit();
+                                PreferenceManager.getDefaultSharedPreferences(FacebookProfileActivity.this).edit().remove("auth_token").commit();
+                                PreferenceManager.getDefaultSharedPreferences(FacebookProfileActivity.this).edit().remove("id").commit();
+                                IbikeApplication.setIsFacebookLogin(false);
+                                setResult(RESULT_USER_DELETED);
+                                (new DB(FacebookProfileActivity.this)).deleteFavorites();
+                                finish();
+                                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                            } else {
+                                launchAlertDialog(data.getString("info"));
+                            }
+                            break;
+                        case HTTPAccountHandler.ERROR:
+                            logout();
+                            Util.launchNoConnectionDialog(FacebookProfileActivity.this);
+                            break;
+                    }
+                    return true;
+                }
+            });
+        }
+        progressBar.setVisibility(View.VISIBLE);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final Message message = HTTPAccountHandler.performGetUser(new UserData(IbikeApplication.getAuthToken(), PreferenceManager
+                        .getDefaultSharedPreferences(FacebookProfileActivity.this).getInt("id", -1)));
+                final Bundle data = message.getData();
+                Boolean success = false;
+                success = data.getBoolean("success");
+                if (success) {
+                    username = data.getString("name");
+                    LoadImageFromWebOperations(data.getString("image_url"));
+                } else
+                    FacebookProfileActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            logout();
+                            Util.showSimpleMessageDlg(FacebookProfileActivity.this, "Error fetching the user id = "
+                                    + PreferenceManager.getDefaultSharedPreferences(FacebookProfileActivity.this).getInt("id", -1) + " auth token = "
+                                    + IbikeApplication.getAuthToken() + (message != null ? message.toString() : ""));
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    });
+            }
+        }).start();
 
-	}
+    }
 
-	private void logout() {
-		PreferenceManager.getDefaultSharedPreferences(FacebookProfileActivity.this).edit().remove("email").commit();
-		PreferenceManager.getDefaultSharedPreferences(FacebookProfileActivity.this).edit().remove("auth_token").commit();
-		PreferenceManager.getDefaultSharedPreferences(FacebookProfileActivity.this).edit().remove("id").commit();
-		(new DB(FacebookProfileActivity.this)).deleteFavorites();
-		IbikeApplication.setIsFacebookLogin(false);
-		Session session = Session.getActiveSession();
-		if (session != null) { // && !session.isClosed()
-			session.closeAndClearTokenInformation();
-		}
-	}
+    private void logout() {
+        IbikeApplication.logout();
+        (new DB(FacebookProfileActivity.this)).deleteFavorites();
+        IbikeApplication.setIsFacebookLogin(false);
+        Session session = Session.getActiveSession();
+        if (session != null) { // && !session.isClosed()
+            session.closeAndClearTokenInformation();
+        }
+    }
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		initStrings();
-	}
+    @Override
+    public void onResume() {
+        super.onResume();
+        initStrings();
+    }
 
-	private void initStrings() {
-		textTitle.setText(IbikeApplication.getString("account"));
-		textTitle.setTypeface(IbikeApplication.getNormalFont());
-		btnLogout.setText(IbikeApplication.getString("logout"));
-		btnLogout.setTypeface(IbikeApplication.getNormalFont());
-		textLogedIn.setText(IbikeApplication.getString("you_are_logged_in_as"));
-		textLogedIn.setTypeface(IbikeApplication.getItalicFont());
-		textLinked.setText(IbikeApplication.getString("account_is_linked_to_facebook"));
-		textLinked.setTypeface(IbikeApplication.getItalicFont());
-		btnDelete.setText(IbikeApplication.getString("delete_my_account"));
-		btnDelete.setTypeface(IbikeApplication.getBoldFont());
-	}
+    private void initStrings() {
+        textTitle.setText(IbikeApplication.getString("account"));
+        textTitle.setTypeface(IbikeApplication.getNormalFont());
+        btnLogout.setText(IbikeApplication.getString("logout"));
+        btnLogout.setTypeface(IbikeApplication.getNormalFont());
+        textLogedIn.setText(IbikeApplication.getString("you_are_logged_in_as"));
+        textLogedIn.setTypeface(IbikeApplication.getItalicFont());
+        textLinked.setText(IbikeApplication.getString("account_is_linked_to_facebook"));
+        textLinked.setTypeface(IbikeApplication.getItalicFont());
+        btnDelete.setText(IbikeApplication.getString("delete_my_account"));
+        btnDelete.setTypeface(IbikeApplication.getBoldFont());
+    }
 
-	public void onBtnDelete(View v) {
-		launchDeleteDialog();
-	}
+    public void onBtnDelete(View v) {
+        launchDeleteDialog();
+    }
 
-	private void launchDeleteDialog() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(FacebookProfileActivity.this);
-		builder.setMessage(IbikeApplication.getString("delete_account_text")).setTitle(IbikeApplication.getString("delete_account_title"));
-		builder.setPositiveButton(IbikeApplication.getString("Delete"), new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				IbikeApplication.getTracker().sendEvent("Account", "Delete", "", Long.valueOf(0));
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						Looper.myLooper();
-						Looper.prepare();
+    private void launchDeleteDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(FacebookProfileActivity.this);
+        builder.setMessage(IbikeApplication.getString("delete_account_text")).setTitle(IbikeApplication.getString("delete_account_title"));
+        builder.setPositiveButton(IbikeApplication.getString("Delete"), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                IbikeApplication.getTracker().sendEvent("Account", "Delete", "", Long.valueOf(0));
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Looper.myLooper();
+                        Looper.prepare();
 
-						FacebookProfileActivity.this.runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								progressBar.setVisibility(View.VISIBLE);
-							}
-						});
+                        FacebookProfileActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressBar.setVisibility(View.VISIBLE);
+                            }
+                        });
 
-						Message message = HTTPAccountHandler.performDeleteUser(new UserData(IbikeApplication.getAuthToken(),
-								PreferenceManager.getDefaultSharedPreferences(FacebookProfileActivity.this).getInt("id", 0)));
-						handler.sendMessage(message);
+                        Message message = HTTPAccountHandler.performDeleteUser(new UserData(IbikeApplication.getAuthToken(), PreferenceManager
+                                .getDefaultSharedPreferences(FacebookProfileActivity.this).getInt("id", 0)));
+                        handler.sendMessage(message);
 
-						FacebookProfileActivity.this.runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								progressBar.setVisibility(View.GONE);
-							}
-						});
-					}
-				}).start();
+                        FacebookProfileActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressBar.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+                }).start();
 
-				dialog.dismiss();
-			}
-		});
-		builder.setNegativeButton(IbikeApplication.getString("close"), new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.dismiss();
-			}
-		});
-		AlertDialog dialog = builder.create();
-		dialog.setCancelable(false);
-		dialog.show();
-	}
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton(IbikeApplication.getString("close"), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.setCancelable(false);
+        dialog.show();
+    }
 
-	private void launchAlertDialog(String msg) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(FacebookProfileActivity.this);
-		builder.setMessage(msg).setTitle(IbikeApplication.getString("Error"));
-		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.dismiss();
-			}
-		});
-		AlertDialog dialog = builder.create();
-		dialog.show();
-	}
+    private void launchAlertDialog(String msg) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(FacebookProfileActivity.this);
+        builder.setMessage(msg).setTitle(IbikeApplication.getString("Error"));
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 
-	private void LoadImageFromWebOperations(final String url) {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					InputStream is = (InputStream) new URL(url).getContent();
-					final Drawable d = Drawable.createFromStream(is, "src name");
-					FacebookProfileActivity.this.runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							pictureContainer.setImageDrawable(d);
-							pictureContainer.invalidate();
-						}
-					});
-				} catch (Exception e) {
-					LOG.e(e.getLocalizedMessage());
-				} finally {
-					FacebookProfileActivity.this.runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							progressBar.setVisibility(View.GONE);
-							textName.setTypeface(IbikeApplication.getItalicFont());
-							textName.setText(username);
-						}
-					});
-				}
-			}
-		}).start();
+    private void LoadImageFromWebOperations(final String url) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    InputStream is = (InputStream) new URL(url).getContent();
+                    final Drawable d = Drawable.createFromStream(is, "src name");
+                    FacebookProfileActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            pictureContainer.setImageDrawable(d);
+                            pictureContainer.invalidate();
+                        }
+                    });
+                } catch (Exception e) {
+                    LOG.e(e.getLocalizedMessage());
+                } finally {
+                    FacebookProfileActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressBar.setVisibility(View.GONE);
+                            textName.setTypeface(IbikeApplication.getItalicFont());
+                            textName.setText(username);
+                        }
+                    });
+                }
+            }
+        }).start();
 
-	}
+    }
 
-	@Override
-	public void onStart() {
-		super.onStart();
-		EasyTracker.getInstance().activityStart(this);
-	}
+    @Override
+    public void onStart() {
+        super.onStart();
+        EasyTracker.getInstance().activityStart(this);
+    }
 
-	@Override
-	public void onStop() {
-		super.onStop();
-		EasyTracker.getInstance().activityStop(this);
-	}
+    @Override
+    public void onStop() {
+        super.onStop();
+        EasyTracker.getInstance().activityStop(this);
+    }
 
 }

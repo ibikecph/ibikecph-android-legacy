@@ -68,7 +68,7 @@ public class SMTurnInstruction {
 	String fixedLengthWithUnit;
 	String directionAbrevation; // N: north, S: south, E: east, W: west, NW:
 								// North West, ...
-	float azimuth;
+	public float azimuth;
 	public int waypointsIndex;
 	Location loc;
 	public String descriptionString;

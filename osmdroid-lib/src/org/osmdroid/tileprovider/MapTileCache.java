@@ -87,6 +87,12 @@ public class MapTileCache implements OpenStreetMapTileProviderConstants {
 			this.mCachedTiles.clear();
 		}
 	}
+	
+	public void removeTile(final MapTile aTile) {
+		synchronized (mCachedTilesLockObject) {
+			this.mCachedTiles.remove(aTile);
+		}
+	}
 
 	// ===========================================================
 	// Inner and Anonymous Classes

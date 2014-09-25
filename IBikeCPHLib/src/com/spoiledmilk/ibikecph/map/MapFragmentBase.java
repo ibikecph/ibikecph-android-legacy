@@ -33,6 +33,7 @@ import com.spoiledmilk.ibikecph.R;
 import com.spoiledmilk.ibikecph.navigation.SMMyLocationNewOverlay;
 import com.spoiledmilk.ibikecph.navigation.routing_engine.SMLocationListener;
 import com.spoiledmilk.ibikecph.navigation.routing_engine.SMLocationManager;
+import com.spoiledmilk.ibikecph.util.Config;
 import com.spoiledmilk.ibikecph.util.IbikePreferences;
 import com.spoiledmilk.ibikecph.util.LOG;
 import com.spoiledmilk.ibikecph.util.Util;
@@ -50,7 +51,6 @@ public class MapFragmentBase extends Fragment implements SMLocationListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		LOG.d("MapFragmentBase onCreate");
-
 		textStationInfo = new TextView(getActivity());
 		textStationInfo.setBackgroundResource(R.drawable.rounded_rectangle_22);
 		textStationInfo.setTypeface(IbikeApplication.getNormalFont());
@@ -106,7 +106,6 @@ public class MapFragmentBase extends Fragment implements SMLocationListener {
 		mapView.getController().setZoom(IbikePreferences.DEFAULT_ZOOM_LEVEL);
 		locationOverlay.enableMyLocation(new GpsMyLocationProvider(getActivity()));
 		locationOverlay.setCustomIconCentered(R.drawable.tracking_dot, false);
-
 		overlaysManager.loadOverlaysData(getActivity());
 	}
 
@@ -118,7 +117,6 @@ public class MapFragmentBase extends Fragment implements SMLocationListener {
 		SMLocationManager.getInstance().removeUpdates();
 		this.locationOverlay.disableMyLocation();
 		super.onPause();
-
 		PowerManager powerManager = (PowerManager) getActivity().getSystemService(Context.POWER_SERVICE);
 		boolean isScreenOn = powerManager.isScreenOn();
 		if (!isScreenOn) {
@@ -134,7 +132,6 @@ public class MapFragmentBase extends Fragment implements SMLocationListener {
 		super.onResume();
 		LOG.d("MapFragmentBase onResume");
 		this.locationOverlay.enableMyLocation(this.locationOverlay.getMyLocationProvider());
-
 		SMLocationManager locManager = SMLocationManager.getInstance();
 		locManager.init(getActivity(), this);
 		if (locManager.hasValidLocation()) {
@@ -142,12 +139,11 @@ public class MapFragmentBase extends Fragment implements SMLocationListener {
 		} else {
 			mapView.setTileSource(TileSourceFactory.getTileSource(TileSourceFactory.IBIKECPH.name()));
 		}
-		if (!SMLocationManager.getInstance().isGPSEnabled())
+		if (!SMLocationManager.getInstance().isGPSEnabled()) {
 			launchGPSDialog();
-
+		}
 		ScaledTilesOverlay scaledTilesOverlay = new ScaledTilesOverlay(mapView.getTileProvider(), getActivity());
 		mapView.getOverlayManager().setScaledTilesOverlay(scaledTilesOverlay);
-
 		PowerManager powerManager = (PowerManager) getActivity().getSystemService(Context.POWER_SERVICE);
 		boolean isScreenOn = powerManager.isScreenOn();
 		if (isReturnFromLock && isScreenOn) {

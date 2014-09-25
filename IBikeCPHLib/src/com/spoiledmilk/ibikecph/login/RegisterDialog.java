@@ -36,294 +36,309 @@ import com.spoiledmilk.ibikecph.controls.TexturedButton;
 
 public class RegisterDialog {
 
-	TextView textDialogTitle;
-	EditText textName;
-	EditText textEmail;
-	EditText textPassword;
-	EditText textPasswordConfirm;
-	ImageButton imgCamera;
-	String validationMessage;
+    TextView textDialogTitle;
+    EditText textName;
+    EditText textEmail;
+    EditText textPassword;
+    EditText textPasswordConfirm;
+    ImageButton imgCamera;
+    String validationMessage;
 
-	Context context;
-	Handler handler;
-	String base64image = "";
-	UserData userData;
-	ProgressBar progressBar;
-	Dialog dialog;
+    Context context;
+    Handler handler;
+    String base64image = "";
+    UserData userData;
+    ProgressBar progressBar;
+    Dialog dialog;
 
-	public boolean inProgress = false;
+    public boolean inProgress = false;
 
-	public void createRegisterDialog(final Context context) {
-		this.context = context;
-		dialog = new Dialog(context);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		dialog.setContentView(R.layout.register_fragment);
-		progressBar = (ProgressBar) dialog.findViewById(R.id.progressBar);
-		textDialogTitle = (TextView) dialog.findViewById(R.id.textCreateAccount);
-		textName = (EditText) dialog.findViewById(R.id.textName);
-		textEmail = (EditText) dialog.findViewById(R.id.textEmail);
-		textPassword = (EditText) dialog.findViewById(R.id.textPassword);
-		textPasswordConfirm = (EditText) dialog.findViewById(R.id.textPasswordConfirm);
-		IbikeApplication.getTracker().sendEvent("Register", "Start", textEmail.getText().toString(), (long) 0);
-		Button btnBack = (Button) dialog.findViewById(R.id.btnBack);
-		btnBack.setOnClickListener(new OnClickListener() {
+    public void createRegisterDialog(final Context context) {
+        this.context = context;
+        dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.register_fragment);
+        progressBar = (ProgressBar) dialog.findViewById(R.id.progressBar);
+        textDialogTitle = (TextView) dialog.findViewById(R.id.textCreateAccount);
+        textName = (EditText) dialog.findViewById(R.id.textName);
+        textEmail = (EditText) dialog.findViewById(R.id.textEmail);
+        textPassword = (EditText) dialog.findViewById(R.id.textPassword);
+        textPasswordConfirm = (EditText) dialog.findViewById(R.id.textPasswordConfirm);
+        IbikeApplication.getTracker().sendEvent("Register", "Start", textEmail.getText().toString(), (long) 0);
+        Button btnBack = (Button) dialog.findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View arg0) {
-				IbikeApplication.getTracker().sendEvent("Register", "Cancel", textEmail.getText().toString(), (long) 0);
-				dialog.dismiss();
-			}
+            @Override
+            public void onClick(View arg0) {
+                IbikeApplication.getTracker().sendEvent("Register", "Cancel", textEmail.getText().toString(), (long) 0);
+                dialog.dismiss();
+            }
 
-		});
+        });
 
-		TexturedButton btnRegister = (TexturedButton) dialog.findViewById(R.id.btnRegister);
-		btnRegister.setBackgroundResource(R.drawable.btn_blue_selector);
-		btnRegister.setTextColor(Color.WHITE);
-		btnRegister.setTextureResource(R.drawable.btn_pattern_repeteable);
-		btnRegister.setOnClickListener(new OnClickListener() {
+        TexturedButton btnRegister = (TexturedButton) dialog.findViewById(R.id.btnRegister);
+        btnRegister.setBackgroundResource(R.drawable.btn_blue_selector);
+        btnRegister.setTextColor(Color.WHITE);
+        btnRegister.setTextureResource(R.drawable.btn_pattern_repeteable);
+        btnRegister.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View arg0) {
-				if (validateInput(textName.getText().toString(), textEmail.getText().toString(), textPassword.getText().toString(),
-						textPasswordConfirm.getText().toString())) {
-					showProgressDialog();
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							if (!inProgress) {
-								inProgress = true;
-								Looper.myLooper();
-								Looper.prepare();
+            @Override
+            public void onClick(View arg0) {
+                if (validateInput(textName.getText().toString(), textEmail.getText().toString(), textPassword.getText().toString(),
+                        textPasswordConfirm.getText().toString())) {
+                    showProgressDialog();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!inProgress) {
+                                inProgress = true;
+                                Looper.myLooper();
+                                Looper.prepare();
+                                showProgressDialog();
+                                userData = new UserData(textName.getText().toString(), textEmail.getText().toString(), textPassword.getText()
+                                        .toString(), textPasswordConfirm.getText().toString(), base64image, "image.jpg");
+                                Message message = HTTPAccountHandler.performRegister(userData, context);
+                                Boolean success = message.getData().getBoolean("success", false);
+                                if (success) {
+                                    IbikeApplication.saveEmail(userData.getEmail());
+                                    IbikeApplication.savePassword(userData.getPassword());
+                                }
+                                handler.sendMessage(message);
+                                IbikeApplication.getTracker().sendEvent("Register", "Completed", userData.getEmail(), (long) 0);
+                                dismissProgressDialog();
+                            }
+                        }
+                    }).start();
 
-								showProgressDialog();
+                } else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(arg0.getContext());
+                    builder.setMessage(validationMessage).setTitle(IbikeApplication.getString("Error"));
+                    builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.dismiss();
+                        }
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+            }
 
-								userData = new UserData(textName.getText().toString(), textEmail.getText().toString(), textPassword
-										.getText().toString(), textPasswordConfirm.getText().toString(), base64image, "image.jpg");
-								Message message = HTTPAccountHandler.performRegister(userData, context);
-								handler.sendMessage(message);
-								IbikeApplication.getTracker().sendEvent("Register", "Completed", userData.getEmail(), (long) 0);
-								dismissProgressDialog();
-							}
-						}
-					}).start();
+        });
 
-				} else {
-					AlertDialog.Builder builder = new AlertDialog.Builder(arg0.getContext());
-					builder.setMessage(validationMessage).setTitle(IbikeApplication.getString("Error"));
-					builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							dialog.dismiss();
-						}
-					});
-					AlertDialog dialog = builder.create();
-					dialog.show();
-				}
-			}
+        if (handler == null) {
+            handler = new Handler(new Handler.Callback() {
 
-		});
+                @Override
+                public boolean handleMessage(Message msg) {
+                    Bundle data = msg.getData();
+                    Boolean success = data.getBoolean("success");
+                    if (success) {
+                        dialog.dismiss();
+                        ((LoginSplashActivity) context).launchRegistrationDialog(data.get("info").toString());
+                    } else {
+                        launchErrorDialog(data.getString("info"));
+                    }
+                    return true;
+                }
+            })
 
-		if (handler == null) {
-			handler = new Handler(new Handler.Callback() {
+            ;
+        }
+        textDialogTitle.setText(IbikeApplication.getString("create_account"));
+        textDialogTitle.setTypeface(IbikeApplication.getBoldFont());
+        textName.setHint(IbikeApplication.getString("register_name_placeholder"));
+        textName.setHintTextColor(context.getResources().getColor(R.color.HintColor));
+        textName.setTypeface(IbikeApplication.getNormalFont());
+        textEmail.setHint(IbikeApplication.getString("register_email_placeholder"));
+        textEmail.setHintTextColor(context.getResources().getColor(R.color.HintColor));
+        textEmail.setTypeface(IbikeApplication.getNormalFont());
+        textPassword.setHint(IbikeApplication.getString("register_password_placeholder"));
+        textPassword.setHintTextColor(context.getResources().getColor(R.color.HintColor));
+        textPassword.setTypeface(IbikeApplication.getNormalFont());
+        textPasswordConfirm.setHint(IbikeApplication.getString("register_password_repeat_placeholder"));
+        textPasswordConfirm.setHintTextColor(context.getResources().getColor(R.color.HintColor));
+        textPasswordConfirm.setTypeface(IbikeApplication.getNormalFont());
+        btnBack.setText(IbikeApplication.getString("back"));
+        btnBack.setTypeface(IbikeApplication.getBoldFont());
+        btnRegister.setText(IbikeApplication.getString("register_save"));
+        btnRegister.setTypeface(IbikeApplication.getBoldFont());
+        final Activity activity = (Activity) context;
 
-				@Override
-				public boolean handleMessage(Message msg) {
-					Bundle data = msg.getData();
-					Boolean success = data.getBoolean("success");
-					if (success) {
-						dialog.dismiss();
-						((LoginSplashActivity) context).launchRegistrationDialog(data.get("info").toString());
-					} else {
-						launchErrorDialog(data.getString("info"));
-					}
-					return true;
-				}
-			})
+        imgCamera = (ImageButton) dialog.findViewById(R.id.imgCamera);
+        imgCamera.setOnClickListener(new OnClickListener() {
 
-			;
-		}
-		textDialogTitle.setText(IbikeApplication.getString("create_account"));
-		textDialogTitle.setTypeface(IbikeApplication.getBoldFont());
-		textName.setHint(IbikeApplication.getString("register_name_placeholder"));
-		textName.setHintTextColor(context.getResources().getColor(R.color.HintColor));
-		textName.setTypeface(IbikeApplication.getNormalFont());
-		textEmail.setHint(IbikeApplication.getString("register_email_placeholder"));
-		textEmail.setHintTextColor(context.getResources().getColor(R.color.HintColor));
-		textEmail.setTypeface(IbikeApplication.getNormalFont());
-		textPassword.setHint(IbikeApplication.getString("register_password_placeholder"));
-		textPassword.setHintTextColor(context.getResources().getColor(R.color.HintColor));
-		textPassword.setTypeface(IbikeApplication.getNormalFont());
-		textPasswordConfirm.setHint(IbikeApplication.getString("register_password_repeat_placeholder"));
-		textPasswordConfirm.setHintTextColor(context.getResources().getColor(R.color.HintColor));
-		textPasswordConfirm.setTypeface(IbikeApplication.getNormalFont());
-		btnBack.setText(IbikeApplication.getString("back"));
-		btnBack.setTypeface(IbikeApplication.getBoldFont());
-		btnRegister.setText(IbikeApplication.getString("register_save"));
-		btnRegister.setTypeface(IbikeApplication.getBoldFont());
-		final Activity activity = (Activity) context;
+            @Override
+            public void onClick(View arg0) {
+                Intent pickIntent = new Intent();
+                pickIntent.setType("image/*");
+                pickIntent.setAction(Intent.ACTION_GET_CONTENT);
+                Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                String pickTitle = "";
+                Intent chooserIntent = Intent.createChooser(pickIntent, pickTitle);
+                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { takePhotoIntent });
+                activity.startActivityForResult(chooserIntent, LoginSplashActivity.IMAGE_REQUEST);
 
-		imgCamera = (ImageButton) dialog.findViewById(R.id.imgCamera);
-		imgCamera.setOnClickListener(new OnClickListener() {
+            }
 
-			@Override
-			public void onClick(View arg0) {
-				Intent pickIntent = new Intent();
-				pickIntent.setType("image/*");
-				pickIntent.setAction(Intent.ACTION_GET_CONTENT);
-				Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-				String pickTitle = "";
-				Intent chooserIntent = Intent.createChooser(pickIntent, pickTitle);
-				chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { takePhotoIntent });
-				activity.startActivityForResult(chooserIntent, LoginSplashActivity.IMAGE_REQUEST);
+        });
 
-			}
+        dialog.getWindow().setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 
-		});
+        final Context contextFinal = context;
+        dialog.setOnDismissListener(new OnDismissListener() {
 
-		dialog.getWindow().setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                if (contextFinal != null) {
+                    ((LoginSplashActivity) contextFinal).onDialogDismissed();
+                }
 
-		final Context contextFinal = context;
-		dialog.setOnDismissListener(new OnDismissListener() {
+            }
+        });
 
-			@Override
-			public void onDismiss(DialogInterface dialog) {
-				if (contextFinal != null) {
-					((LoginSplashActivity) contextFinal).onDialogDismissed();
-				}
+        try {
+            dialog.show();
+        } catch (Exception e) {
 
-			}
-		});
+        }
 
-		try {
-			dialog.show();
-		} catch (Exception e) {
+    }
 
-		}
+    private boolean validateInput(String name, String email, String password, String passwordConfirm) {
+        boolean ret = true;
+        if (name.length() == 0) {
+            validationMessage = IbikeApplication.getString("name_blank");
+            ret = false;
+        } else if (email.length() == 0) {
+            validationMessage = IbikeApplication.getString("email_blank");
+            ret = false;
+        } else if (password.length() == 0) {
+            validationMessage = IbikeApplication.getString("password_blank");
+            ret = false;
+        } else if (passwordConfirm.length() == 0) {
+            validationMessage = IbikeApplication.getString("password_confirm_blank");
+            ret = false;
+        } else if (textPasswordConfirm.getText().toString().length() < 3) {
+            validationMessage = IbikeApplication.getString("password_short");
+            ret = false;
+        } else if (!validEmail(email)) {
+            ret = false;
+        } else if (!password.equals(passwordConfirm)) {
+            validationMessage = IbikeApplication.getString("register_error_passwords");
+            ret = false;
+        } else if (password.length() < 3) {
+            validationMessage = IbikeApplication.getString("register_error_passwords_short");
+            ret = false;
+        }
+        return ret;
+    }
 
-	}
+    private boolean validEmail(String email) {
+        boolean ret = true;
+        int atIndex = email.indexOf("@");
+        if (atIndex <= 0) {
+            validationMessage = IbikeApplication.getString("register_error_invalid_email");
+            ret = false;
+        } else if (email.length() < atIndex + 2) {
+            validationMessage = IbikeApplication.getString("register_error_invalid_email");
+            ret = false;
+        } else if (email.indexOf(".", atIndex) < atIndex + 1) {
+            validationMessage = IbikeApplication.getString("register_error_invalid_email");
+            ;
+            ret = false;
+        }
+        return ret;
+    }
 
-	private boolean validateInput(String name, String email, String password, String passwordConfirm) {
-		boolean ret = true;
-		if (name.length() == 0 || email.length() == 0 || password.length() == 0 || passwordConfirm.length() == 0) {
-			validationMessage = IbikeApplication.getString("register_error_fields");
-			ret = false;
-		} else if (!validEmail(email)) {
-			ret = false;
-		} else if (!password.equals(passwordConfirm)) {
-			validationMessage = IbikeApplication.getString("register_error_passwords");
-			ret = false;
-		} else if (password.length() < 3) {
-			validationMessage = IbikeApplication.getString("register_error_passwords_short");
-			ret = false;
-		}
-		return ret;
-	}
+    private void launchErrorDialog(String info) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(info).setTitle(IbikeApplication.getString("Error"));
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 
-	private boolean validEmail(String email) {
-		boolean ret = true;
-		int atIndex = email.indexOf("@");
-		if (atIndex <= 0) {
-			validationMessage = IbikeApplication.getString("register_error_invalid_email");
-			ret = false;
-		} else if (email.length() < atIndex + 2) {
-			validationMessage = IbikeApplication.getString("register_error_invalid_email");
-			ret = false;
-		} else if (email.indexOf(".", atIndex) < atIndex + 1) {
-			validationMessage = IbikeApplication.getString("register_error_invalid_email");
-			;
-			ret = false;
-		}
-		return ret;
-	}
+    public void showProgressDialog() {
+        ((Activity) context).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.VISIBLE);
+            }
+        });
+    }
 
-	private void launchErrorDialog(String info) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(info).setTitle(IbikeApplication.getString("Error"));
-		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.dismiss();
-			}
-		});
-		AlertDialog dialog = builder.create();
-		dialog.show();
-	}
+    public void dismissProgressDialog() {
+        ((Activity) context).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.GONE);
+            }
+        });
+    }
 
-	public void showProgressDialog() {
-		((Activity) context).runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				progressBar.setVisibility(View.VISIBLE);
-			}
-		});
-	}
+    public void onImageSet(String base64image, Drawable imgDrawable) {
+        showProgressDialog();
+        this.base64image = base64image;
+        imgCamera.setBackgroundColor(Color.TRANSPARENT);
+        imgCamera.setScaleType(ScaleType.CENTER_CROP);
+        imgCamera.setImageDrawable(imgDrawable);
+        dismissProgressDialog();
+    }
 
-	public void dismissProgressDialog() {
-		((Activity) context).runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				progressBar.setVisibility(View.GONE);
-			}
-		});
-	}
+    public boolean isDialogAlive() {
+        return (dialog != null && dialog.isShowing());
+    }
 
-	public void onImageSet(String base64image, Drawable imgDrawable) {
-		showProgressDialog();
-		this.base64image = base64image;
-		imgCamera.setBackgroundColor(Color.TRANSPARENT);
-		imgCamera.setScaleType(ScaleType.CENTER_CROP);
-		imgCamera.setImageDrawable(imgDrawable);
-		dismissProgressDialog();
-	}
+    public String getName() {
+        String ret = "";
+        if (textName.getText() != null) {
+            ret = textName.getText().toString();
+        }
+        return ret;
+    }
 
-	public boolean isDialogAlive() {
-		return (dialog != null && dialog.isShowing());
-	}
+    public String getEmail() {
+        String ret = "";
+        if (textEmail.getText() != null) {
+            ret = textEmail.getText().toString();
+        }
+        return ret;
+    }
 
-	public String getName() {
-		String ret = "";
-		if (textName.getText() != null) {
-			ret = textName.getText().toString();
-		}
-		return ret;
-	}
+    public String getPassword() {
+        String ret = "";
+        if (textPassword.getText() != null) {
+            ret = textPassword.getText().toString();
+        }
+        return ret;
+    }
 
-	public String getEmail() {
-		String ret = "";
-		if (textEmail.getText() != null) {
-			ret = textEmail.getText().toString();
-		}
-		return ret;
-	}
+    public String getPasswordConfirmation() {
+        String ret = "";
+        if (textPasswordConfirm.getText() != null) {
+            ret = textPasswordConfirm.getText().toString();
+        }
+        return ret;
+    }
 
-	public String getPassword() {
-		String ret = "";
-		if (textPassword.getText() != null) {
-			ret = textPassword.getText().toString();
-		}
-		return ret;
-	}
+    public void setName(String string) {
+        textName.setText(string);
+    }
 
-	public String getPasswordConfirmation() {
-		String ret = "";
-		if (textPasswordConfirm.getText() != null) {
-			ret = textPasswordConfirm.getText().toString();
-		}
-		return ret;
-	}
+    public void setEmail(String string) {
+        textEmail.setText(string);
+    }
 
-	public void setName(String string) {
-		textName.setText(string);
-	}
+    public void setPassword(String string) {
+        textPassword.setText(string);
+    }
 
-	public void setEmail(String string) {
-		textEmail.setText(string);
-	}
-
-	public void setPassword(String string) {
-		textPassword.setText(string);
-	}
-
-	public void setPasswordConfirmation(String string) {
-		textPasswordConfirm.setText(string);
-	}
+    public void setPasswordConfirmation(String string) {
+        textPasswordConfirm.setText(string);
+    }
 
 }

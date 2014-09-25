@@ -23,6 +23,7 @@ import com.spoiledmilk.ibikecph.R;
 import com.spoiledmilk.ibikecph.map.MapActivity;
 import com.spoiledmilk.ibikecph.navigation.routing_engine.SMLocationListener;
 import com.spoiledmilk.ibikecph.navigation.routing_engine.SMLocationManager;
+import com.spoiledmilk.ibikecph.search.AddressParser;
 import com.spoiledmilk.ibikecph.search.SearchAutocompleteActivity;
 import com.spoiledmilk.ibikecph.util.DB;
 import com.spoiledmilk.ibikecph.util.Util;
@@ -153,23 +154,16 @@ public class FavoritesActivity extends Activity implements SMLocationListener {
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		if (resultCode == SearchAutocompleteActivity.RESULT_AUTOTOCMPLETE_SET) {
 			Bundle data = intent.getExtras();
-			if (data != null) {
+			if (data != null && data.containsKey("address")) {
+				String address = AddressParser.textFromBundle(data);
 				if (requestCode == REQUEST_CODE_HOME) {
-					homeFavorite = new FavoritesData(IbikeApplication.getString("Home"), data.getString("address"), FavoritesData.favHome,
+					homeFavorite = new FavoritesData(IbikeApplication.getString("Home"), address, FavoritesData.favHome,
 							data.getDouble("lat"), data.getDouble("lon"), -1);
-					String text = data.getString("address");
-					if (text.length() > 23) {
-						text = text.substring(0, 22) + "...";
-					}
-					textHome.setText(text);
+					textHome.setText(address);
 				} else if (requestCode == REQUEST_CODE_WORK) {
-					workFavorite = new FavoritesData(IbikeApplication.getString("Work"), data.getString("address"), FavoritesData.favWork,
+					workFavorite = new FavoritesData(IbikeApplication.getString("Work"), address, FavoritesData.favWork,
 							data.getDouble("lat"), data.getDouble("lon"), -1);
-					String text = data.getString("address");
-					if (text.length() > 23) {
-						text = text.substring(0, 22) + "...";
-					}
-					textWork.setText(text);
+					textWork.setText(address);
 				}
 			}
 		}

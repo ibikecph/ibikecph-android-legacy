@@ -20,6 +20,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
@@ -38,32 +39,30 @@ import com.spoiledmilk.ibikecph.login.UserData;
 public class HttpUtils {
 
 	private static final String ACCEPT = "application/vnd.ibikecph.v1";
+	private static final int CONNECTON_TIMEOUT = 30000;
 
 	public static JsonResult readLink(String url_string, String method) {
 		JsonResult result = new JsonResult();
-
-		if (url_string == null)
+		if (url_string == null) {
 			return result;
-
+		}
 		URL url = null;
 		HttpURLConnection httpget = null;
 		try {
 			LOG.d("HttpUtils readlink() " + url_string);
-
 			url = new URL(url_string);
 			httpget = (HttpURLConnection) url.openConnection();
 			httpget.setDoInput(true);
 			httpget.setRequestMethod(method);
 			httpget.setRequestProperty("Accept", "application/json");
 			httpget.setRequestProperty("Content-type", "application/json");
-
-			httpget.setConnectTimeout(20000);
-			httpget.setReadTimeout(20000);
-
+			httpget.setConnectTimeout(CONNECTON_TIMEOUT);
+			httpget.setReadTimeout(CONNECTON_TIMEOUT);
 			JsonNode root = null;
 			root = Util.getJsonObjectMapper().readValue(httpget.getInputStream(), JsonNode.class);
-			if (root != null)
+			if (root != null) {
 				result.setNode(root);
+			}
 		} catch (JsonParseException e) {
 			LOG.w("HttpUtils readLink() JsonParseException ", e);
 			result.error = JsonResult.ErrorCode.APIError;
@@ -77,18 +76,19 @@ public class HttpUtils {
 			LOG.w("HttpUtils readLink() IOException", e);
 			result.error = JsonResult.ErrorCode.ConnectionError;
 		} finally {
-			if (httpget != null)
+			if (httpget != null) {
 				httpget.disconnect();
+			}
 		}
-
 		LOG.d("HttpUtils readLink() " + (result != null && result.error == JsonResult.ErrorCode.Success ? "succeeded" : "failed"));
 		return result;
 	}
 
 	public static JsonNode get(String url_string) {
 		JsonResult result = readLink(url_string, "GET");
-		if (result.error == JsonResult.ErrorCode.Success)
+		if (result.error == JsonResult.ErrorCode.Success) {
 			return result.getNode();
+		}
 		return null;
 	}
 
@@ -115,15 +115,13 @@ public class HttpUtils {
 		JsonNode ret = null;
 		LOG.d("POST api request, url = " + urlString + " object = " + objectToPost.toString());
 		HttpParams myParams = new BasicHttpParams();
-		HttpConnectionParams.setConnectionTimeout(myParams, 30000);
-		HttpConnectionParams.setSoTimeout(myParams, 30000);
+		HttpConnectionParams.setConnectionTimeout(myParams, CONNECTON_TIMEOUT);
+		HttpConnectionParams.setSoTimeout(myParams, CONNECTON_TIMEOUT);
 		HttpClient httpclient = new DefaultHttpClient(myParams);
+		httpclient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, Config.USER_AGENT);
 		HttpPost httppost = null;
-
 		URL url = null;
-
 		try {
-
 			url = new URL(urlString);
 			httppost = new HttpPost(url.toString());
 			httppost.setHeader("Content-type", "application/json");
@@ -132,17 +130,15 @@ public class HttpUtils {
 			StringEntity se = new StringEntity(objectToPost.toString(), HTTP.UTF_8);// , HTTP.UTF_8
 			se.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
 			httppost.setEntity(se);
-
 			HttpResponse response = httpclient.execute(httppost);
 			String serverResponse = EntityUtils.toString(response.getEntity());
 			LOG.d("API response = " + serverResponse);
 			ret = Util.stringToJsonNode(serverResponse);
-
 		} catch (Exception e) {
-			if (e != null && e.getLocalizedMessage() != null)
+			if (e != null && e.getLocalizedMessage() != null) {
 				LOG.e(e.getLocalizedMessage());
+			}
 		}
-
 		return ret;
 	}
 
@@ -150,13 +146,12 @@ public class HttpUtils {
 		JsonNode ret = null;
 		LOG.d("GET api request, url = " + urlString);
 		HttpParams myParams = new BasicHttpParams();
-		HttpConnectionParams.setConnectionTimeout(myParams, 20000);
-		HttpConnectionParams.setSoTimeout(myParams, 20000);
+		HttpConnectionParams.setConnectionTimeout(myParams, CONNECTON_TIMEOUT);
+		HttpConnectionParams.setSoTimeout(myParams, CONNECTON_TIMEOUT);
 		HttpClient httpclient = new DefaultHttpClient(myParams);
+		httpclient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, Config.USER_AGENT);
 		HttpGet httpget = null;
-
 		URL url = null;
-
 		try {
 
 			url = new URL(urlString);
@@ -168,12 +163,11 @@ public class HttpUtils {
 			String serverResponse = EntityUtils.toString(response.getEntity());
 			LOG.d("API response = " + serverResponse);
 			ret = Util.stringToJsonNode(serverResponse);
-
 		} catch (Exception e) {
-			if (e != null && e.getLocalizedMessage() != null)
+			if (e != null && e.getLocalizedMessage() != null) {
 				LOG.e(e.getLocalizedMessage());
+			}
 		}
-
 		return ret;
 	}
 
@@ -181,15 +175,13 @@ public class HttpUtils {
 		JsonNode ret = null;
 		LOG.d("PUT api request, url = " + urlString);
 		HttpParams myParams = new BasicHttpParams();
-		HttpConnectionParams.setConnectionTimeout(myParams, 30000);
-		HttpConnectionParams.setSoTimeout(myParams, 30000);
+		HttpConnectionParams.setConnectionTimeout(myParams, CONNECTON_TIMEOUT);
+		HttpConnectionParams.setSoTimeout(myParams, CONNECTON_TIMEOUT);
 		HttpClient httpclient = new DefaultHttpClient(myParams);
+		httpclient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, Config.USER_AGENT);
 		HttpPut httput = null;
-
 		URL url = null;
-
 		try {
-
 			url = new URL(urlString);
 			httput = new HttpPut(url.toString());
 			httput.setHeader("Content-type", "application/json");
@@ -198,17 +190,15 @@ public class HttpUtils {
 			StringEntity se = new StringEntity(objectToPost.toString(), HTTP.UTF_8);
 			se.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
 			httput.setEntity(se);
-
 			HttpResponse response = httpclient.execute(httput);
 			String serverResponse = EntityUtils.toString(response.getEntity());
 			LOG.d("API response = " + serverResponse);
 			ret = Util.stringToJsonNode(serverResponse);
-
 		} catch (Exception e) {
-			if (e != null && e.getLocalizedMessage() != null)
+			if (e != null && e.getLocalizedMessage() != null) {
 				LOG.e(e.getLocalizedMessage());
+			}
 		}
-
 		return ret;
 	}
 
@@ -216,15 +206,13 @@ public class HttpUtils {
 		JsonNode ret = null;
 		LOG.d("DELETE api request, url = " + urlString);
 		HttpParams myParams = new BasicHttpParams();
-		HttpConnectionParams.setConnectionTimeout(myParams, 10000);
-		HttpConnectionParams.setSoTimeout(myParams, 10000);
+		HttpConnectionParams.setConnectionTimeout(myParams, CONNECTON_TIMEOUT);
+		HttpConnectionParams.setSoTimeout(myParams, CONNECTON_TIMEOUT);
 		HttpClient httpclient = new DefaultHttpClient(myParams);
+		httpclient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, Config.USER_AGENT);
 		HTTPDeleteWithBody httpdelete = null;
-
 		URL url = null;
-
 		try {
-
 			url = new URL(urlString);
 			httpdelete = new HTTPDeleteWithBody(url.toString());
 			httpdelete.setHeader("Content-type", "application/json");
@@ -237,12 +225,10 @@ public class HttpUtils {
 			String serverResponse = EntityUtils.toString(response.getEntity());
 			LOG.d("API response = " + serverResponse);
 			ret = Util.stringToJsonNode(serverResponse);
-
 		} catch (Exception e) {
 			if (e != null && e.getLocalizedMessage() != null)
 				LOG.e(e.getLocalizedMessage());
 		}
-
 		return ret;
 	}
 
@@ -250,9 +236,6 @@ public class HttpUtils {
 		Message ret = new Message();
 		Bundle data = new Bundle();
 		if (result != null) {
-			if (result.has("info_title")){
-				data.putString("info_title", result.get("info_title").asText());
-			}
 			data.putBoolean("success", result.get("success").asBoolean());
 			data.putString("info", result.get("info").asText());
 			if (result.has("errors"))

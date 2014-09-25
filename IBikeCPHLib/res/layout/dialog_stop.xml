@@ -42,7 +42,8 @@
             android:paddingLeft="15dp"
             android:paddingRight="15dp"
             android:text=""
-            android:textColor="#4c4c4c" />
+            android:textColor="#4c4c4c"
+            android:textSize="14sp" />
 
         <View
             android:layout_width="0dp"
@@ -59,7 +60,8 @@
             android:paddingBottom="2dp"
             android:paddingTop="2dp"
             android:text=""
-            android:textColor="@color/White" />
+            android:textColor="@color/White"
+            android:textSize="14sp" />
 
         <View
             android:layout_width="0dp"

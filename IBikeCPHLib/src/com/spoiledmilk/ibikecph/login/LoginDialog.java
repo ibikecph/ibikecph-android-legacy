@@ -33,181 +33,181 @@ import com.spoiledmilk.ibikecph.controls.TexturedButton;
 
 public class LoginDialog {
 
-	Context context;
+    Context context;
 
-	TextView textLoginTitle;
-	EditText textEmail;
-	EditText textPassword;
-	Button btnBack;
-	TexturedButton btnLogin;
-	TextView textCreateAccount;
+    TextView textLoginTitle;
+    EditText textEmail;
+    EditText textPassword;
+    Button btnBack;
+    TexturedButton btnLogin;
+    TextView textCreateAccount;
 
-	UserData userData;
+    UserData userData;
 
-	Dialog dialog;
-	ProgressBar progressBar;
-	Handler handler;
+    Dialog dialog;
+    ProgressBar progressBar;
+    Handler handler;
 
-	public void createLoginDialog(Context context) {
-		this.context = context;
+    public void createLoginDialog(Context context) {
+        this.context = context;
+        dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.login_dialog);
+        progressBar = (ProgressBar) dialog.findViewById(R.id.progressBar);
+        textLoginTitle = (TextView) dialog.findViewById(R.id.textLoginTitle);
+        textLoginTitle.setText(IbikeApplication.getString("log_in"));
+        textLoginTitle.setTypeface(IbikeApplication.getBoldFont());
+        textEmail = (EditText) dialog.findViewById(R.id.textEmail);
+        textEmail.setHint(IbikeApplication.getString("register_email_placeholder"));
+        textEmail.setHintTextColor(context.getResources().getColor(R.color.HintColor));
+        textEmail.setTypeface(IbikeApplication.getNormalFont());
+        textPassword = (EditText) dialog.findViewById(R.id.textPassword);
+        textPassword.setHint(IbikeApplication.getString("register_password_placeholder"));
+        textPassword.setHintTextColor(context.getResources().getColor(R.color.HintColor));
+        textPassword.setTypeface(IbikeApplication.getNormalFont());
+        btnBack = (Button) dialog.findViewById(R.id.btnBack);
+        btnBack.setText(IbikeApplication.getString("back"));
+        btnBack.setTypeface(IbikeApplication.getBoldFont());
+        btnBack.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                progressBar.setVisibility(View.GONE);
+                if (dialog != null && dialog.isShowing())
+                    dialog.dismiss();
+            }
 
-		dialog = new Dialog(context);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		dialog.setContentView(R.layout.login_dialog);
-		progressBar = (ProgressBar) dialog.findViewById(R.id.progressBar);
-		textLoginTitle = (TextView) dialog.findViewById(R.id.textLoginTitle);
-		textLoginTitle.setText(IbikeApplication.getString("log_in"));
-		textLoginTitle.setTypeface(IbikeApplication.getBoldFont());
-		textEmail = (EditText) dialog.findViewById(R.id.textEmail);
-		textEmail.setHint(IbikeApplication.getString("register_email_placeholder"));
-		textEmail.setHintTextColor(context.getResources().getColor(R.color.HintColor));
-		textEmail.setTypeface(IbikeApplication.getNormalFont());
-		textPassword = (EditText) dialog.findViewById(R.id.textPassword);
-		textPassword.setHint(IbikeApplication.getString("register_password_placeholder"));
-		textPassword.setHintTextColor(context.getResources().getColor(R.color.HintColor));
-		textPassword.setTypeface(IbikeApplication.getNormalFont());
-		btnBack = (Button) dialog.findViewById(R.id.btnBack);
-		btnBack.setText(IbikeApplication.getString("back"));
-		btnBack.setTypeface(IbikeApplication.getBoldFont());
-		btnBack.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				progressBar.setVisibility(View.GONE);
-				if (dialog != null && dialog.isShowing())
-					dialog.dismiss();
-			}
+        });
+        btnLogin = (TexturedButton) dialog.findViewById(R.id.btnLogin);
+        btnLogin.setBackgroundResource(R.drawable.btn_blue_selector);
+        btnLogin.setTextureResource(R.drawable.btn_pattern_repeteable);
+        btnLogin.setTextColor(Color.WHITE);
+        btnLogin.setText(IbikeApplication.getString("login"));
+        btnLogin.setTypeface(IbikeApplication.getBoldFont());
+        btnLogin.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (textEmail.getText() == null || ("" + textEmail.getText().toString().trim()).equals("") || textPassword.getText() == null
+                        || ("" + textPassword.getText().toString()).trim().equals("")) {
+                    launchErrorDialog("", IbikeApplication.getString("login_error_fields"));
+                } else {
+                    showProgressDialog();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Looper.myLooper();
+                            Looper.prepare();
+                            userData = new UserData(textEmail.getText().toString(), textPassword.getText().toString());
+                            Message message = HTTPAccountHandler.performLogin(userData);
+                            handler.sendMessage(message);
+                            dismissProgressDialog();
+                        }
+                    }).start();
+                }
+            }
 
-		});
+        });
 
-		btnLogin = (TexturedButton) dialog.findViewById(R.id.btnLogin);
-		btnLogin.setBackgroundResource(R.drawable.btn_blue_selector);
-		btnLogin.setTextureResource(R.drawable.btn_pattern_repeteable);
-		btnLogin.setTextColor(Color.WHITE);
-		btnLogin.setText(IbikeApplication.getString("login"));
-		btnLogin.setTypeface(IbikeApplication.getBoldFont());
-		btnLogin.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (textEmail.getText() == null || ("" + textEmail.getText().toString().trim()).equals("")
-						|| textPassword.getText() == null || ("" + textPassword.getText().toString()).trim().equals("")) {
-					launchErrorDialog("", IbikeApplication.getString("login_error_fields"));
-				} else {
-					showProgressDialog();
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							Looper.myLooper();
-							Looper.prepare();
-							userData = new UserData(textEmail.getText().toString(), textPassword.getText().toString());
-							Message message = HTTPAccountHandler.performLogin(userData);
-							handler.sendMessage(message);
-							dismissProgressDialog();
-						}
-					}).start();
-				}
-			}
+        if (handler == null) {
+            handler = new Handler(new Handler.Callback() {
 
-		});
+                @Override
+                public boolean handleMessage(Message msg) {
+                    Bundle data = msg.getData();
+                    Boolean success = data.getBoolean("success");
+                    if (success) {
+                        IbikeApplication.savePassword(textPassword.getText().toString());
+                        String auth_token = data.getString("auth_token");
+                        int id = data.getInt("id");
+                        launchMainMapActivity(auth_token, id);
+                        if (dialog != null) {
+                            dialog.dismiss();
+                        }
+                    } else {
+                        final String message = data.containsKey("errors") ? data.getString("errors") : data.getString("info");
+                        Log.d("", data.toString());
+                        String title = "";
+                        if (data.containsKey("info_title")) {
+                            title = data.getString("info_title");
+                        }
+                        launchErrorDialog(title, message);
+                    }
+                    return true;
+                }
+            });
+        }
+        textCreateAccount = (TextView) dialog.findViewById(R.id.textCreateAccount);
+        textCreateAccount.setText(IbikeApplication.getString("login_new_account"));
+        textCreateAccount.setTypeface(IbikeApplication.getBoldFont());
+        textCreateAccount.setClickable(true);
+        final Context contextFinal = context;
+        textCreateAccount.setOnClickListener(new OnClickListener() {
 
-		if (handler == null) {
-			handler = new Handler(new Handler.Callback() {
+            @Override
+            public void onClick(View v) {
+                RegisterDialog rd = new RegisterDialog();
+                rd.createRegisterDialog(contextFinal);
+                ((LoginSplashActivity) contextFinal).setRegisterDialog(rd);
+            }
+        });
 
-				@Override
-				public boolean handleMessage(Message msg) {
-					Bundle data = msg.getData();
-					Boolean success = data.getBoolean("success");
-					if (success) {
-						String auth_token = data.getString("auth_token");
-						int id = data.getInt("id");
-						launchMainMapActivity(auth_token, id);
-						if (dialog != null) {
-							dialog.dismiss();
-						}
-					} else {
-						final String message = data.containsKey("errors") ? data.getString("errors") : data.getString("info");
-						Log.d("",data.toString());
-						String title = "";
-						if (data.containsKey("info_title")) {
-							title = data.getString("info_title");
-						}
-						launchErrorDialog(title, message);
-					}
-					return true;
-				}
-			});
-		}
-		textCreateAccount = (TextView) dialog.findViewById(R.id.textCreateAccount);
-		textCreateAccount.setText(IbikeApplication.getString("login_new_account"));
-		textCreateAccount.setTypeface(IbikeApplication.getBoldFont());
-		textCreateAccount.setClickable(true);
-		final Context contextFinal = context;
-		textCreateAccount.setOnClickListener(new OnClickListener() {
+        dialog.getWindow().setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 
-			@Override
-			public void onClick(View v) {
-				RegisterDialog rd = new RegisterDialog();
-				rd.createRegisterDialog(contextFinal);
-				((LoginSplashActivity) contextFinal).setRegisterDialog(rd);
-			}
-		});
+        dialog.setOnDismissListener(new OnDismissListener() {
 
-		dialog.getWindow().setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                if (contextFinal != null) {
+                    ((LoginSplashActivity) contextFinal).onDialogDismissed();
+                }
 
-		dialog.setOnDismissListener(new OnDismissListener() {
+            }
+        });
+        textEmail.setText(IbikeApplication.getEmail());
+        textPassword.setText(IbikeApplication.getPassword());
+        dialog.show();
+    }
 
-			@Override
-			public void onDismiss(DialogInterface dialog) {
-				if (contextFinal != null) {
-					((LoginSplashActivity) contextFinal).onDialogDismissed();
-				}
+    private void launchErrorDialog(String title, String info) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        if (!title.equals("")) {
+            builder.setTitle(title);
+        } else {
+            builder.setTitle(IbikeApplication.getString("Error"));
+        }
+        builder.setMessage(info);
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 
-			}
-		});
+    private void launchMainMapActivity(String auth_token, int id) {
+        dialog.dismiss();
+        progressBar.setVisibility(View.GONE);
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putString("auth_token", auth_token).commit();
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("id", id).commit();
+        ((LoginSplashActivity) context).launchMainMapActivity(auth_token, id);
+    }
 
-		dialog.show();
-	}
+    public void showProgressDialog() {
+        ((Activity) context).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.VISIBLE);
+            }
+        });
+    }
 
-	private void launchErrorDialog(String title, String info) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		if (!title.equals("")) {
-			builder.setTitle(title);
-		} else {
-			builder.setTitle(IbikeApplication.getString("Error"));
-		}
-		builder.setMessage(info);
-		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.dismiss();
-			}
-		});
-		AlertDialog dialog = builder.create();
-		dialog.show();
-	}
-
-	private void launchMainMapActivity(String auth_token, int id) {
-		dialog.dismiss();
-		progressBar.setVisibility(View.GONE);
-		PreferenceManager.getDefaultSharedPreferences(context).edit().putString("auth_token", auth_token).commit();
-		PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("id", id).commit();
-		((LoginSplashActivity) context).launchMainMapActivity(auth_token, id);
-	}
-
-	public void showProgressDialog() {
-		((Activity) context).runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				progressBar.setVisibility(View.VISIBLE);
-			}
-		});
-	}
-
-	public void dismissProgressDialog() {
-		((Activity) context).runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				progressBar.setVisibility(View.GONE);
-			}
-		});
-	}
+    public void dismissProgressDialog() {
+        ((Activity) context).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.GONE);
+            }
+        });
+    }
 
 }

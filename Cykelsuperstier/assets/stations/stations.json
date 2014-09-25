@@ -1166,18 +1166,6 @@
       "coords":"12.613183 56.033122",
       "line":"940R Hillerød-Gilleje-Helsingør",
       "type":"local-train"
-    },
-    {
-      "name":"Studentski Trg",
-      "coords":"20.457677 44.818704",
-      "line":"31",
-      "type":"metro"
-    },
-    {
-      "name":"Trg Republike",
-      "coords":"20.460708 44.81621",
-      "line":"31",
-      "type":"metro"
     }
   ]
 }
