@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.UnknownHostException;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -18,6 +19,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.CoreProtocolPNames;
 import org.osmdroid.tileprovider.BitmapPool;
 import org.osmdroid.tileprovider.MapTile;
+import org.osmdroid.tileprovider.MapTileInfo;
+import org.osmdroid.tileprovider.MapTileInfoManager;
 import org.osmdroid.tileprovider.MapTileRequestState;
 import org.osmdroid.tileprovider.ReusableBitmapDrawable;
 import org.osmdroid.tileprovider.tilesource.BitmapTileSourceBase.LowMemoryException;
@@ -29,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
+import android.util.Log;
 
 /**
  * The {@link MapTileDownloader} loads tiles from an HTTP server. It saves downloaded tiles to an IFilesystemCache if
@@ -206,6 +210,8 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
 				// if (tile.isVisible()) {
 
 				final HttpResponse response = client.execute(head);
+				
+				
 
 				// synchronized (activeConntections) {
 				// activeConntections.remove(client);
@@ -224,6 +230,32 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
 					return null;
 				}
 				in = entity.getContent();
+				
+				Header lastModifiedHeader = response
+						.getFirstHeader("Last-Modified");
+				String lastModifiedValue = lastModifiedHeader != null ? lastModifiedHeader
+						.getValue() : null;
+
+						// used only for testing purposes
+//			    if (lastModifiedValue == null) {
+//			    	Header dateHeader = response.getFirstHeader("Date");
+//					lastModifiedValue = dateHeader != null ? dateHeader.getValue() : null;
+//			    }
+						
+				Header eTagHeader = response.getFirstHeader("Etag");
+				String eTagValue = eTagHeader != null ? eTagHeader.getValue()
+						: null;
+				if (eTagValue != null && lastModifiedValue != null) {
+					if (DEBUGMODE) {
+						logger.debug("Tile can be used with Conditional GET");
+					}
+					MapTileInfo info = new MapTileInfo();
+					info.seteTag(eTagValue);
+					info.setLastModified(lastModifiedValue);
+					info.setUrl(tileURLString);
+					info.setExpired(false);
+					MapTileInfoManager.getInstance().putMapTileInfo(tile, info);
+				}
 
 				// if (tile.isVisible()) {
 				final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
