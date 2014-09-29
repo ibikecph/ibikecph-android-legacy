@@ -11,16 +11,26 @@ public class Config {
 	public static final String API_SERVER_LOGIN = serverUrl + "/login";
 	public static final String API_SERVER_REGISTER = serverUrl + "/users";
 	public static final String GOOGLE_API_KEY = "AIzaSyAZwBZgYS-61R-gIvp4GtnekJGGrIKh0Dk";
-	public static final String OSRM_SERVER_CARGO = "http://routes.ibikecph.dk/cargo";
 //	public static final String OSRM_SERVER_BICYCLE = "http://routes.ibikecph.dk";
-	public static final String OSRM_SERVER_FAST = "http://routes.ibikecph.dk/fast";
-	public static final String OSRM_SERVER_GREEN = "http://routes.ibikecph.dk/green";
+//	public static final String OSRM_SERVER_CARGO = "http://routes.ibikecph.dk/cargo";
+//	public static final String OSRM_SERVER_FAST = "http://routes.ibikecph.dk/fast";
+//	public static final String OSRM_SERVER_GREEN = "http://routes.ibikecph.dk/green";
+	
+	//New server
+	public static final String OSRM_SERVER_FAST = "http://routes.ibikecph.dk/v1.1/fast";
+	public static final String OSRM_SERVER_GREEN = "http://routes.ibikecph.dk/v1.1/green";
+	public static final String OSRM_SERVER_CARGO = "http://routes.ibikecph.dk/v1.1/cargo";
 
-	public static String OSRM_SERVER = "http://routes.ibikecph.dk";
+    public static final double GEOMETRY_DIGITS_LATITUDE = 1e6;
+    public static final double GEOMETRY_DIGITS_LONGITUDE = 1e6;
+	
+    public static final String OSRM_SERVER_DEFAULT = "http://routes.ibikecph.dk/standard";
+    
+	public static String OSRM_SERVER = OSRM_SERVER_DEFAULT;
 	public static final String GEOCODER = "http://geo.oiorest.dk/adresser";
 	// TODO uncomment this before submission
-//	 public static final String ALTERNATE_TILESOURCE = "IBikeCPH";
-	public static final String ALTERNATE_TILESOURCE = "CycleMap";
+	 public static final String ALTERNATE_TILESOURCE = "IBikeCPH";
+//	public static final String ALTERNATE_TILESOURCE = "CycleMap";
 	public static final String USER_AGENT = "IBikeCPH/1.1";
 	public static boolean LOG_ENABLED = true;
 	public static final String HOCKEY_APP_ID = "f145bf4833683cfaa1744bf799eee64b";

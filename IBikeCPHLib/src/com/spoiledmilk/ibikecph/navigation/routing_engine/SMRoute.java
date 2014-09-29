@@ -11,8 +11,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import android.graphics.Bitmap.Config;
 import android.location.Location;
 import android.os.Handler;
+import android.util.Log;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.spoiledmilk.ibikecph.IbikeApplication;
@@ -25,7 +27,7 @@ import com.spoiledmilk.ibikecph.util.Util;
 
 public class SMRoute implements SMHttpRequestListener {
 
-    public static final int MAX_DISTANCE_FROM_PATH = 20;
+	public static final int MAX_DISTANCE_FROM_PATH = 20;
     public static final int MIN_DISTANCE_FOR_RECALCULATION = 20;
     public static final int TO_START_STATION = 0;
     public static final int TO_END_STATION = 1;
@@ -239,7 +241,7 @@ public class SMRoute implements SMHttpRequestListener {
     }
 
     boolean parseFromJson(JsonNode jsonRoot, SMRouteListener listener, boolean isBrokenRoute) {
-        LOG.d("SMRoute parseFromJson() json = " + jsonRoot);
+        Log.d("SMRoute", "parseFromJson() json = " + jsonRoot);
         synchronized (this) {
             if (jsonRoot == null) {
                 return false;
@@ -429,8 +431,7 @@ public class SMRoute implements SMHttpRequestListener {
                 else
                     lng += delta;
             }
-            // LOG.d("decodePolyline(): (" + lat + ", " + lng + ")");
-            Location loc = Util.locationFromCoordinates((double) lat / 1e5, (double) lng / 1e5);
+            Location loc = Util.locationFromCoordinates((double) lat / com.spoiledmilk.ibikecph.util.Config.GEOMETRY_DIGITS_LATITUDE, (double) lng / com.spoiledmilk.ibikecph.util.Config.GEOMETRY_DIGITS_LONGITUDE);
             locations.add(loc);
         }
 
