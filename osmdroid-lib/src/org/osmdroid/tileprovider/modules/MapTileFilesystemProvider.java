@@ -5,6 +5,7 @@ import java.io.File;
 import org.osmdroid.tileprovider.ExpirableBitmapDrawable;
 import org.osmdroid.tileprovider.IRegisterReceiver;
 import org.osmdroid.tileprovider.MapTile;
+import org.osmdroid.tileprovider.MapTileInfoManager;
 import org.osmdroid.tileprovider.MapTileRequestState;
 import org.osmdroid.tileprovider.tilesource.BitmapTileSourceBase.LowMemoryException;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
@@ -145,7 +146,7 @@ public class MapTileFilesystemProvider extends MapTileFileStorageProviderBase {
 					// Check to see if file has expired
 					final long now = System.currentTimeMillis();
 					final long lastModified = file.lastModified();
-					final boolean fileExpired = lastModified < now - mMaximumCachedFileAge;
+					final boolean fileExpired = (lastModified < now - mMaximumCachedFileAge) || MapTileInfoManager.getInstance().didTileExpire(tile);
 
 					if (fileExpired) {
 						if (DEBUGMODE) {

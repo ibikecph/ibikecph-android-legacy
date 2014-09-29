@@ -1,16 +1,26 @@
 package org.osmdroid.tileprovider;
 
-import android.graphics.drawable.Drawable;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreProtocolPNames;
+import org.osmdroid.tileprovider.modules.MapTileFilesystemProvider;
 import org.osmdroid.tileprovider.modules.MapTileModuleProviderBase;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 /**
  * This top-level tile provider allows a consumer to provide an array of modular asynchronous tile providers to be used
@@ -88,6 +98,44 @@ public class MapTileProviderArray extends MapTileProviderBase {
 			if (DEBUGMODE) {
 				logger.debug("MapTileCache succeeded for: " + pTile);
 			}
+			
+			new Thread(new Runnable() {  // check if our cached tile is still valid
+				
+				@Override
+				public void run() {
+							try {
+								MapTileInfo info = MapTileInfoManager.getInstance().getMapTileInfo(pTile);
+								if (info != null) {
+									final HttpClient client = new DefaultHttpClient();
+									client.getParams().setParameter(
+											CoreProtocolPNames.USER_AGENT,
+											"I Bike CPH Android");
+
+									final HttpUriRequest head = new HttpGet(
+											info.getUrl());
+									head.addHeader("If-Modified-Since",
+											info.getLastModified());
+									head.addHeader("If-None-Match", info.geteTag());
+
+									final HttpResponse response = client
+											.execute(head);
+
+									final org.apache.http.StatusLine line = response
+											.getStatusLine();
+//									Log.d("Test", "conditional GET statusLine: " + line);
+									if (line.getStatusCode() != HttpStatus.SC_NOT_MODIFIED) {
+										// we should invalidate the cached tile!
+										info.setExpired(true);
+										mTileCache.removeTile(pTile);
+									}
+								}
+							} catch (IOException e) {
+								Log.d("", "Couldn't reach tile url: " + e);
+							}
+				}
+			}).start();
+			
+			
 			return tile;
 		} else {
 			boolean alreadyInProgress = false;
@@ -164,6 +212,15 @@ public class MapTileProviderArray extends MapTileProviderBase {
 				mWorking.remove(aState.getMapTile());
 			}
 		}
+	}
+	
+	private MapTileFilesystemProvider getFileSystemProvider() {
+		for (MapTileModuleProviderBase provider: mTileProviderList) {
+			if (provider instanceof MapTileFilesystemProvider) {
+				return (MapTileFilesystemProvider) provider;
+			}
+		}
+		return null;
 	}
 
 	/**
