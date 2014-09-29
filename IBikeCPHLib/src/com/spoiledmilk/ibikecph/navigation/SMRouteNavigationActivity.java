@@ -212,7 +212,7 @@ public class SMRouteNavigationActivity extends FragmentActivity implements View.
 		mapFragment.locationOverlay.disableMyLocation();
 		
 		v.setBackgroundResource(R.color.BlueListBackground);
-		((ImageView) findViewById(R.id.imgBicycle)).setImageResource(R.drawable.normal_white);
+		((ImageView) findViewById(R.id.imgBicycle)).setImageResource(R.drawable.fast_white);
 		textBicycle.setTextColor(getResources().getColor(R.color.White));
 		
 		setCargoContainerInactive();
@@ -256,7 +256,7 @@ public class SMRouteNavigationActivity extends FragmentActivity implements View.
 
 	private void setBicycleContainerInactive() {
 		findViewById(R.id.bicycleContainer).setBackgroundResource(R.color.LeftGreyBackground);
-		((ImageView) findViewById(R.id.imgBicycle)).setImageResource(R.drawable.normal_grey);
+		((ImageView) findViewById(R.id.imgBicycle)).setImageResource(R.drawable.fast_grey);
 		textBicycle.setTextColor(getResources().getColor(R.color.TextLightGrey));
 	}
 	
