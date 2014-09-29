@@ -29,6 +29,7 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 import android.os.Message;
+import android.util.Log;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -86,6 +87,7 @@ public class HttpUtils {
 
 	public static JsonNode get(String url_string) {
 		JsonResult result = readLink(url_string, "GET");
+		Log.d("debug", "get:" + result.toString());
 		if (result.error == JsonResult.ErrorCode.Success) {
 			return result.getNode();
 		}
