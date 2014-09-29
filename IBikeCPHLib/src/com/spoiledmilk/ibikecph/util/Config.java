@@ -24,7 +24,7 @@ public class Config {
     public static final double GEOMETRY_DIGITS_LATITUDE = 1e6;
     public static final double GEOMETRY_DIGITS_LONGITUDE = 1e6;
 	
-    public static final String OSRM_SERVER_DEFAULT = "http://routes.ibikecph.dk/standard";
+    public static final String OSRM_SERVER_DEFAULT = "http://routes.ibikecph.dk/v1.1/fast";
     
 	public static String OSRM_SERVER = OSRM_SERVER_DEFAULT;
 	public static final String GEOCODER = "http://geo.oiorest.dk/adresser";
