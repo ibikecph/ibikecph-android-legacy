@@ -1,14 +1,20 @@
+# built application files
+*.apk
+*.ap_
 
-*.jar
+# files for the dex VM
+*.dex
 
-*.jar
+# Java class files
+*.class
 
-facebook-android-sdk-3.0.1/facebook/bin/facebooksdk.jar
+# generated files
+bin/
+gen/
 
-facebook-android-sdk-3.0.1/facebook/bin/facebooksdk.jar
-
-facebook-android-sdk-3.0.1/facebook/bin/facebooksdk.jar
-
-facebook-android-sdk-3.0.1/facebook/bin/facebooksdk.jar
-
-facebook-android-sdk-3.0.1/facebook/bin/facebooksdk.jar
+# Local configuration file (sdk path, etc)
+local.properties
+.DS_Store
+.classpath
+.project
+.metadata
