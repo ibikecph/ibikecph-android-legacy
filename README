@@ -1,9 +1,0 @@
-Dependent Libraries and building:
-
-The IBikeCPH project makes use of several sub-libraries, listed below. All the libraries can be found in the same repository.
-
-IBikeCPH references the IBikeCPHLib library.
-
-IBikeCPHLib references the osmdroid-lib which is a fork of https://code.google.com/p/osmdroid/ , and the Facebook library: facebook-android-sdk-3.0.1.
-
-When the repository is cloned, all the projects and libs will be in the same directory, so there is no need for the projects references updating.
